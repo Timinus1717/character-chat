@@ -17,7 +17,7 @@ client = OpenAI(
 )
 
 # High-performing, permanently free model on OpenRouter
-MODEL_NAME = "meta-llama/llama-3.2-3b-instruct:free"
+MODEL_NAME = "google/gemma-4-26b-a4b-it:free"
 
 # 2. Load Book & Character Catalog
 @st.cache_data
