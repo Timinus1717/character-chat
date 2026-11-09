@@ -285,9 +285,7 @@ st.markdown("""
         fill: #ffffff !important;
     }
 
-    /* ========================================================
-       SIDEBAR: Scrollable Top + Sticky Locked Bottom Profile
-       ======================================================== */
+    /* Sidebar Conversations Styling */
     [data-testid="stSidebar"] {
         background-color: #ffffff;
         border-right: 1px solid #e0f2fe;
@@ -364,7 +362,7 @@ st.markdown("""
         margin-top: 4px;
     }
 
-    /* Pinned / Sticky Profile Card Container */
+    /* Pinned Profile Card Container at Bottom of Sidebar */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
@@ -597,7 +595,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 14. Integrated Bottom Chat Input
+# 14. Integrated Bottom Chat Input with Universal Student Guardrails
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -620,9 +618,22 @@ if user_query:
         unsafe_allow_html=True
     )
 
+    # Universal Student-Friendly Guardrail
+    student_guardrail = (
+        "TARGET AUDIENCE: Primary school English learners.\n"
+        "RULES:\n"
+        "- Stay strictly in character.\n"
+        "- Use simple, clear, everyday English words (A2/B1 level).\n"
+        "- Keep sentences short, friendly, and direct.\n"
+        "- The total response must be only 2 to 3 sentences maximum.\n"
+        "- Never use long words, Victorian jargon, or complicated sentence structures."
+    )
+
+    full_system_prompt = f"{current_char['system_prompt']}\n\n{student_guardrail}"
+
     # Build prompt payload
     conversation_payload = [
-        {"role": "system", "content": current_char["system_prompt"]}
+        {"role": "system", "content": full_system_prompt}
     ]
     for m in st.session_state.character_chats[current_char["name"]]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
@@ -644,7 +655,7 @@ if user_query:
             messages=conversation_payload,
             stream=True,
             temperature=0.7,
-            max_tokens=250
+            max_tokens=120  # Caps the length to 2-3 short sentences
         )
         
         has_started_typing = False
