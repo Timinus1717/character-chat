@@ -42,7 +42,6 @@ st.markdown("""
         font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* Main chat container background with subtle WhatsApp doodle texture */
     .stApp {
         background-color: #efeae2;
         background-image: radial-gradient(#d5cdbf 0.75px, transparent 0.75px), radial-gradient(#d5cdbf 0.75px, #efeae2 0.75px);
@@ -202,7 +201,6 @@ st.markdown("""
         border-right: 1px solid #e1e4ea;
     }
 
-    /* Contact Card in Sidebar */
     .sidebar-profile-card {
         background: white;
         border-radius: 14px;
@@ -267,7 +265,7 @@ client = OpenAI(
 
 MODEL_NAME = "openrouter/free"
 
-# 6. Load Catalog (Uncached for instant live edits)
+# 6. Load Catalog
 def load_catalog():
     with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
         return json.load(f)
@@ -278,6 +276,9 @@ catalog = load_catalog()
 if "character_chats" not in st.session_state:
     st.session_state.character_chats = {}
 
+if "failed_prompts" not in st.session_state:
+    st.session_state.failed_prompts = {}
+
 # 8. Sidebar Contact Directory
 st.sidebar.markdown("### 💬 Chats")
 
@@ -285,7 +286,6 @@ selected_story = st.sidebar.selectbox("Select Book / Story:", list(catalog.keys(
 character_list = catalog[selected_story]
 char_dict = {c["name"]: c for c in character_list}
 
-# Character selector
 selected_char_name = st.sidebar.radio(
     "Choose Contact:",
     options=list(char_dict.keys()),
@@ -314,6 +314,7 @@ if st.sidebar.button("🗑️ Clear This Chat History", use_container_width=True
     st.session_state.character_chats[selected_char_name] = [
         {"role": "assistant", "content": f"Hello! I am {selected_char_name}. What would you like to ask me?", "time": now}
     ]
+    st.session_state.failed_prompts.pop(selected_char_name, None)
     st.rerun()
 
 # 9. Initialize Conversation for Current Contact
@@ -327,6 +328,11 @@ if selected_char_name not in st.session_state.character_chats:
         }
     ]
 
+# Automatic cleanup: Remove any empty ghost bubbles from chat history
+st.session_state.character_chats[selected_char_name] = [
+    m for m in st.session_state.character_chats[selected_char_name] 
+    if m.get("content", "").strip() != ""
+]
 current_messages = st.session_state.character_chats[selected_char_name]
 
 # 10. WhatsApp Top Header
@@ -357,13 +363,26 @@ for msg in current_messages:
     content = msg["content"]
     time_str = msg.get("time", now_str)
     
-    # Clean single-line rendering to prevent markdown code-block bug
     st.markdown(
         f'<div class="chat-row {role}"><div class="bubble {role}">{content}<span class="bubble-time">{time_str}</span></div></div>',
         unsafe_allow_html=True
     )
 
-# 13. Message Input & Auto-Retry Handling
+# 13. Persistent Retry Notification Bar (Rendered outside input logic)
+if selected_char_name in st.session_state.failed_prompts:
+    failed_text = st.session_state.failed_prompts[selected_char_name]
+    st.warning(f"⚠️ Message failed: '{failed_text}'")
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("🔄 Retry Message", key="retry_btn_action", use_container_width=True):
+            st.session_state.pending_prompt = st.session_state.failed_prompts.pop(selected_char_name)
+            st.rerun()
+    with col2:
+        if st.button("❌ Dismiss", key="dismiss_btn_action", use_container_width=True):
+            st.session_state.failed_prompts.pop(selected_char_name)
+            st.rerun()
+
+# 14. Message Input & Execution
 user_query = st.chat_input(f"Type a message to {current_char['name']}...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -393,9 +412,12 @@ if user_query:
     for m in st.session_state.character_chats[selected_char_name]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
-    # Display typing indicator
+    # Show typing indicator
     typing_box = st.empty()
     typing_box.markdown(f'<div class="typing-indicator"><span>✍️ <b>{current_char["name"]}</b> is typing...</span></div>', unsafe_allow_html=True)
+
+    bubble_placeholder = st.empty()
+    response_text = ""
 
     try:
         stream = client.chat.completions.create(
@@ -406,31 +428,45 @@ if user_query:
             max_tokens=250
         )
         
-        response_text = ""
-        bubble_placeholder = st.empty()
-        typing_box.empty()
-
+        has_started_typing = False
         for chunk in stream:
             content = chunk.choices[0].delta.content or ""
             response_text += content
-            bubble_placeholder.markdown(
-                f'<div class="chat-row assistant"><div class="bubble assistant">{response_text}<span class="bubble-time">{current_time}</span></div></div>',
-                unsafe_allow_html=True
-            )
+            
+            # Remove typing box only once the first real word is received
+            if not has_started_typing and response_text.strip():
+                typing_box.empty()
+                has_started_typing = True
 
-        # Save assistant reply
-        st.session_state.character_chats[selected_char_name].append({
-            "role": "assistant",
-            "content": response_text,
-            "time": current_time
-        })
+            if has_started_typing:
+                bubble_placeholder.markdown(
+                    f'<div class="chat-row assistant"><div class="bubble assistant">{response_text}<span class="bubble-time">{current_time}</span></div></div>',
+                    unsafe_allow_html=True
+                )
+
+        typing_box.empty()
+
+        # Only save if we actually received non-empty text
+        if response_text.strip():
+            st.session_state.character_chats[selected_char_name].append({
+                "role": "assistant",
+                "content": response_text,
+                "time": current_time
+            })
+            # Clear any failure flag if message succeeded
+            st.session_state.failed_prompts.pop(selected_char_name, None)
+        else:
+            bubble_placeholder.empty()
+            raise Exception("AI returned an empty response. The server may be rate-limited.")
 
     except Exception as e:
         typing_box.empty()
-        st.error(f"⚠️ Message failed to send: {e}")
+        bubble_placeholder.empty()
         
-        # Store failed prompt for the retry button
-        st.session_state.failed_prompt = user_query
-        if st.button("🔄 Retry Message", key="retry_btn", use_container_width=True):
-            st.session_state.pending_prompt = st.session_state.pop("failed_prompt")
-            st.rerun()
+        # Remove the unanswered user message so the log stays clean
+        if st.session_state.character_chats[selected_char_name] and st.session_state.character_chats[selected_char_name][-1]["role"] == "user":
+            st.session_state.character_chats[selected_char_name].pop()
+            
+        # Store for retry
+        st.session_state.failed_prompts[selected_char_name] = user_query
+        st.rerun()
