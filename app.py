@@ -33,7 +33,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. Sky-Blue & Pure White Minimalist CSS
+# 4. Sky-Blue & Pure White Minimalist CSS + Split Sidebar
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -42,7 +42,7 @@ st.markdown("""
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    /* Streamlit top header adjustment so buttons remain clickable without covering sticky items */
+    /* Streamlit top header adjustment */
     header[data-testid="stHeader"] {
         background: transparent !important;
         pointer-events: none !important;
@@ -168,7 +168,7 @@ st.markdown("""
         box-shadow: 0 6px 16px rgba(14, 165, 233, 0.2);
     }
 
-    /* Message Bubbles - Layered under sticky header */
+    /* Message Bubbles */
     .msg-row {
         display: flex;
         width: 100%;
@@ -285,10 +285,19 @@ st.markdown("""
         fill: #ffffff !important;
     }
 
-    /* Sidebar Conversations Styling */
+    /* ========================================================
+       SIDEBAR: Scrollable Top + Sticky Locked Bottom Profile
+       ======================================================== */
     [data-testid="stSidebar"] {
         background-color: #ffffff;
         border-right: 1px solid #e0f2fe;
+    }
+    [data-testid="stSidebar"] > div:first-child {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow-y: auto;
+        padding-bottom: 0 !important;
     }
     [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
         color: #0f172a;
@@ -296,6 +305,7 @@ st.markdown("""
         letter-spacing: -0.02em;
     }
 
+    /* Story Card Item */
     .sidebar-story-card {
         display: flex;
         align-items: center;
@@ -354,57 +364,70 @@ st.markdown("""
         margin-top: 4px;
     }
 
+    /* Pinned / Sticky Profile Card Container */
+    div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
+    .element-container:has(.locked-profile-anchor) {
+        position: sticky !important;
+        bottom: 0 !important;
+        z-index: 1000 !important;
+        background: #ffffff !important;
+        padding-top: 12px !important;
+        padding-bottom: 14px !important;
+        margin-top: auto !important;
+        box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.08) !important;
+        border-top: 1.5px solid #e0f2fe !important;
+    }
+
     .light-profile-card {
         background: #f8fafc;
         border-radius: 20px;
-        padding: 16px 14px;
+        padding: 14px 12px;
         text-align: center;
         border: 1px solid #e2e8f0;
-        margin-top: 14px;
     }
     .light-profile-avatar {
-        width: 78px;
-        height: 78px;
+        width: 68px;
+        height: 68px;
         border-radius: 50%;
         object-fit: cover;
-        margin: 0 auto 10px auto;
+        margin: 0 auto 8px auto;
         display: block;
         border: 3px solid #38bdf8;
         box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
     }
     .light-profile-avatar-fallback {
-        width: 78px;
-        height: 78px;
+        width: 68px;
+        height: 68px;
         border-radius: 50%;
         background: #38bdf8;
         color: white;
-        font-size: 38px;
+        font-size: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 10px auto;
+        margin: 0 auto 8px auto;
     }
     .light-profile-name {
-        font-size: 1.05rem;
+        font-size: 0.98rem;
         font-weight: 700;
         color: #0f172a;
         margin-bottom: 2px;
     }
     .light-profile-book {
-        font-size: 0.78rem;
+        font-size: 0.74rem;
         color: #0284c7;
         font-weight: 600;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
     .light-profile-bio {
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 10px;
-        font-size: 0.82rem;
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-size: 0.78rem;
         color: #475569;
         text-align: left;
-        line-height: 1.45;
+        line-height: 1.4;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -447,7 +470,7 @@ first_char_name = catalog[st.session_state.selected_story]["characters"][0]["nam
 if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
-# 8. "Conversations" Sidebar
+# 8. "Conversations" Sidebar (Top Scrollable Zone)
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -485,21 +508,21 @@ current_char = next((c for c in chars_in_story if c["name"] == st.session_state.
 st.session_state.selected_char = current_char["name"]
 avatar_b64 = get_image_base64(current_char.get("avatar", ""))
 
-# Profile Card in Sidebar
-st.sidebar.markdown("---")
+# Locked / Sticky Profile Card at Bottom of Sidebar
 avatar_portrait_html = f'<img class="light-profile-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="light-profile-avatar-fallback">📖</div>'
 st.sidebar.markdown(f"""
-<div class="light-profile-card">
-    {avatar_portrait_html}
-    <div class="light-profile-name">{current_char['name']}</div>
-    <div class="light-profile-book">📖 {selected_story}</div>
-    <div class="light-profile-bio">
-        <b>About:</b><br>{current_char.get('tagline', '')}
+<div class="locked-profile-anchor">
+    <div class="light-profile-card">
+        {avatar_portrait_html}
+        <div class="light-profile-name">{current_char['name']}</div>
+        <div class="light-profile-book">📖 {selected_story}</div>
+        <div class="light-profile-bio">
+            <b>About:</b><br>{current_char.get('tagline', '')}
+        </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-st.sidebar.write("")
 if st.sidebar.button("🗑️ Clear History", use_container_width=True):
     now = get_hkt_time()
     st.session_state.character_chats[current_char["name"]] = [
