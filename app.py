@@ -34,31 +34,27 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. Strict Sanitizer to Prevent AI Reasoning Leaks
-def sanitize_ai_output(text: str) -> str:
-    """Strips <think> tags, 'Analyze the Request', and prompt breakdown leaks."""
+# 4. Reliable Clean Output Sanitizer
+def clean_ai_reply(text: str, user_prompt: str) -> str:
+    """Strips thinking tags, meta-headers, and echoes."""
     if not text:
         return ""
-    # Strip DeepSeek/Qwen <think> reasoning blocks
+    
+    # Strip <think> blocks
     cleaned = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
     
-    # If the response contains an analysis header, extract only real character dialogue
-    if "Analyze the Request" in cleaned or "Recall Character Details" in cleaned or "Formulate the Response" in cleaned:
-        # Match quoted dialogue if present
-        dialogue_match = re.findall(r'"([^"]{10,})"', cleaned)
-        if dialogue_match:
-            cleaned = " ".join(dialogue_match)
-        else:
-            lines = cleaned.split("\n")
-            clean_lines = [
-                l for l in lines 
-                if not re.match(r'^\s*(\d+\.|\*|-)\s*(\*\*)?(Analyze|Recall|Formulate|Persona|Constraints|Target)', l, re.IGNORECASE)
-                and not any(k in l for k in ["Analyze the Request", "Recall Character", "Formulate the Response"])
-            ]
-            cleaned = " ".join(clean_lines).strip()
-    return cleaned.strip()
+    # Remove markdown analysis headers if any appear
+    cleaned = re.sub(r'(?i)\d+\.\s*\*\*.*?(?:Analyze|Recall|Formulate|Persona|Context).*?\n', '', cleaned)
+    cleaned = re.sub(r'(?i)\*.*?(?:User asks|Constraints|Target Audience).*?\n', '', cleaned)
+    cleaned = cleaned.strip()
 
-# 5. Seamless Sky-Blue CSS (Fixes scrolling and cut-off card issues)
+    # If the model simply echoed the user's prompt, invalidate it so it does not render
+    if cleaned.strip().lower().strip('?"\'!.') == user_prompt.strip().lower().strip('?"\'!.'):
+        return ""
+        
+    return cleaned
+
+# 5. Sky-Blue CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -76,12 +72,10 @@ st.markdown("""
         pointer-events: auto !important;
     }
 
-    /* Seamless pastel blue canvas across the entire viewport */
     .stApp {
         background-color: #eef7fc !important;
     }
 
-    /* Main chat column: natural full-height scrolling with bottom padding */
     .block-container {
         padding-top: 0.5rem !important;
         padding-bottom: 140px !important;
@@ -89,7 +83,6 @@ st.markdown("""
         background-color: transparent !important;
     }
 
-    /* Locked sticky header wrapper with solid background buffer */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
@@ -102,7 +95,6 @@ st.markdown("""
         margin-top: -10px !important;
     }
 
-    /* Header Visual Card */
     .chat-top-header {
         display: flex;
         align-items: center;
@@ -132,7 +124,6 @@ st.markdown("""
         letter-spacing: -0.01em;
     }
 
-    /* Glowing Green Status Badge */
     .online-badge {
         display: inline-flex;
         align-items: center;
@@ -182,7 +173,6 @@ st.markdown("""
         font-size: 24px;
     }
 
-    /* Chat Message Bubbles */
     .msg-row {
         display: flex;
         width: 100%;
@@ -222,7 +212,6 @@ st.markdown("""
         border: 1px solid rgba(226, 232, 240, 0.8);
     }
 
-    /* Typing Status Indicator */
     .typing-pill {
         display: inline-flex;
         align-items: center;
@@ -237,7 +226,6 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(14, 165, 233, 0.12);
     }
 
-    /* Starter Question Buttons */
     .block-container .stButton button {
         background-color: #ffffff !important;
         color: #0284c7 !important;
@@ -257,7 +245,6 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(56, 189, 248, 0.25) !important;
     }
 
-    /* Floating Chat Input Dock */
     [data-testid="stBottom"],
     [data-testid="stBottom"] > div,
     [data-testid="stBottom"] > div > div {
@@ -299,7 +286,6 @@ st.markdown("""
         fill: #ffffff !important;
     }
 
-    /* Sidebar Styling */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-right: 1.5px solid #e0f2fe !important;
@@ -441,7 +427,6 @@ st.markdown("""
         transform: translateY(-1px) !important;
     }
 
-    /* Pinned Bottom Profile Card */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
@@ -533,7 +518,8 @@ client = OpenAI(
     api_key=api_key or "missing_key"
 )
 
-MODEL_NAME = "openrouter/free"
+# Use reliable conversational free model
+MODEL_NAME = "meta-llama/llama-3.3-70b-instruct:free"
 
 # 7. Load Catalog
 def load_catalog():
@@ -628,7 +614,7 @@ with st.sidebar.container():
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 10. Persistent Conversation Initialization & Sanitize Old Chat History
+# 10. Initialize Conversation & Purge Echoes or Analysis Leaks
 now_str = get_hkt_time()
 if current_char["name"] not in st.session_state.character_chats:
     st.session_state.character_chats[current_char["name"]] = [
@@ -639,22 +625,30 @@ if current_char["name"] not in st.session_state.character_chats:
         }
     ]
 
-# Purge any leaked analysis messages that were previously saved in session
-sanitized_messages = []
-for m in st.session_state.character_chats[current_char["name"]]:
+# Purge corrupted messages and echo loops from existing session state
+cleaned_chat = []
+for idx, m in enumerate(st.session_state.character_chats[current_char["name"]]):
     content = m.get("content", "").strip()
     if not content:
         continue
-    if "Analyze the Request" in content or "Recall Character Details" in content:
-        cleaned_dialogue = sanitize_ai_output(content)
-        if cleaned_dialogue:
-            m["content"] = cleaned_dialogue
-            sanitized_messages.append(m)
-        # If it was 100% analysis with no dialogue, drop it completely
-    else:
-        sanitized_messages.append(m)
+    # Drop previous analysis breakdown leaks
+    if "Analyze the Request" in content or "Recall Character" in content:
+        continue
+    # Drop echoing messages where assistant duplicated the user's previous line
+    if m["role"] == "assistant" and idx > 0:
+        prev = st.session_state.character_chats[current_char["name"]][idx - 1]
+        if prev["role"] == "user" and prev["content"].strip().lower() == content.strip().lower():
+            continue
+    cleaned_chat.append(m)
 
-st.session_state.character_chats[current_char["name"]] = sanitized_messages
+if not cleaned_chat or cleaned_chat[0]["role"] != "assistant":
+    cleaned_chat.insert(0, {
+        "role": "assistant",
+        "content": f"Hello! I am {current_char['name']}. What would you like to ask me?",
+        "time": now_str
+    })
+
+st.session_state.character_chats[current_char["name"]] = cleaned_chat
 current_messages = st.session_state.character_chats[current_char["name"]]
 
 # 11. Locked Top Header Bar with Glowing Green Status Dot
@@ -728,20 +722,22 @@ if user_query:
         unsafe_allow_html=True
     )
 
-    # Conversational roleplay prompt (avoids prompting analysis triggers)
+    # Conversational roleplay prompt
     system_instruction = (
-        f"You are roleplaying as {current_char['name']} from the story '{selected_story}'.\n"
+        f"You are {current_char['name']} from '{selected_story}'.\n"
         f"{current_char['system_prompt']}\n\n"
-        "SPEAK DIRECTLY TO THE STUDENT:\n"
-        "- Reply immediately in character in 2 to 3 short, friendly sentences.\n"
-        "- Use simple, easy English words suitable for primary school students.\n"
-        "- DO NOT write notes, outlines, thoughts, reasoning, or lists. ONLY say your spoken words."
+        "Guidelines for speaking with primary school students:\n"
+        "- Reply directly in character using friendly, simple, everyday English words.\n"
+        "- Keep your answer short (2 to 3 sentences maximum).\n"
+        "- Do NOT repeat the user's question.\n"
+        "- Do NOT provide analysis, notes, or bullet points."
     )
 
     conversation_payload = [
         {"role": "system", "content": system_instruction}
     ]
-    for m in st.session_state.character_chats[current_char["name"]]:
+    # Send clean recent messages
+    for m in st.session_state.character_chats[current_char["name"]][-6:]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
     # Cyan "Typing..." Pill indicator
@@ -756,20 +752,30 @@ if user_query:
     raw_response_text = ""
 
     try:
-        stream = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=conversation_payload,
-            stream=True,
-            temperature=0.6,
-            max_tokens=140
-        )
+        # Request from conversational model with fallback to openrouter/free
+        try:
+            stream = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=conversation_payload,
+                stream=True,
+                temperature=0.7,
+                max_tokens=150
+            )
+        except Exception:
+            stream = client.chat.completions.create(
+                model="openrouter/free",
+                messages=conversation_payload,
+                stream=True,
+                temperature=0.7,
+                max_tokens=150
+            )
         
         has_started_typing = False
         for chunk in stream:
             content = chunk.choices[0].delta.content or ""
             raw_response_text += content
             
-            clean_display = sanitize_ai_output(raw_response_text)
+            clean_display = clean_ai_reply(raw_response_text, user_query)
             
             if not has_started_typing and clean_display.strip():
                 typing_box.empty()
@@ -782,7 +788,7 @@ if user_query:
                 )
 
         typing_box.empty()
-        final_clean_response = sanitize_ai_output(raw_response_text)
+        final_clean_response = clean_ai_reply(raw_response_text, user_query)
 
         if final_clean_response.strip():
             st.session_state.character_chats[current_char["name"]].append({
@@ -793,7 +799,7 @@ if user_query:
             st.session_state.failed_prompts.pop(current_char["name"], None)
         else:
             bubble_placeholder.empty()
-            raise Exception("AI returned empty text. Please try again.")
+            raise Exception("AI response was blank or invalid. Please try again.")
 
     except Exception as e:
         typing_box.empty()
