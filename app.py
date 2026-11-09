@@ -1,7 +1,7 @@
 import os
 import json
 import base64
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import streamlit as st
 from openai import OpenAI
 
@@ -15,7 +15,12 @@ st.set_page_config(
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# 2. Helper to encode local images for web rendering
+# 2. Hong Kong Time Helper (UTC+8)
+def get_hkt_time():
+    hkt_zone = timezone(timedelta(hours=8))
+    return datetime.now(hkt_zone).strftime("%I:%M %p")
+
+# 3. Helper to encode local images for web rendering
 def get_image_base64(relative_path):
     if not relative_path:
         return None
@@ -28,7 +33,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 3. Modern WhatsApp Theme CSS
+# 4. WhatsApp Modern CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap');
@@ -45,10 +50,9 @@ st.markdown("""
         background-position: 0 0, 15px 15px;
     }
 
-    /* Clean up default Streamlit padding */
     .block-container {
         padding-top: 1rem !important;
-        padding-bottom: 5rem !important;
+        padding-bottom: 5.5rem !important;
         max-width: 760px !important;
     }
 
@@ -59,12 +63,11 @@ st.markdown("""
         z-index: 99;
         display: flex;
         align-items: center;
-        background-color: #075e54;
         background: linear-gradient(135deg, #075e54 0%, #128c7e 100%);
         padding: 10px 18px;
         border-radius: 14px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        margin-bottom: 20px;
+        margin-bottom: 18px;
     }
     .wa-avatar {
         width: 48px;
@@ -114,7 +117,7 @@ st.markdown("""
         box-shadow: 0 0 6px #25d366;
     }
 
-    /* Custom Message Bubbles */
+    /* Message Bubbles */
     .chat-row {
         display: flex;
         width: 100%;
@@ -136,6 +139,7 @@ st.markdown("""
         color: #111b21;
         box-shadow: 0 1px 2px rgba(11, 20, 26, 0.13);
         word-wrap: break-word;
+        white-space: pre-wrap;
     }
     .bubble.user {
         background-color: #d9fdd3;
@@ -146,7 +150,6 @@ st.markdown("""
         border-radius: 0px 12px 12px 12px;
     }
 
-    /* Message timestamp */
     .bubble-time {
         position: absolute;
         bottom: 4px;
@@ -162,7 +165,7 @@ st.markdown("""
     .typing-indicator {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: 6px;
         padding: 8px 14px;
         background: #ffffff;
         border-radius: 12px;
@@ -173,7 +176,7 @@ st.markdown("""
         font-size: 0.88rem;
     }
 
-    /* Starter Question Buttons (Pill Chips) */
+    /* Suggested Question Buttons (Pill Chips) */
     .stButton button {
         background-color: #ffffff !important;
         color: #075e54 !important;
@@ -193,19 +196,69 @@ st.markdown("""
         box-shadow: 0 3px 6px rgba(0,0,0,0.12) !important;
     }
 
-    /* Sidebar customization */
+    /* Sidebar Styling */
     [data-testid="stSidebar"] {
-        background-color: #f0f2f5;
-        border-right: 1px solid #d1d7db;
+        background-color: #f7f9fa;
+        border-right: 1px solid #e1e4ea;
     }
-    [data-testid="stSidebar"] h3 {
-        color: #111b21;
+
+    /* Contact Card in Sidebar */
+    .sidebar-profile-card {
+        background: white;
+        border-radius: 14px;
+        padding: 16px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-top: 15px;
+        border: 1px solid #eef0f3;
+    }
+    .profile-avatar-lg {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 10px auto;
+        display: block;
+        border: 3px solid #128c7e;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .profile-avatar-lg-fallback {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: #128c7e;
+        color: white;
+        font-size: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px auto;
+    }
+    .profile-name {
+        font-size: 1.1rem;
         font-weight: 600;
+        color: #111b21;
+        margin-bottom: 4px;
+    }
+    .profile-book {
+        font-size: 0.82rem;
+        color: #128c7e;
+        font-weight: 500;
+        margin-bottom: 12px;
+    }
+    .profile-bio-box {
+        background: #f0f2f5;
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 0.85rem;
+        color: #4a5568;
+        text-align: left;
+        line-height: 1.4;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 4. OpenRouter API Connection
+# 5. OpenRouter Connection
 api_key = st.secrets.get("OPENROUTER_API_KEY", "")
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
@@ -214,46 +267,57 @@ client = OpenAI(
 
 MODEL_NAME = "openrouter/free"
 
-# 5. Load Catalog directly (no cache so GitHub updates show immediately)
+# 6. Load Catalog (Uncached for instant live edits)
 def load_catalog():
     with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
         return json.load(f)
 
 catalog = load_catalog()
 
-# 6. Persistent Session Initialization
+# 7. Persistent Memory Initialization
 if "character_chats" not in st.session_state:
     st.session_state.character_chats = {}
 
-# 7. Sidebar Navigation (Contact List)
+# 8. Sidebar Contact Directory
 st.sidebar.markdown("### 💬 Chats")
-selected_story = st.sidebar.selectbox("Book / Story:", list(catalog.keys()))
 
+selected_story = st.sidebar.selectbox("Select Book / Story:", list(catalog.keys()))
 character_list = catalog[selected_story]
 char_dict = {c["name"]: c for c in character_list}
 
+# Character selector
 selected_char_name = st.sidebar.radio(
-    "Select Contact:",
-    options=list(char_dict.keys())
+    "Choose Contact:",
+    options=list(char_dict.keys()),
+    key="char_radio_select"
 )
 
 current_char = char_dict[selected_char_name]
 avatar_b64 = get_image_base64(current_char.get("avatar", ""))
 
-st.sidebar.divider()
-if avatar_b64:
-    st.sidebar.image(os.path.join(BASE_DIR, current_char["avatar"]), width=120)
-st.sidebar.markdown(f"**About:** {current_char.get('tagline', '')}")
+# Profile Card for Selected Character
+avatar_lg_html = f'<img class="profile-avatar-lg" src="{avatar_b64}">' if avatar_b64 else f'<div class="profile-avatar-lg-fallback">📖</div>'
+st.sidebar.markdown(f"""
+<div class="sidebar-profile-card">
+    {avatar_lg_html}
+    <div class="profile-name">{current_char['name']}</div>
+    <div class="profile-book">📖 {selected_story}</div>
+    <div class="profile-bio-box">
+        <b>About:</b><br>{current_char.get('tagline', '')}
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-if st.sidebar.button("🗑️ Reset Chat", use_container_width=True):
-    now = datetime.now().strftime("%I:%M %p")
+st.sidebar.write("")
+if st.sidebar.button("🗑️ Clear This Chat History", use_container_width=True):
+    now = get_hkt_time()
     st.session_state.character_chats[selected_char_name] = [
         {"role": "assistant", "content": f"Hello! I am {selected_char_name}. What would you like to ask me?", "time": now}
     ]
     st.rerun()
 
-# 8. Initialize chat for selected character if empty
-now_str = datetime.now().strftime("%I:%M %p")
+# 9. Initialize Conversation for Current Contact
+now_str = get_hkt_time()
 if selected_char_name not in st.session_state.character_chats:
     st.session_state.character_chats[selected_char_name] = [
         {
@@ -265,7 +329,7 @@ if selected_char_name not in st.session_state.character_chats:
 
 current_messages = st.session_state.character_chats[selected_char_name]
 
-# 9. Top WhatsApp Header
+# 10. WhatsApp Top Header
 avatar_html = f'<img class="wa-avatar" src="{avatar_b64}">' if avatar_b64 else f'<div class="wa-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="wa-header">
@@ -277,32 +341,29 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 10. Suggested Questions (Styled as clean pill chips)
+# 11. Starter Questions
 starters = current_char.get("starter_questions", [])
 if len(current_messages) <= 1 and starters:
-    st.caption("Tap a question to ask:")
+    st.caption("Suggested Questions:")
     cols = st.columns(len(starters))
     for idx, question in enumerate(starters):
         if cols[idx].button(question, key=f"{selected_char_name}_starter_{idx}", use_container_width=True):
             st.session_state.pending_prompt = question
             st.rerun()
 
-# 11. Render Message Feed (WhatsApp Bubbles)
+# 12. Render Message Log
 for msg in current_messages:
     role = msg["role"]
     content = msg["content"]
     time_str = msg.get("time", now_str)
     
-    st.markdown(f"""
-    <div class="chat-row {role}">
-        <div class="bubble {role}">
-            {content}
-            <span class="bubble-time">{time_str}</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Clean single-line rendering to prevent markdown code-block bug
+    st.markdown(
+        f'<div class="chat-row {role}"><div class="bubble {role}">{content}<span class="bubble-time">{time_str}</span></div></div>',
+        unsafe_allow_html=True
+    )
 
-# 12. Handle Input & "is typing..."
+# 13. Message Input & Auto-Retry Handling
 user_query = st.chat_input(f"Type a message to {current_char['name']}...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -312,37 +373,29 @@ if user_query:
         st.error("Please add OPENROUTER_API_KEY in Streamlit Secrets.")
         st.stop()
 
-    current_time = datetime.now().strftime("%I:%M %p")
+    current_time = get_hkt_time()
 
-    # Save and display user bubble immediately
+    # Save and display user message
     st.session_state.character_chats[selected_char_name].append({
         "role": "user",
         "content": user_query,
         "time": current_time
     })
-    st.markdown(f"""
-    <div class="chat-row user">
-        <div class="bubble user">
-            {user_query}
-            <span class="bubble-time">{current_time}</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="chat-row user"><div class="bubble user">{user_query}<span class="bubble-time">{current_time}</span></div></div>',
+        unsafe_allow_html=True
+    )
 
-    # Prepare system payload
+    # Build prompt payload
     conversation_payload = [
         {"role": "system", "content": current_char["system_prompt"]}
     ]
     for m in st.session_state.character_chats[selected_char_name]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
-    # Render typing indicator
+    # Display typing indicator
     typing_box = st.empty()
-    typing_box.markdown(f"""
-    <div class="typing-indicator">
-        <span>✍️ <b>{current_char['name']}</b> is typing...</span>
-    </div>
-    """, unsafe_allow_html=True)
+    typing_box.markdown(f'<div class="typing-indicator"><span>✍️ <b>{current_char["name"]}</b> is typing...</span></div>', unsafe_allow_html=True)
 
     try:
         stream = client.chat.completions.create(
@@ -353,7 +406,6 @@ if user_query:
             max_tokens=250
         )
         
-        # Stream response directly into the assistant's bubble
         response_text = ""
         bubble_placeholder = st.empty()
         typing_box.empty()
@@ -361,16 +413,12 @@ if user_query:
         for chunk in stream:
             content = chunk.choices[0].delta.content or ""
             response_text += content
-            bubble_placeholder.markdown(f"""
-            <div class="chat-row assistant">
-                <div class="bubble assistant">
-                    {response_text}
-                    <span class="bubble-time">{current_time}</span>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            bubble_placeholder.markdown(
+                f'<div class="chat-row assistant"><div class="bubble assistant">{response_text}<span class="bubble-time">{current_time}</span></div></div>',
+                unsafe_allow_html=True
+            )
 
-        # Save assistant message to session memory
+        # Save assistant reply
         st.session_state.character_chats[selected_char_name].append({
             "role": "assistant",
             "content": response_text,
@@ -379,4 +427,10 @@ if user_query:
 
     except Exception as e:
         typing_box.empty()
-        st.error(f"API Error: {e}")
+        st.error(f"⚠️ Message failed to send: {e}")
+        
+        # Store failed prompt for the retry button
+        st.session_state.failed_prompt = user_query
+        if st.button("🔄 Retry Message", key="retry_btn", use_container_width=True):
+            st.session_state.pending_prompt = st.session_state.pop("failed_prompt")
+            st.rerun()
