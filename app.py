@@ -18,10 +18,9 @@ client = OpenAI(
 
 # High-performing, permanently free model on OpenRouter
 FREE_MODELS = [
-    "liquid/lfm-2.5-1.2b-instruct:free",
-    "google/gemma-2-9b-it:free",
-    "meta-llama/llama-3.2-3b-instruct:free",
-    "deepseek/deepseek-chat:free"
+   "liquid/lfm2.5-2.6b:free",
+    "nvidia/nemotron-3.5-lightning:free",
+    "liquid/lfm3-1.7b:free"
 ]
 
 # 2. Load Book & Character Catalog
@@ -103,7 +102,7 @@ if user_query:
                 stream=True,
                 temperature=0.7,
                 max_tokens=250,
-                extra_body={"models": FREE_MODELS}  # OpenRouter will try each model in order if one returns 429
+                extra_body={"models": FREE_MODELS}
             )
             response_text = st.write_stream(stream)
             st.session_state.messages.append({"role": "assistant", "content": response_text})
