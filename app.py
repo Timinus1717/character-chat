@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import base64
 from datetime import datetime, timezone, timedelta
 import streamlit as st
@@ -51,7 +52,6 @@ st.markdown("""
         pointer-events: auto !important;
     }
 
-    /* Seamless pastel blue canvas */
     .stApp {
         background-color: #e6f4fd !important;
     }
@@ -63,7 +63,6 @@ st.markdown("""
         background-color: transparent !important;
     }
 
-    /* Locked sticky header */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
@@ -155,7 +154,6 @@ st.markdown("""
         font-size: 24px;
     }
 
-    /* Message Rows & Bubbles */
     .msg-row {
         display: flex;
         width: 100%;
@@ -180,7 +178,6 @@ st.markdown("""
         white-space: pre-wrap;
     }
 
-    /* User Bubble: Deep Royal Ocean Gradient with pure white text */
     .msg-bubble.user {
         background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
         color: #ffffff !important;
@@ -189,7 +186,6 @@ st.markdown("""
         box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
     }
 
-    /* Assistant Bubble: Solid White with Deep Charcoal Text */
     .msg-bubble.assistant {
         background: #ffffff !important;
         color: #0f172a !important;
@@ -214,7 +210,6 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.10);
     }
 
-    /* Starter Question Buttons */
     .block-container .stButton button {
         background-color: #ffffff !important;
         color: #0369a1 !important;
@@ -234,7 +229,6 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(2, 132, 199, 0.3) !important;
     }
 
-    /* Chat Input */
     [data-testid="stBottom"],
     [data-testid="stBottom"] > div,
     [data-testid="stBottom"] > div > div {
@@ -278,9 +272,7 @@ st.markdown("""
         fill: #ffffff !important;
     }
 
-    /* =========================================================
-       SIDEBAR: HIGH-CONTRAST READABILITY
-       ========================================================= */
+    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-right: 1.5px solid #cbd5e1 !important;
@@ -301,7 +293,6 @@ st.markdown("""
         font-weight: 700;
     }
 
-    /* Story Card Item */
     .sidebar-story-card {
         display: flex;
         align-items: center;
@@ -341,7 +332,6 @@ st.markdown("""
         line-height: 1.25;
     }
 
-    /* Expander Container */
     [data-testid="stExpander"] {
         background-color: #ffffff !important;
         border: 1.5px solid #93c5fd !important;
@@ -400,7 +390,6 @@ st.markdown("""
         margin-top: 3px;
     }
 
-    /* Character Selection Button inside Expander */
     [data-testid="stSidebar"] [data-testid="stExpander"] .stButton button {
         background-color: #ffffff !important;
         color: #0f172a !important;
@@ -425,7 +414,6 @@ st.markdown("""
         transform: translateY(-1px) !important;
     }
 
-    /* Sticky Profile Card */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
@@ -518,7 +506,7 @@ client = OpenAI(
     api_key=api_key or "missing_key"
 )
 
-# Unrestricted paid tier model (fast, clear English, ~$0.20 per 1M tokens)
+# Unrestricted paid tier model
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
 
 # 6. Load Catalog
@@ -675,7 +663,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 14. Integrated Bottom Chat Input
+# 14. Integrated Bottom Chat Input with Natural Typing Pace
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -687,7 +675,7 @@ if user_query:
 
     current_time = get_hkt_time()
 
-    # Save and display user message
+    # Save and display user message immediately
     st.session_state.character_chats[current_char["name"]].append({
         "role": "user",
         "content": user_query,
@@ -715,13 +703,16 @@ if user_query:
     for m in st.session_state.character_chats[current_char["name"]][-8:]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
-    # Cyan "Typing..." Pill indicator
+    # Realistic typing indicator display
     typing_box = st.empty()
     typing_box.markdown(f'''
     <div class="typing-pill">
         <span>✍️ {current_char["name"]} is typing...</span>
     </div>
     ''', unsafe_allow_html=True)
+
+    # 1.5-second natural pause before words start streaming
+    time.sleep(1.5)
 
     bubble_placeholder = st.empty()
     full_response_text = ""
@@ -738,17 +729,23 @@ if user_query:
         has_started_typing = False
         for chunk in stream:
             content = chunk.choices[0].delta.content or ""
-            full_response_text += content
-            
-            if not has_started_typing and full_response_text.strip():
-                typing_box.empty()
-                has_started_typing = True
+            if not content:
+                continue
 
-            if has_started_typing:
-                bubble_placeholder.markdown(
-                    f'<div class="msg-row assistant"><div class="msg-bubble assistant">{full_response_text}</div></div>',
-                    unsafe_allow_html=True
-                )
+            # Stream words with a smooth, readable micro-delay
+            for char in content:
+                full_response_text += char
+                time.sleep(0.015)  # 15ms per character typing cadence
+                
+                if not has_started_typing and full_response_text.strip():
+                    typing_box.empty()
+                    has_started_typing = True
+
+                if has_started_typing:
+                    bubble_placeholder.markdown(
+                        f'<div class="msg-row assistant"><div class="msg-bubble assistant">{full_response_text}</div></div>',
+                        unsafe_allow_html=True
+                    )
 
         typing_box.empty()
 
