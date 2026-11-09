@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 import streamlit as st
 from openai import OpenAI
 
@@ -11,36 +12,54 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. WhatsApp-Style Clean CSS Styling
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# 2. Helper to encode local images for web rendering
+def get_image_base64(relative_path):
+    """Encodes local images to Base64 so Streamlit and HTML can render them reliably."""
+    if not relative_path:
+        return None
+    
+    full_path = os.path.join(BASE_DIR, relative_path)
+    if os.path.isfile(full_path):
+        with open(full_path, "rb") as f:
+            encoded = base64.b64encode(f.read()).decode()
+            ext = os.path.splitext(full_path)[1].lower().replace(".", "")
+            mime = "jpeg" if ext in ["jpg", "jpeg"] else ext
+            return f"data:image/{mime};base64,{encoded}"
+    return None
+
+# 3. WhatsApp-Style Clean CSS Styling
 st.markdown("""
 <style>
-    /* Main background tint */
+    /* WhatsApp conversation background */
     .stApp {
         background-color: #ECE5DD;
     }
     
-    /* Sticky Top Header bar resembling WhatsApp */
+    /* WhatsApp contact banner header */
     .chat-header {
         display: flex;
         align-items: center;
         background-color: #075E54;
         color: white;
         padding: 10px 16px;
-        border-radius: 10px;
+        border-radius: 12px;
         margin-bottom: 15px;
     }
     .chat-header img {
-        width: 46px;
-        height: 46px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         object-fit: cover;
-        margin-right: 12px;
+        margin-right: 14px;
         border: 2px solid #ffffff;
     }
     .chat-header-info h3 {
         margin: 0;
         color: #ffffff;
         font-size: 1.15rem;
+        font-weight: 600;
     }
     .chat-header-info p {
         margin: 0;
@@ -48,15 +67,7 @@ st.markdown("""
         font-size: 0.85rem;
     }
     
-    /* Typing indicator styling */
-    .typing-box {
-        font-style: italic;
-        color: #667781;
-        font-size: 0.9rem;
-        margin: 6px 0 10px 12px;
-    }
-    
-    /* WhatsApp bubble aesthetics */
+    /* WhatsApp message bubble styling */
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
         background-color: #DCF8C6 !important;
         border-radius: 12px 0 12px 12px !important;
@@ -76,52 +87,49 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Connect to API
+# 4. OpenRouter API Connection
 api_key = st.secrets.get("OPENROUTER_API_KEY", "")
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=api_key or "missing_key"
 )
 
-# OpenRouter Free Router
 MODEL_NAME = "openrouter/free"
 
-# 4. Load Catalog
+# 5. Load Book & Character Catalog
 @st.cache_data
 def load_catalog():
-    with open("characters.json", "r", encoding="utf-8") as f:
+    with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
         return json.load(f)
 
 catalog = load_catalog()
 
-# 5. Helper function for avatars
-def resolve_avatar(avatar_path):
-    """Returns local image path if valid, or a generic fallback."""
-    if avatar_path and os.path.exists(avatar_path):
-        return avatar_path
-    return "📖"
+# 6. Multi-Character Persistent Session Setup
+if "character_chats" not in st.session_state:
+    st.session_state.character_chats = {}
 
-# 6. Sidebar Navigation (WhatsApp contact list style)
+# 7. Sidebar Navigation (Contact List)
 st.sidebar.markdown("### 📚 Contacts")
 selected_story = st.sidebar.selectbox("Select Story:", list(catalog.keys()))
 
 character_list = catalog[selected_story]
 char_dict = {c["name"]: c for c in character_list}
 
-# Character selector with custom profile images
 selected_char_name = st.sidebar.radio(
-    "Select Character to Chat:",
-    options=list(char_dict.keys()),
-    format_func=lambda name: f"{name}"
+    "Choose Character:",
+    options=list(char_dict.keys())
 )
 
 current_char = char_dict[selected_char_name]
-avatar_image = resolve_avatar(current_char.get("avatar", ""))
 
-# Show character bio & preview in sidebar
+# Resolve profile image (Base64 Data URI)
+avatar_b64 = get_image_base64(current_char.get("avatar", ""))
+chat_avatar = avatar_b64 if avatar_b64 else "📖"
+
+# Show profile preview & bio in sidebar
 st.sidebar.divider()
-if os.path.exists(current_char.get("avatar", "")):
-    st.sidebar.image(current_char["avatar"], width=100)
+if avatar_b64:
+    st.sidebar.image(os.path.join(BASE_DIR, current_char["avatar"]), width=120)
 st.sidebar.markdown(f"**Bio:** {current_char.get('tagline', '')}")
 
 if st.sidebar.button("🗑️ Clear This Chat", use_container_width=True):
@@ -130,11 +138,7 @@ if st.sidebar.button("🗑️ Clear This Chat", use_container_width=True):
     ]
     st.rerun()
 
-# 7. Multi-Character Session Memory Initialization
-if "character_chats" not in st.session_state:
-    st.session_state.character_chats = {}
-
-# Ensure selected character has their own conversation history
+# Initialize selected character's chat history if not yet created
 if selected_char_name not in st.session_state.character_chats:
     st.session_state.character_chats[selected_char_name] = [
         {
@@ -143,8 +147,10 @@ if selected_char_name not in st.session_state.character_chats:
         }
     ]
 
-# 8. WhatsApp-Style Header
-header_img_tag = f'<img src="{current_char["avatar"]}">' if os.path.exists(current_char.get("avatar", "")) else '<span style="font-size:32px;margin-right:10px;">📖</span>'
+current_messages = st.session_state.character_chats[selected_char_name]
+
+# 8. WhatsApp-Style Header Banner
+header_img_tag = f'<img src="{avatar_b64}">' if avatar_b64 else '<span style="font-size:32px;margin-right:12px;">📖</span>'
 st.markdown(f"""
 <div class="chat-header">
     {header_img_tag}
@@ -155,10 +161,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 9. Starter Question Buttons (Only show if new conversation)
-current_messages = st.session_state.character_chats[selected_char_name]
+# 9. Starter Question Buttons (Only displays on a fresh conversation)
 starters = current_char.get("starter_questions", [])
-
 if len(current_messages) <= 1 and starters:
     st.caption("Suggested Questions:")
     for idx, question in enumerate(starters):
@@ -166,14 +170,14 @@ if len(current_messages) <= 1 and starters:
             st.session_state.pending_prompt = question
             st.rerun()
 
-# 10. Display Messages for Current Character
+# 10. Render Conversation History for Current Character
 for msg in current_messages:
     role = msg["role"]
-    avatar = avatar_image if role == "assistant" else None
+    avatar = chat_avatar if role == "assistant" else None
     with st.chat_message(role, avatar=avatar):
         st.markdown(msg["content"])
 
-# 11. Handle Input & "Character is typing..." Indicator
+# 11. Handle Chat Input & "is typing..." Indicator
 user_query = st.chat_input(f"Message {current_char['name']}...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -183,7 +187,7 @@ if user_query:
         st.error("Please add OPENROUTER_API_KEY in Streamlit Secrets.")
         st.stop()
 
-    # Append to this character's persistent session history
+    # Save student message to memory
     st.session_state.character_chats[selected_char_name].append({"role": "user", "content": user_query})
     with st.chat_message("user"):
         st.markdown(user_query)
@@ -195,8 +199,8 @@ if user_query:
     for m in st.session_state.character_chats[selected_char_name]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
-    # Render assistant response with dynamic typing placeholder
-    with st.chat_message("assistant", avatar=avatar_image):
+    # Render character response with typing placeholder
+    with st.chat_message("assistant", avatar=chat_avatar):
         typing_placeholder = st.empty()
         typing_placeholder.markdown(f"*{current_char['name']} is typing...*")
 
@@ -208,7 +212,6 @@ if user_query:
                 temperature=0.7,
                 max_tokens=250
             )
-            # Remove typing indicator before writing the streaming output
             typing_placeholder.empty()
             response_text = st.write_stream(stream)
             
