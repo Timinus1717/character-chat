@@ -42,6 +42,16 @@ st.markdown("""
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
+    /* Streamlit top header adjustment so buttons remain clickable without covering sticky items */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        pointer-events: none !important;
+    }
+    header[data-testid="stHeader"] button, 
+    header[data-testid="stHeader"] a {
+        pointer-events: auto !important;
+    }
+
     /* Outer application canvas */
     .stApp {
         background-color: #38bdf8;
@@ -50,7 +60,7 @@ st.markdown("""
 
     /* Main chat container card */
     .block-container {
-        padding-top: 0.8rem !important;
+        padding-top: 0.5rem !important;
         padding-bottom: 6rem !important;
         max-width: 640px !important;
         background-color: #eef7fc;
@@ -62,19 +72,32 @@ st.markdown("""
         border: 4px solid #ffffff;
     }
 
-    /* Locked / Sticky White Top Bar */
+    /* Lock the parent element container to the top */
+    div[data-testid="stElementContainer"]:has(.chat-top-header),
+    .element-container:has(.chat-top-header),
+    div:has(> div > .chat-top-header) {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 9999 !important;
+        background-color: #eef7fc !important;
+        padding-top: 10px !important;
+        padding-bottom: 8px !important;
+        margin-top: -10px !important;
+        border-top-left-radius: 32px !important;
+        border-top-right-radius: 32px !important;
+    }
+
+    /* White Curved Header Card */
     .chat-top-header {
-        position: sticky;
-        top: 0;
-        z-index: 999;
         display: flex;
         align-items: center;
         justify-content: space-between;
         background: #ffffff;
         padding: 14px 22px;
         border-radius: 26px;
-        box-shadow: 0 8px 22px rgba(56, 189, 248, 0.16);
-        margin-bottom: 18px;
+        box-shadow: 0 8px 24px rgba(56, 189, 248, 0.16);
+        position: relative;
+        z-index: 10000;
     }
     .header-left {
         display: flex;
@@ -145,11 +168,13 @@ st.markdown("""
         box-shadow: 0 6px 16px rgba(14, 165, 233, 0.2);
     }
 
-    /* Message Bubbles */
+    /* Message Bubbles - Layered under sticky header */
     .msg-row {
         display: flex;
         width: 100%;
         margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
     }
     .msg-row.user {
         justify-content: flex-end;
