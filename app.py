@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import base64
 from datetime import datetime, timezone, timedelta
 import streamlit as st
@@ -33,13 +34,31 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. Sky-Blue & Pure White Minimalist CSS + Split Sidebar
+# 4. Clean Filter for Model Thinking & Meta-Analysis Leaks
+def sanitize_ai_output(text: str) -> str:
+    """Removes thinking tags or leaked analysis templates from reasoning models."""
+    if not text:
+        return ""
+    # Strip <think> tags (from DeepSeek/Qwen thinking models)
+    cleaned = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
+    # Strip any leaked 'Analyze the Request' preambles
+    if "Analyze the Request" in cleaned or "**Persona:**" in cleaned:
+        paragraphs = cleaned.split("\n\n")
+        safe_paragraphs = [
+            p for p in paragraphs 
+            if not any(k in p for k in ["Analyze the Request", "**Persona:**", "**Target Audience:**", "**Constraints:**", "**Tone:**"])
+        ]
+        if safe_paragraphs:
+            cleaned = "\n\n".join(safe_paragraphs)
+    return cleaned.strip()
+
+# 5. High-Contrast Light/Dark Resilient CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
     html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }
 
     /* Streamlit top header adjustment */
@@ -52,27 +71,27 @@ st.markdown("""
         pointer-events: auto !important;
     }
 
-    /* Outer application canvas */
+    /* Outer Canvas */
     .stApp {
-        background-color: #38bdf8;
-        background: linear-gradient(145deg, #38bdf8 0%, #0ea5e9 100%);
+        background: linear-gradient(145deg, #38bdf8 0%, #0ea5e9 100%) !important;
+        background-attachment: fixed !important;
     }
 
-    /* Main chat container card */
+    /* Main Chat Center Stage Card */
     .block-container {
         padding-top: 0.5rem !important;
-        padding-bottom: 6rem !important;
+        padding-bottom: 6.5rem !important;
         max-width: 640px !important;
-        background-color: #eef7fc;
-        border-radius: 36px;
-        box-shadow: 0 20px 40px rgba(2, 132, 199, 0.25);
-        margin-top: 1.5rem;
-        margin-bottom: 2rem;
-        min-height: 85vh;
-        border: 4px solid #ffffff;
+        background-color: #eef7fc !important;
+        border-radius: 36px !important;
+        box-shadow: 0 20px 40px rgba(2, 132, 199, 0.25) !important;
+        margin-top: 1.5rem !important;
+        margin-bottom: 2rem !important;
+        min-height: 85vh !important;
+        border: 4px solid #ffffff !important;
     }
 
-    /* Lock the parent element container to the top */
+    /* Lock Header Bar to Top of Chat Window */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
@@ -87,12 +106,12 @@ st.markdown("""
         border-top-right-radius: 32px !important;
     }
 
-    /* White Curved Header Card */
+    /* Header Visual Card */
     .chat-top-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background: #ffffff;
+        background: #ffffff !important;
         padding: 14px 22px;
         border-radius: 26px;
         box-shadow: 0 8px 24px rgba(56, 189, 248, 0.16);
@@ -107,13 +126,12 @@ st.markdown("""
     .back-arrow-btn {
         font-size: 1.1rem;
         color: #64748b;
-        cursor: pointer;
     }
     .header-titles h3 {
         margin: 0;
         font-size: 1.25rem;
         font-weight: 700;
-        color: #1e293b;
+        color: #1e293b !important;
         letter-spacing: -0.01em;
     }
 
@@ -125,7 +143,7 @@ st.markdown("""
         margin: 0;
         font-size: 0.82rem;
         font-weight: 600;
-        color: #059669;
+        color: #059669 !important;
     }
     .status-dot-glow {
         width: 8px;
@@ -165,14 +183,13 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         font-size: 24px;
-        box-shadow: 0 6px 16px rgba(14, 165, 233, 0.2);
     }
 
-    /* Message Bubbles */
+    /* Chat Message Bubbles */
     .msg-row {
         display: flex;
         width: 100%;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
         position: relative;
         z-index: 1;
     }
@@ -185,40 +202,39 @@ st.markdown("""
 
     .msg-bubble {
         position: relative;
-        max-width: 78%;
-        padding: 12px 18px;
-        font-size: 0.94rem;
-        line-height: 1.45;
+        max-width: 80%;
+        padding: 13px 18px;
+        font-size: 0.95rem;
+        line-height: 1.5;
         word-wrap: break-word;
         white-space: pre-wrap;
     }
 
-    /* User Bubble: Sky Blue Pill */
     .msg-bubble.user {
-        background: linear-gradient(135deg, #4fc3f7 0%, #0ea5e9 100%);
-        color: #ffffff;
+        background: linear-gradient(135deg, #4fc3f7 0%, #0ea5e9 100%) !important;
+        color: #ffffff !important;
         border-radius: 20px 20px 4px 20px;
         box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
     }
 
-    /* Assistant Bubble: Pure White Pill */
     .msg-bubble.assistant {
-        background: #ffffff;
-        color: #334155;
+        background: #ffffff !important;
+        color: #1e293b !important;
         border-radius: 20px 20px 20px 4px;
-        box-shadow: 0 4px 12px rgba(148, 163, 184, 0.08);
+        box-shadow: 0 4px 12px rgba(148, 163, 184, 0.12);
+        border: 1px solid rgba(226, 232, 240, 0.8);
     }
 
-    /* Typing Status Chip */
+    /* Typing Status Indicator */
     .typing-pill {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: #ffffff;
+        background: #ffffff !important;
         padding: 8px 16px;
         border-radius: 20px;
         margin-bottom: 12px;
-        color: #0ea5e9;
+        color: #0ea5e9 !important;
         font-size: 0.82rem;
         font-weight: 600;
         box-shadow: 0 2px 8px rgba(14, 165, 233, 0.12);
@@ -228,9 +244,9 @@ st.markdown("""
     .stButton button {
         background-color: #ffffff !important;
         color: #0284c7 !important;
-        border: 1px solid #bae6fd !important;
+        border: 1.5px solid #bae6fd !important;
         border-radius: 20px !important;
-        font-size: 0.84rem !important;
+        font-size: 0.85rem !important;
         font-weight: 600 !important;
         padding: 8px 14px !important;
         transition: all 0.2s ease !important;
@@ -244,12 +260,13 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(56, 189, 248, 0.25) !important;
     }
 
-    /* Floating Chat Input Bar */
-    [data-testid="stBottom"] {
-        background-color: transparent !important;
-        border: none !important;
-    }
-    [data-testid="stBottom"] > div {
+    /* =========================================================
+       CHAT INPUT: Resilient to Dark Mode & Light Mode
+       ========================================================= */
+    [data-testid="stBottom"],
+    [data-testid="stBottom"] > div,
+    [data-testid="stBottom"] > div > div {
+        background: transparent !important;
         background-color: transparent !important;
         border: none !important;
     }
@@ -257,21 +274,25 @@ st.markdown("""
     [data-testid="stChatInput"] {
         background-color: #ffffff !important;
         border-radius: 36px !important;
-        border: 1.5px solid #d0ecfc !important;
-        box-shadow: 0 10px 25px -4px rgba(56, 189, 248, 0.25), 0 4px 10px rgba(0, 0, 0, 0.04) !important;
+        border: 2px solid #bae6fd !important;
+        box-shadow: 0 10px 25px -4px rgba(56, 189, 248, 0.25), 0 4px 10px rgba(0, 0, 0, 0.06) !important;
         padding: 6px 10px 6px 18px !important;
         margin-bottom: 8px !important;
     }
 
+    /* Force input textarea to stay white with dark text in dark mode */
+    [data-testid="stChatInput"] > div,
     [data-testid="stChatInput"] textarea {
-        color: #1e293b !important;
-        font-size: 0.94rem !important;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        font-size: 0.95rem !important;
+        caret-color: #0284c7 !important;
     }
-
     [data-testid="stChatInput"] textarea::placeholder {
         color: #94a3b8 !important;
     }
 
+    /* Cyan Circular Send Button */
     [data-testid="stChatInput"] button {
         background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%) !important;
         color: #ffffff !important;
@@ -285,10 +306,12 @@ st.markdown("""
         fill: #ffffff !important;
     }
 
-    /* Sidebar Conversations Styling */
+    /* =========================================================
+       SIDEBAR & EXPANDERS: Resilient to Dark Mode
+       ========================================================= */
     [data-testid="stSidebar"] {
-        background-color: #ffffff;
-        border-right: 1px solid #e0f2fe;
+        background-color: #ffffff !important;
+        border-right: 1px solid #e0f2fe !important;
     }
     [data-testid="stSidebar"] > div:first-child {
         display: flex;
@@ -297,10 +320,39 @@ st.markdown("""
         overflow-y: auto;
         padding-bottom: 0 !important;
     }
-    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
-        color: #0f172a;
+    [data-testid="stSidebar"] h1, 
+    [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] p {
+        color: #0f172a !important;
         font-weight: 700;
-        letter-spacing: -0.02em;
+    }
+
+    /* Fix Native Expander Box Colors in Dark Mode */
+    [data-testid="stExpander"] {
+        background-color: #ffffff !important;
+        border: 1.5px solid #d0ecfc !important;
+        border-radius: 14px !important;
+        overflow: hidden !important;
+        margin-bottom: 8px !important;
+    }
+    [data-testid="stExpander"] details {
+        background-color: #ffffff !important;
+    }
+    [data-testid="stExpander"] summary {
+        color: #0284c7 !important;
+        font-weight: 600 !important;
+        font-size: 0.86rem !important;
+    }
+    [data-testid="stExpander"] summary svg {
+        fill: #0284c7 !important;
+    }
+    [data-testid="stExpander"] summary:hover {
+        color: #0369a1 !important;
+    }
+    [data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
+        background-color: #f8fafc !important;
+        padding: 8px 10px !important;
     }
 
     /* Story Card Item */
@@ -308,24 +360,24 @@ st.markdown("""
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 10px 12px;
+        padding: 8px 10px;
         background: #f0f9ff;
-        border-radius: 16px;
+        border-radius: 14px;
         border: 1px solid #e0f2fe;
         margin-top: 10px;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
     .sidebar-story-thumb {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid #38bdf8;
         flex-shrink: 0;
     }
     .sidebar-story-fallback {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         background: #38bdf8;
         color: white;
@@ -336,101 +388,117 @@ st.markdown("""
         flex-shrink: 0;
     }
     .sidebar-story-title {
-        font-size: 0.90rem;
+        font-size: 0.88rem;
         font-weight: 700;
-        color: #0f172a;
+        color: #0f172a !important;
     }
 
     .sidebar-char-thumb {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         object-fit: cover;
         border: 1.5px solid #38bdf8;
         margin-top: 4px;
     }
     .sidebar-char-fallback {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         background: #e0f2fe;
         color: #0284c7;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 15px;
+        font-size: 14px;
         margin-top: 4px;
     }
 
-    /* Pinned Profile Card Container at Bottom of Sidebar */
+    /* Sidebar Character Selection Buttons */
+    [data-testid="stSidebar"] [data-testid="stExpander"] .stButton button {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 10px !important;
+        font-size: 0.80rem !important;
+        font-weight: 600 !important;
+        padding: 4px 8px !important;
+    }
+    [data-testid="stSidebar"] [data-testid="stExpander"] .stButton button:hover {
+        background-color: #e0f2fe !important;
+        color: #0284c7 !important;
+        border-color: #38bdf8 !important;
+    }
+
+    /* Pinned Bottom Profile Card */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
         bottom: 0 !important;
         z-index: 1000 !important;
         background: #ffffff !important;
-        padding-top: 12px !important;
-        padding-bottom: 14px !important;
+        padding-top: 10px !important;
+        padding-bottom: 12px !important;
         margin-top: auto !important;
         box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.08) !important;
         border-top: 1.5px solid #e0f2fe !important;
     }
 
     .light-profile-card {
-        background: #f8fafc;
-        border-radius: 20px;
-        padding: 14px 12px;
+        background: #f8fafc !important;
+        border-radius: 18px;
+        padding: 12px 10px;
         text-align: center;
         border: 1px solid #e2e8f0;
     }
     .light-profile-avatar {
-        width: 68px;
-        height: 68px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
         object-fit: cover;
-        margin: 0 auto 8px auto;
+        margin: 0 auto 6px auto;
         display: block;
-        border: 3px solid #38bdf8;
-        box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+        border: 2.5px solid #38bdf8;
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
     }
     .light-profile-avatar-fallback {
-        width: 68px;
-        height: 68px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
         background: #38bdf8;
         color: white;
-        font-size: 32px;
+        font-size: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 8px auto;
+        margin: 0 auto 6px auto;
     }
     .light-profile-name {
-        font-size: 0.98rem;
+        font-size: 0.95rem;
         font-weight: 700;
-        color: #0f172a;
+        color: #0f172a !important;
         margin-bottom: 2px;
     }
     .light-profile-book {
         font-size: 0.74rem;
-        color: #0284c7;
+        color: #0284c7 !important;
         font-weight: 600;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
     .light-profile-bio {
-        background: #ffffff;
+        background: #ffffff !important;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
         padding: 8px 10px;
         font-size: 0.78rem;
-        color: #475569;
+        color: #334155 !important;
         text-align: left;
         line-height: 1.4;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 5. OpenRouter Connection
+# 6. OpenRouter Connection
 api_key = st.secrets.get("OPENROUTER_API_KEY", "")
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
@@ -439,7 +507,7 @@ client = OpenAI(
 
 MODEL_NAME = "openrouter/free"
 
-# 6. Load Catalog
+# 7. Load Catalog
 def load_catalog():
     with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -454,7 +522,7 @@ def load_catalog():
 catalog = load_catalog()
 all_stories = list(catalog.keys())
 
-# 7. Persistent Session Initialization
+# 8. Persistent Session Initialization
 if "character_chats" not in st.session_state:
     st.session_state.character_chats = {}
 
@@ -468,7 +536,7 @@ first_char_name = catalog[st.session_state.selected_story]["characters"][0]["nam
 if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
-# 8. "Conversations" Sidebar (Top Scrollable Zone)
+# 9. "Conversations" Sidebar (Top Scrollable Zone)
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -529,7 +597,7 @@ if st.sidebar.button("🗑️ Clear History", use_container_width=True):
     st.session_state.failed_prompts.pop(current_char["name"], None)
     st.rerun()
 
-# 9. Persistent Conversation Initialization
+# 10. Persistent Conversation Initialization
 now_str = get_hkt_time()
 if current_char["name"] not in st.session_state.character_chats:
     st.session_state.character_chats[current_char["name"]] = [
@@ -547,7 +615,7 @@ st.session_state.character_chats[current_char["name"]] = [
 ]
 current_messages = st.session_state.character_chats[current_char["name"]]
 
-# 10. Locked Top Header Bar with Glowing Green Status Dot
+# 11. Locked Top Header Bar with Glowing Green Status Dot
 top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="chat-top-header">
@@ -562,7 +630,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 11. Starter Questions
+# 12. Starter Questions
 starters = current_char.get("starter_questions", [])
 if len(current_messages) <= 1 and starters:
     cols = st.columns(len(starters))
@@ -571,7 +639,7 @@ if len(current_messages) <= 1 and starters:
             st.session_state.pending_prompt = question
             st.rerun()
 
-# 12. Render Clean Pill Chat Feed
+# 13. Render Clean Pill Chat Feed
 for msg in current_messages:
     role = msg["role"]
     content = msg["content"]
@@ -581,7 +649,7 @@ for msg in current_messages:
         unsafe_allow_html=True
     )
 
-# 13. Persistent Retry Notification Bar
+# 14. Persistent Retry Notification Bar
 if current_char["name"] in st.session_state.failed_prompts:
     failed_text = st.session_state.failed_prompts[current_char["name"]]
     st.warning(f"Connection dropped on: '{failed_text}'")
@@ -595,7 +663,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 14. Integrated Bottom Chat Input with Universal Student Guardrails
+# 15. Integrated Bottom Chat Input with Guardrails & Leak Prevention
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -618,15 +686,15 @@ if user_query:
         unsafe_allow_html=True
     )
 
-    # Universal Student-Friendly Guardrail
+    # Universal Student-Friendly Guardrail + Anti-Leak Enforcement
     student_guardrail = (
         "TARGET AUDIENCE: Primary school English learners.\n"
-        "RULES:\n"
-        "- Stay strictly in character.\n"
-        "- Use simple, clear, everyday English words (A2/B1 level).\n"
-        "- Keep sentences short, friendly, and direct.\n"
-        "- The total response must be only 2 to 3 sentences maximum.\n"
-        "- Never use long words, Victorian jargon, or complicated sentence structures."
+        "STRICT INSTRUCTIONS:\n"
+        "- Respond strictly in character.\n"
+        "- Output ONLY the spoken response. NEVER write analysis, thought processes, outlines, or bullet points.\n"
+        "- Use simple, clear everyday English (A2/B1 level).\n"
+        "- Keep the answer between 2 and 3 short sentences maximum.\n"
+        "- Never use Victorian vocabulary, geological jargon, or difficult words."
     )
 
     full_system_prompt = f"{current_char['system_prompt']}\n\n{student_guardrail}"
@@ -647,38 +715,41 @@ if user_query:
     ''', unsafe_allow_html=True)
 
     bubble_placeholder = st.empty()
-    response_text = ""
+    raw_response_text = ""
 
     try:
         stream = client.chat.completions.create(
             model=MODEL_NAME,
             messages=conversation_payload,
             stream=True,
-            temperature=0.7,
-            max_tokens=120  # Caps the length to 2-3 short sentences
+            temperature=0.6,
+            max_tokens=120
         )
         
         has_started_typing = False
         for chunk in stream:
             content = chunk.choices[0].delta.content or ""
-            response_text += content
+            raw_response_text += content
             
-            if not has_started_typing and response_text.strip():
+            clean_display = sanitize_ai_output(raw_response_text)
+            
+            if not has_started_typing and clean_display.strip():
                 typing_box.empty()
                 has_started_typing = True
 
-            if has_started_typing:
+            if has_started_typing and clean_display.strip():
                 bubble_placeholder.markdown(
-                    f'<div class="msg-row assistant"><div class="msg-bubble assistant">{response_text}</div></div>',
+                    f'<div class="msg-row assistant"><div class="msg-bubble assistant">{clean_display}</div></div>',
                     unsafe_allow_html=True
                 )
 
         typing_box.empty()
+        final_clean_response = sanitize_ai_output(raw_response_text)
 
-        if response_text.strip():
+        if final_clean_response.strip():
             st.session_state.character_chats[current_char["name"]].append({
                 "role": "assistant",
-                "content": response_text,
+                "content": final_clean_response,
                 "time": current_time
             })
             st.session_state.failed_prompts.pop(current_char["name"], None)
