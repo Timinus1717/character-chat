@@ -17,8 +17,12 @@ client = OpenAI(
 )
 
 # High-performing, permanently free model on OpenRouter
-MODEL_NAME = "google/gemma-4-26b-a4b-it:free"
-
+FREE_MODELS = [
+    "liquid/lfm-2.5-1.2b-instruct:free",
+    "google/gemma-2-9b-it:free",
+    "meta-llama/llama-3.2-3b-instruct:free",
+    "deepseek/deepseek-chat:free"
+    
 # 2. Load Book & Character Catalog
 @st.cache_data
 def load_catalog():
@@ -93,11 +97,12 @@ if user_query:
     with st.chat_message("assistant", avatar=current_char["avatar"]):
         try:
             stream = client.chat.completions.create(
-                model=MODEL_NAME,
+                model=FREE_MODELS[0],
                 messages=conversation_payload,
                 stream=True,
                 temperature=0.7,
-                max_tokens=250
+                max_tokens=250,
+                extra_body={"models": FREE_MODELS}  # OpenRouter will try each model in order if one returns 429
             )
             response_text = st.write_stream(stream)
             st.session_state.messages.append({"role": "assistant", "content": response_text})
