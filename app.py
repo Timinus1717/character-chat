@@ -1,6 +1,5 @@
 import os
 import json
-import re
 import base64
 from datetime import datetime, timezone, timedelta
 import streamlit as st
@@ -34,27 +33,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. Reliable Clean Output Sanitizer
-def clean_ai_reply(text: str, user_prompt: str) -> str:
-    """Strips thinking tags, meta-headers, and echoes."""
-    if not text:
-        return ""
-    
-    # Strip <think> blocks
-    cleaned = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
-    
-    # Remove markdown analysis headers if any appear
-    cleaned = re.sub(r'(?i)\d+\.\s*\*\*.*?(?:Analyze|Recall|Formulate|Persona|Context).*?\n', '', cleaned)
-    cleaned = re.sub(r'(?i)\*.*?(?:User asks|Constraints|Target Audience).*?\n', '', cleaned)
-    cleaned = cleaned.strip()
-
-    # If the model simply echoed the user's prompt, invalidate it so it does not render
-    if cleaned.strip().lower().strip('?"\'!.') == user_prompt.strip().lower().strip('?"\'!.'):
-        return ""
-        
-    return cleaned
-
-# 5. Sky-Blue CSS
+# 4. Seamless Sky-Blue CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -511,17 +490,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 6. OpenRouter Connection
+# 5. OpenRouter Connection (Configured for unrestricted paid tier)
 api_key = st.secrets.get("OPENROUTER_API_KEY", "")
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=api_key or "missing_key"
 )
 
-# Use reliable conversational free model
-MODEL_NAME = "meta-llama/llama-3.3-70b-instruct:free"
+# Paid model unrestricted for Hong Kong billing (Fast, excellent roleplay, ~$0.20 per 1M tokens)
+MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
 
-# 7. Load Catalog
+# 6. Load Catalog
 def load_catalog():
     with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -536,7 +515,7 @@ def load_catalog():
 catalog = load_catalog()
 all_stories = list(catalog.keys())
 
-# 8. Persistent Session Initialization
+# 7. Persistent Session Initialization
 if "character_chats" not in st.session_state:
     st.session_state.character_chats = {}
 
@@ -550,7 +529,7 @@ first_char_name = catalog[st.session_state.selected_story]["characters"][0]["nam
 if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
-# 9. Sidebar Directory
+# 8. Sidebar Directory
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -614,7 +593,7 @@ with st.sidebar.container():
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 10. Initialize Conversation & Purge Echoes or Analysis Leaks
+# 9. Initialize Conversation
 now_str = get_hkt_time()
 if current_char["name"] not in st.session_state.character_chats:
     st.session_state.character_chats[current_char["name"]] = [
@@ -625,33 +604,9 @@ if current_char["name"] not in st.session_state.character_chats:
         }
     ]
 
-# Purge corrupted messages and echo loops from existing session state
-cleaned_chat = []
-for idx, m in enumerate(st.session_state.character_chats[current_char["name"]]):
-    content = m.get("content", "").strip()
-    if not content:
-        continue
-    # Drop previous analysis breakdown leaks
-    if "Analyze the Request" in content or "Recall Character" in content:
-        continue
-    # Drop echoing messages where assistant duplicated the user's previous line
-    if m["role"] == "assistant" and idx > 0:
-        prev = st.session_state.character_chats[current_char["name"]][idx - 1]
-        if prev["role"] == "user" and prev["content"].strip().lower() == content.strip().lower():
-            continue
-    cleaned_chat.append(m)
-
-if not cleaned_chat or cleaned_chat[0]["role"] != "assistant":
-    cleaned_chat.insert(0, {
-        "role": "assistant",
-        "content": f"Hello! I am {current_char['name']}. What would you like to ask me?",
-        "time": now_str
-    })
-
-st.session_state.character_chats[current_char["name"]] = cleaned_chat
 current_messages = st.session_state.character_chats[current_char["name"]]
 
-# 11. Locked Top Header Bar with Glowing Green Status Dot
+# 10. Locked Top Header Bar with Glowing Green Status Dot
 top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="chat-top-header">
@@ -666,7 +621,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 12. Starter Questions
+# 11. Starter Questions
 starters = current_char.get("starter_questions", [])
 if len(current_messages) <= 1 and starters:
     cols = st.columns(len(starters))
@@ -675,7 +630,7 @@ if len(current_messages) <= 1 and starters:
             st.session_state.pending_prompt = question
             st.rerun()
 
-# 13. Render Chat Feed
+# 12. Render Chat Feed
 for msg in current_messages:
     role = msg["role"]
     content = msg["content"]
@@ -685,7 +640,7 @@ for msg in current_messages:
         unsafe_allow_html=True
     )
 
-# 14. Persistent Retry Notification Bar
+# 13. Persistent Retry Notification Bar
 if current_char["name"] in st.session_state.failed_prompts:
     failed_text = st.session_state.failed_prompts[current_char["name"]]
     st.warning(f"Connection dropped on: '{failed_text}'")
@@ -699,7 +654,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 15. Integrated Bottom Chat Input
+# 14. Integrated Bottom Chat Input
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -722,22 +677,22 @@ if user_query:
         unsafe_allow_html=True
     )
 
-    # Conversational roleplay prompt
+    # Clean roleplay instructions tailored for primary school learners
     system_instruction = (
-        f"You are {current_char['name']} from '{selected_story}'.\n"
+        f"You are roleplaying as {current_char['name']} from the book '{selected_story}'.\n"
         f"{current_char['system_prompt']}\n\n"
-        "Guidelines for speaking with primary school students:\n"
-        "- Reply directly in character using friendly, simple, everyday English words.\n"
-        "- Keep your answer short (2 to 3 sentences maximum).\n"
-        "- Do NOT repeat the user's question.\n"
-        "- Do NOT provide analysis, notes, or bullet points."
+        "Rules for speaking to the student:\n"
+        "1. Speak directly in character using simple, everyday English words suitable for primary school students.\n"
+        "2. Keep your answer brief: 2 to 3 sentences maximum.\n"
+        "3. Do NOT repeat or echo the student's question.\n"
+        "4. Output only your spoken words. Never write outlines, notes, or bullet points."
     )
 
     conversation_payload = [
         {"role": "system", "content": system_instruction}
     ]
-    # Send clean recent messages
-    for m in st.session_state.character_chats[current_char["name"]][-6:]:
+    # Send recent dialogue for context
+    for m in st.session_state.character_chats[current_char["name"]][-8:]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
     # Cyan "Typing..." Pill indicator
@@ -749,57 +704,44 @@ if user_query:
     ''', unsafe_allow_html=True)
 
     bubble_placeholder = st.empty()
-    raw_response_text = ""
+    full_response_text = ""
 
     try:
-        # Request from conversational model with fallback to openrouter/free
-        try:
-            stream = client.chat.completions.create(
-                model=MODEL_NAME,
-                messages=conversation_payload,
-                stream=True,
-                temperature=0.7,
-                max_tokens=150
-            )
-        except Exception:
-            stream = client.chat.completions.create(
-                model="openrouter/free",
-                messages=conversation_payload,
-                stream=True,
-                temperature=0.7,
-                max_tokens=150
-            )
+        stream = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=conversation_payload,
+            stream=True,
+            temperature=0.7,
+            max_tokens=150
+        )
         
         has_started_typing = False
         for chunk in stream:
             content = chunk.choices[0].delta.content or ""
-            raw_response_text += content
+            full_response_text += content
             
-            clean_display = clean_ai_reply(raw_response_text, user_query)
-            
-            if not has_started_typing and clean_display.strip():
+            if not has_started_typing and full_response_text.strip():
                 typing_box.empty()
                 has_started_typing = True
 
-            if has_started_typing and clean_display.strip():
+            if has_started_typing:
                 bubble_placeholder.markdown(
-                    f'<div class="msg-row assistant"><div class="msg-bubble assistant">{clean_display}</div></div>',
+                    f'<div class="msg-row assistant"><div class="msg-bubble assistant">{full_response_text}</div></div>',
                     unsafe_allow_html=True
                 )
 
         typing_box.empty()
-        final_clean_response = clean_ai_reply(raw_response_text, user_query)
 
-        if final_clean_response.strip():
+        if full_response_text.strip():
             st.session_state.character_chats[current_char["name"]].append({
                 "role": "assistant",
-                "content": final_clean_response,
+                "content": full_response_text.strip(),
                 "time": current_time
             })
             st.session_state.failed_prompts.pop(current_char["name"], None)
         else:
             bubble_placeholder.empty()
-            raise Exception("AI response was blank or invalid. Please try again.")
+            raise Exception("No response received from the model.")
 
     except Exception as e:
         typing_box.empty()
