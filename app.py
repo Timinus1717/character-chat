@@ -237,7 +237,7 @@ st.markdown("""
         fill: #ffffff !important;
     }
 
-    /* Sidebar "Conversations" Styling */
+    /* Sidebar Conversations Styling */
     [data-testid="stSidebar"] {
         background-color: #ffffff;
         border-right: 1px solid #e0f2fe;
@@ -401,7 +401,7 @@ if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
 # 8. "Conversations" Sidebar
-st.sidebar.markdown("### Conversations")[cite: 7]
+st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
     is_active_story = (story_name == st.session_state.selected_story)
@@ -479,7 +479,7 @@ st.session_state.character_chats[current_char["name"]] = [
 ]
 current_messages = st.session_state.character_chats[current_char["name"]]
 
-# 10. Top Bar (Curved Header Card Matching Mockup)
+# 10. Top Bar (Curved Header Card)
 top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="chat-top-header">
@@ -528,7 +528,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.rerun()
 
 # 14. Integrated Bottom Chat Input
-user_query = st.chat_input(f"Write a message...")[cite: 7]
+user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
 
