@@ -9,16 +9,17 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 1. Connect to GitHub Models Endpoint
-token = st.secrets.get("GITHUB_TOKEN", "")
+# 1. Connect to OpenRouter (Free-tier routing)
+api_key = st.secrets.get("OPENROUTER_API_KEY", "")
 client = OpenAI(
-    base_url="https://models.github.ai/inference",
-    api_key=token or "missing_token"
+    base_url="https://openrouter.ai/api/v1",
+    api_key=api_key or "missing_key"
 )
 
-MODEL_NAME = "gpt-4o-mini"
+# High-performing, permanently free model on OpenRouter
+MODEL_NAME = "meta-llama/llama-3.1-8b-instruct:free"
 
-# 2. Load Catalog
+# 2. Load Book & Character Catalog
 @st.cache_data
 def load_catalog():
     with open("characters.json", "r", encoding="utf-8") as f:
@@ -75,8 +76,8 @@ if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
 
 if user_query:
-    if not token:
-        st.error("Missing GITHUB_TOKEN. Please add it to your Streamlit App Secrets.")
+    if not api_key:
+        st.error("Please add OPENROUTER_API_KEY in your Streamlit app secrets.")
         st.stop()
 
     st.session_state.messages.append({"role": "user", "content": user_query})
@@ -90,12 +91,15 @@ if user_query:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
     with st.chat_message("assistant", avatar=current_char["avatar"]):
-        stream = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=conversation_payload,
-            stream=True,
-            temperature=0.7,
-            max_tokens=250
-        )
-        response_text = st.write_stream(stream)
-        st.session_state.messages.append({"role": "assistant", "content": response_text})
+        try:
+            stream = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=conversation_payload,
+                stream=True,
+                temperature=0.7,
+                max_tokens=250
+            )
+            response_text = st.write_stream(stream)
+            st.session_state.messages.append({"role": "assistant", "content": response_text})
+        except Exception as e:
+            st.error(f"API Error: {e}")
