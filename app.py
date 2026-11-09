@@ -17,11 +17,7 @@ client = OpenAI(
 )
 
 # High-performing, permanently free model on OpenRouter
-FREE_MODELS = [
-   "liquid/lfm2.5-2.6b:free",
-    "nvidia/nemotron-3.5-lightning:free",
-    "liquid/lfm3-1.7b:free"
-]
+MODEL_NAME = "openrouter/free"
 
 # 2. Load Book & Character Catalog
 @st.cache_data
@@ -97,12 +93,11 @@ if user_query:
     with st.chat_message("assistant", avatar=current_char["avatar"]):
         try:
             stream = client.chat.completions.create(
-                model=FREE_MODELS[0],
+                model=MODEL_NAME,
                 messages=conversation_payload,
                 stream=True,
                 temperature=0.7,
-                max_tokens=250,
-                extra_body={"models": FREE_MODELS}
+                max_tokens=250
             )
             response_text = st.write_stream(stream)
             st.session_state.messages.append({"role": "assistant", "content": response_text})
