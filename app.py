@@ -34,23 +34,31 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. Clean Filter for Model Thinking & Meta-Analysis Leaks
+# 4. Strict Sanitizer to Prevent AI Reasoning Leaks
 def sanitize_ai_output(text: str) -> str:
-    """Removes thinking tags or leaked analysis templates from reasoning models."""
+    """Strips <think> tags, 'Analyze the Request', and prompt breakdown leaks."""
     if not text:
         return ""
+    # Strip DeepSeek/Qwen <think> reasoning blocks
     cleaned = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
-    if "Analyze the Request" in cleaned or "**Persona:**" in cleaned:
-        paragraphs = cleaned.split("\n\n")
-        safe_paragraphs = [
-            p for p in paragraphs 
-            if not any(k in p for k in ["Analyze the Request", "**Persona:**", "**Target Audience:**", "**Constraints:**", "**Tone:**"])
-        ]
-        if safe_paragraphs:
-            cleaned = "\n\n".join(safe_paragraphs)
+    
+    # If the response contains an analysis header, extract only real character dialogue
+    if "Analyze the Request" in cleaned or "Recall Character Details" in cleaned or "Formulate the Response" in cleaned:
+        # Match quoted dialogue if present
+        dialogue_match = re.findall(r'"([^"]{10,})"', cleaned)
+        if dialogue_match:
+            cleaned = " ".join(dialogue_match)
+        else:
+            lines = cleaned.split("\n")
+            clean_lines = [
+                l for l in lines 
+                if not re.match(r'^\s*(\d+\.|\*|-)\s*(\*\*)?(Analyze|Recall|Formulate|Persona|Constraints|Target)', l, re.IGNORECASE)
+                and not any(k in l for k in ["Analyze the Request", "Recall Character", "Formulate the Response"])
+            ]
+            cleaned = " ".join(clean_lines).strip()
     return cleaned.strip()
 
-# 5. Sky-Blue & Pure White Minimalist CSS with Theme-Resilient Sidebar
+# 5. Seamless Sky-Blue CSS (Fixes scrolling and cut-off card issues)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -59,7 +67,6 @@ st.markdown("""
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }
 
-    /* Streamlit top header adjustment */
     header[data-testid="stHeader"] {
         background: transparent !important;
         pointer-events: none !important;
@@ -69,27 +76,20 @@ st.markdown("""
         pointer-events: auto !important;
     }
 
-    /* Outer Canvas */
+    /* Seamless pastel blue canvas across the entire viewport */
     .stApp {
-        background: linear-gradient(145deg, #38bdf8 0%, #0ea5e9 100%) !important;
-        background-attachment: fixed !important;
+        background-color: #eef7fc !important;
     }
 
-    /* Main Chat Center Stage Card */
+    /* Main chat column: natural full-height scrolling with bottom padding */
     .block-container {
         padding-top: 0.5rem !important;
-        padding-bottom: 6.5rem !important;
-        max-width: 640px !important;
-        background-color: #eef7fc !important;
-        border-radius: 36px !important;
-        box-shadow: 0 20px 40px rgba(2, 132, 199, 0.25) !important;
-        margin-top: 1.5rem !important;
-        margin-bottom: 2rem !important;
-        min-height: 85vh !important;
-        border: 4px solid #ffffff !important;
+        padding-bottom: 140px !important;
+        max-width: 660px !important;
+        background-color: transparent !important;
     }
 
-    /* Lock Header Bar to Top of Chat Window */
+    /* Locked sticky header wrapper with solid background buffer */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
@@ -98,10 +98,8 @@ st.markdown("""
         z-index: 9999 !important;
         background-color: #eef7fc !important;
         padding-top: 10px !important;
-        padding-bottom: 8px !important;
+        padding-bottom: 12px !important;
         margin-top: -10px !important;
-        border-top-left-radius: 32px !important;
-        border-top-right-radius: 32px !important;
     }
 
     /* Header Visual Card */
@@ -115,6 +113,7 @@ st.markdown("""
         box-shadow: 0 8px 24px rgba(56, 189, 248, 0.16);
         position: relative;
         z-index: 10000;
+        border: 2px solid #ffffff;
     }
     .header-left {
         display: flex;
@@ -164,16 +163,16 @@ st.markdown("""
     }
 
     .header-avatar {
-        width: 54px;
-        height: 54px;
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
         object-fit: cover;
         box-shadow: 0 6px 16px rgba(14, 165, 233, 0.2);
         border: 2px solid #ffffff;
     }
     .header-avatar-fallback {
-        width: 54px;
-        height: 54px;
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
         background: #0ea5e9;
         color: white;
@@ -200,26 +199,26 @@ st.markdown("""
 
     .msg-bubble {
         position: relative;
-        max-width: 80%;
+        max-width: 82%;
         padding: 13px 18px;
-        font-size: 0.95rem;
+        font-size: 0.96rem;
         line-height: 1.5;
         word-wrap: break-word;
         white-space: pre-wrap;
     }
 
     .msg-bubble.user {
-        background: linear-gradient(135deg, #4fc3f7 0%, #0ea5e9 100%) !important;
+        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%) !important;
         color: #ffffff !important;
-        border-radius: 20px 20px 4px 20px;
+        border-radius: 22px 22px 4px 22px;
         box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
     }
 
     .msg-bubble.assistant {
         background: #ffffff !important;
         color: #1e293b !important;
-        border-radius: 20px 20px 20px 4px;
-        box-shadow: 0 4px 12px rgba(148, 163, 184, 0.12);
+        border-radius: 22px 22px 22px 4px;
+        box-shadow: 0 4px 14px rgba(148, 163, 184, 0.14);
         border: 1px solid rgba(226, 232, 240, 0.8);
     }
 
@@ -232,8 +231,8 @@ st.markdown("""
         padding: 8px 16px;
         border-radius: 20px;
         margin-bottom: 12px;
-        color: #0ea5e9 !important;
-        font-size: 0.82rem;
+        color: #0284c7 !important;
+        font-size: 0.84rem;
         font-weight: 600;
         box-shadow: 0 2px 8px rgba(14, 165, 233, 0.12);
     }
@@ -258,7 +257,7 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(56, 189, 248, 0.25) !important;
     }
 
-    /* Chat Input */
+    /* Floating Chat Input Dock */
     [data-testid="stBottom"],
     [data-testid="stBottom"] > div,
     [data-testid="stBottom"] > div > div {
@@ -271,9 +270,9 @@ st.markdown("""
         background-color: #ffffff !important;
         border-radius: 36px !important;
         border: 2px solid #bae6fd !important;
-        box-shadow: 0 10px 25px -4px rgba(56, 189, 248, 0.25), 0 4px 10px rgba(0, 0, 0, 0.06) !important;
+        box-shadow: 0 10px 25px -4px rgba(56, 189, 248, 0.3), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
         padding: 6px 10px 6px 18px !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 12px !important;
     }
 
     [data-testid="stChatInput"] > div,
@@ -300,9 +299,7 @@ st.markdown("""
         fill: #ffffff !important;
     }
 
-    /* =========================================================
-       SIDEBAR: FULL SKY-BLUE & WHITE HARMONY (LIGHT & DARK RESILIENT)
-       ========================================================= */
+    /* Sidebar Styling */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-right: 1.5px solid #e0f2fe !important;
@@ -323,7 +320,6 @@ st.markdown("""
         font-weight: 700;
     }
 
-    /* Story Card Item */
     .sidebar-story-card {
         display: flex;
         align-items: center;
@@ -363,7 +359,6 @@ st.markdown("""
         line-height: 1.25;
     }
 
-    /* Expander Container Overhaul */
     [data-testid="stExpander"] {
         background-color: #ffffff !important;
         border: 1.5px solid #d0ecfc !important;
@@ -376,8 +371,6 @@ st.markdown("""
         background-color: #ffffff !important;
         border: none !important;
     }
-
-    /* Expander Header (Summary Bar) - Forces Bright Sky-Blue Header */
     [data-testid="stExpander"] summary,
     [data-testid="stExpander"] details summary,
     [data-testid="stExpander"] details[open] summary {
@@ -387,7 +380,6 @@ st.markdown("""
         font-size: 0.86rem !important;
         padding: 8px 12px !important;
         border-bottom: 1px solid #e0f2fe !important;
-        border-radius: 12px 12px 0 0 !important;
     }
     [data-testid="stExpander"] summary:hover {
         background-color: #e0f2fe !important;
@@ -399,7 +391,6 @@ st.markdown("""
         color: #0284c7 !important;
     }
 
-    /* Expander Content Drawer */
     [data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
         background-color: #f8fafc !important;
         padding: 8px 8px !important;
@@ -426,7 +417,6 @@ st.markdown("""
         margin-top: 3px;
     }
 
-    /* Character Selection Button Inside Expander (Wraps without cutting off) */
     [data-testid="stSidebar"] [data-testid="stExpander"] .stButton button {
         background-color: #ffffff !important;
         color: #1e293b !important;
@@ -451,7 +441,7 @@ st.markdown("""
         transform: translateY(-1px) !important;
     }
 
-    /* Sticky Bottom Profile Card */
+    /* Pinned Bottom Profile Card */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
@@ -517,7 +507,6 @@ st.markdown("""
         line-height: 1.4;
     }
 
-    /* Sleek Clear History Button */
     .clear-chat-container .stButton button {
         background-color: #ffffff !important;
         color: #e11d48 !important;
@@ -575,7 +564,7 @@ first_char_name = catalog[st.session_state.selected_story]["characters"][0]["nam
 if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
-# 9. "Conversations" Sidebar (Scrollable Top Zone)
+# 9. Sidebar Directory
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -613,7 +602,7 @@ current_char = next((c for c in chars_in_story if c["name"] == st.session_state.
 st.session_state.selected_char = current_char["name"]
 avatar_b64 = get_image_base64(current_char.get("avatar", ""))
 
-# 10. Locked / Sticky Profile Card at Bottom of Sidebar
+# Locked Profile Card in Sidebar
 avatar_portrait_html = f'<img class="light-profile-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="light-profile-avatar-fallback">📖</div>'
 st.sidebar.markdown(f"""
 <div class="locked-profile-anchor">
@@ -639,7 +628,7 @@ with st.sidebar.container():
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 11. Persistent Conversation Initialization
+# 10. Persistent Conversation Initialization & Sanitize Old Chat History
 now_str = get_hkt_time()
 if current_char["name"] not in st.session_state.character_chats:
     st.session_state.character_chats[current_char["name"]] = [
@@ -650,13 +639,25 @@ if current_char["name"] not in st.session_state.character_chats:
         }
     ]
 
-st.session_state.character_chats[current_char["name"]] = [
-    m for m in st.session_state.character_chats[current_char["name"]] 
-    if m.get("content", "").strip() != ""
-]
+# Purge any leaked analysis messages that were previously saved in session
+sanitized_messages = []
+for m in st.session_state.character_chats[current_char["name"]]:
+    content = m.get("content", "").strip()
+    if not content:
+        continue
+    if "Analyze the Request" in content or "Recall Character Details" in content:
+        cleaned_dialogue = sanitize_ai_output(content)
+        if cleaned_dialogue:
+            m["content"] = cleaned_dialogue
+            sanitized_messages.append(m)
+        # If it was 100% analysis with no dialogue, drop it completely
+    else:
+        sanitized_messages.append(m)
+
+st.session_state.character_chats[current_char["name"]] = sanitized_messages
 current_messages = st.session_state.character_chats[current_char["name"]]
 
-# 12. Locked Top Header Bar with Glowing Green Status Dot
+# 11. Locked Top Header Bar with Glowing Green Status Dot
 top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="chat-top-header">
@@ -671,7 +672,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 13. Starter Questions
+# 12. Starter Questions
 starters = current_char.get("starter_questions", [])
 if len(current_messages) <= 1 and starters:
     cols = st.columns(len(starters))
@@ -680,7 +681,7 @@ if len(current_messages) <= 1 and starters:
             st.session_state.pending_prompt = question
             st.rerun()
 
-# 14. Render Clean Pill Chat Feed
+# 13. Render Chat Feed
 for msg in current_messages:
     role = msg["role"]
     content = msg["content"]
@@ -690,7 +691,7 @@ for msg in current_messages:
         unsafe_allow_html=True
     )
 
-# 15. Persistent Retry Notification Bar
+# 14. Persistent Retry Notification Bar
 if current_char["name"] in st.session_state.failed_prompts:
     failed_text = st.session_state.failed_prompts[current_char["name"]]
     st.warning(f"Connection dropped on: '{failed_text}'")
@@ -704,7 +705,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 16. Integrated Bottom Chat Input with Guardrails & Leak Prevention
+# 15. Integrated Bottom Chat Input
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -716,7 +717,7 @@ if user_query:
 
     current_time = get_hkt_time()
 
-    # Save and display user message in sky-blue bubble
+    # Save and display user message
     st.session_state.character_chats[current_char["name"]].append({
         "role": "user",
         "content": user_query,
@@ -727,21 +728,18 @@ if user_query:
         unsafe_allow_html=True
     )
 
-    # Universal Student-Friendly Guardrail + Anti-Leak Enforcement
-    student_guardrail = (
-        "TARGET AUDIENCE: Primary school English learners.\n"
-        "STRICT INSTRUCTIONS:\n"
-        "- Respond strictly in character.\n"
-        "- Output ONLY the spoken response. NEVER write analysis, thought processes, outlines, or bullet points.\n"
-        "- Use simple, clear everyday English (A2/B1 level).\n"
-        "- Keep the answer between 2 and 3 short sentences maximum.\n"
-        "- Never use Victorian vocabulary, geological jargon, or difficult words."
+    # Conversational roleplay prompt (avoids prompting analysis triggers)
+    system_instruction = (
+        f"You are roleplaying as {current_char['name']} from the story '{selected_story}'.\n"
+        f"{current_char['system_prompt']}\n\n"
+        "SPEAK DIRECTLY TO THE STUDENT:\n"
+        "- Reply immediately in character in 2 to 3 short, friendly sentences.\n"
+        "- Use simple, easy English words suitable for primary school students.\n"
+        "- DO NOT write notes, outlines, thoughts, reasoning, or lists. ONLY say your spoken words."
     )
 
-    full_system_prompt = f"{current_char['system_prompt']}\n\n{student_guardrail}"
-
     conversation_payload = [
-        {"role": "system", "content": full_system_prompt}
+        {"role": "system", "content": system_instruction}
     ]
     for m in st.session_state.character_chats[current_char["name"]]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
@@ -763,7 +761,7 @@ if user_query:
             messages=conversation_payload,
             stream=True,
             temperature=0.6,
-            max_tokens=120
+            max_tokens=140
         )
         
         has_started_typing = False
@@ -795,7 +793,7 @@ if user_query:
             st.session_state.failed_prompts.pop(current_char["name"], None)
         else:
             bubble_placeholder.empty()
-            raise Exception("AI returned empty text. Service might be busy.")
+            raise Exception("AI returned empty text. Please try again.")
 
     except Exception as e:
         typing_box.empty()
