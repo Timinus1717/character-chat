@@ -33,7 +33,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. Seamless Sky-Blue CSS
+# 4. High-Contrast Sky-Blue & Pure White CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -51,8 +51,9 @@ st.markdown("""
         pointer-events: auto !important;
     }
 
+    /* Seamless pastel blue canvas */
     .stApp {
-        background-color: #eef7fc !important;
+        background-color: #e6f4fd !important;
     }
 
     .block-container {
@@ -62,13 +63,14 @@ st.markdown("""
         background-color: transparent !important;
     }
 
+    /* Locked sticky header */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
         position: sticky !important;
         top: 0 !important;
         z-index: 9999 !important;
-        background-color: #eef7fc !important;
+        background-color: #e6f4fd !important;
         padding-top: 10px !important;
         padding-bottom: 12px !important;
         margin-top: -10px !important;
@@ -81,7 +83,7 @@ st.markdown("""
         background: #ffffff !important;
         padding: 14px 22px;
         border-radius: 26px;
-        box-shadow: 0 8px 24px rgba(56, 189, 248, 0.16);
+        box-shadow: 0 6px 20px rgba(2, 132, 199, 0.12);
         position: relative;
         z-index: 10000;
         border: 2px solid #ffffff;
@@ -92,14 +94,15 @@ st.markdown("""
         gap: 12px;
     }
     .back-arrow-btn {
-        font-size: 1.1rem;
-        color: #64748b;
+        font-size: 1.15rem;
+        color: #475569 !important;
+        font-weight: 700;
     }
     .header-titles h3 {
         margin: 0;
         font-size: 1.25rem;
         font-weight: 700;
-        color: #1e293b !important;
+        color: #0f172a !important;
         letter-spacing: -0.01em;
     }
 
@@ -108,13 +111,13 @@ st.markdown("""
         align-items: center;
         gap: 6px;
         margin: 0;
-        font-size: 0.82rem;
-        font-weight: 600;
-        color: #059669 !important;
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #047857 !important;
     }
     .status-dot-glow {
-        width: 8px;
-        height: 8px;
+        width: 9px;
+        height: 9px;
         background-color: #10b981;
         border-radius: 50%;
         display: inline-block;
@@ -137,14 +140,14 @@ st.markdown("""
         height: 52px;
         border-radius: 50%;
         object-fit: cover;
-        box-shadow: 0 6px 16px rgba(14, 165, 233, 0.2);
-        border: 2px solid #ffffff;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+        border: 2.5px solid #0284c7;
     }
     .header-avatar-fallback {
         width: 52px;
         height: 52px;
         border-radius: 50%;
-        background: #0ea5e9;
+        background: #0284c7;
         color: white;
         display: flex;
         align-items: center;
@@ -152,6 +155,7 @@ st.markdown("""
         font-size: 24px;
     }
 
+    /* Message Rows & Bubbles */
     .msg-row {
         display: flex;
         width: 100%;
@@ -170,25 +174,29 @@ st.markdown("""
         position: relative;
         max-width: 82%;
         padding: 13px 18px;
-        font-size: 0.96rem;
-        line-height: 1.5;
+        font-size: 0.97rem;
+        line-height: 1.55;
         word-wrap: break-word;
         white-space: pre-wrap;
     }
 
+    /* User Bubble: Deep Royal Ocean Gradient with pure white text */
     .msg-bubble.user {
-        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%) !important;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
         color: #ffffff !important;
+        font-weight: 500;
         border-radius: 22px 22px 4px 22px;
-        box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
     }
 
+    /* Assistant Bubble: Solid White with Deep Charcoal Text */
     .msg-bubble.assistant {
         background: #ffffff !important;
-        color: #1e293b !important;
+        color: #0f172a !important;
+        font-weight: 500;
         border-radius: 22px 22px 22px 4px;
-        box-shadow: 0 4px 14px rgba(148, 163, 184, 0.14);
-        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+        border: 1.5px solid #cbd5e1 !important;
     }
 
     .typing-pill {
@@ -199,31 +207,34 @@ st.markdown("""
         padding: 8px 16px;
         border-radius: 20px;
         margin-bottom: 12px;
-        color: #0284c7 !important;
-        font-size: 0.84rem;
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(14, 165, 233, 0.12);
+        color: #0369a1 !important;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: 1px solid #bae6fd;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.10);
     }
 
+    /* Starter Question Buttons */
     .block-container .stButton button {
         background-color: #ffffff !important;
-        color: #0284c7 !important;
-        border: 1.5px solid #bae6fd !important;
+        color: #0369a1 !important;
+        border: 1.5px solid #93c5fd !important;
         border-radius: 20px !important;
-        font-size: 0.85rem !important;
-        font-weight: 600 !important;
+        font-size: 0.86rem !important;
+        font-weight: 700 !important;
         padding: 8px 14px !important;
         transition: all 0.2s ease !important;
-        box-shadow: 0 2px 6px rgba(56, 189, 248, 0.08) !important;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08) !important;
     }
     .block-container .stButton button:hover {
-        background: #38bdf8 !important;
+        background: #0284c7 !important;
         color: #ffffff !important;
-        border-color: #38bdf8 !important;
+        border-color: #0284c7 !important;
         transform: translateY(-1px);
-        box-shadow: 0 6px 14px rgba(56, 189, 248, 0.25) !important;
+        box-shadow: 0 6px 14px rgba(2, 132, 199, 0.3) !important;
     }
 
+    /* Chat Input */
     [data-testid="stBottom"],
     [data-testid="stBottom"] > div,
     [data-testid="stBottom"] > div > div {
@@ -235,8 +246,8 @@ st.markdown("""
     [data-testid="stChatInput"] {
         background-color: #ffffff !important;
         border-radius: 36px !important;
-        border: 2px solid #bae6fd !important;
-        box-shadow: 0 10px 25px -4px rgba(56, 189, 248, 0.3), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+        border: 2px solid #93c5fd !important;
+        box-shadow: 0 10px 25px -4px rgba(2, 132, 199, 0.25), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
         padding: 6px 10px 6px 18px !important;
         margin-bottom: 12px !important;
     }
@@ -245,29 +256,34 @@ st.markdown("""
     [data-testid="stChatInput"] textarea {
         background-color: #ffffff !important;
         color: #0f172a !important;
-        font-size: 0.95rem !important;
+        font-size: 0.96rem !important;
         caret-color: #0284c7 !important;
+        font-weight: 500 !important;
     }
     [data-testid="stChatInput"] textarea::placeholder {
-        color: #94a3b8 !important;
+        color: #64748b !important;
+        font-weight: 500 !important;
     }
 
     [data-testid="stChatInput"] button {
-        background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%) !important;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
         color: #ffffff !important;
         border-radius: 50% !important;
         width: 38px !important;
         height: 38px !important;
         border: none !important;
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35) !important;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35) !important;
     }
     [data-testid="stChatInput"] button svg {
         fill: #ffffff !important;
     }
 
+    /* =========================================================
+       SIDEBAR: HIGH-CONTRAST READABILITY
+       ========================================================= */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
-        border-right: 1.5px solid #e0f2fe !important;
+        border-right: 1.5px solid #cbd5e1 !important;
     }
     [data-testid="stSidebar"] > div:first-child {
         display: flex;
@@ -285,6 +301,7 @@ st.markdown("""
         font-weight: 700;
     }
 
+    /* Story Card Item */
     .sidebar-story-card {
         display: flex;
         align-items: center;
@@ -292,24 +309,24 @@ st.markdown("""
         padding: 9px 12px;
         background: #f0f9ff !important;
         border-radius: 16px;
-        border: 1.5px solid #d0ecfc !important;
+        border: 1.5px solid #bae6fd !important;
         margin-top: 10px;
         margin-bottom: 4px;
-        box-shadow: 0 2px 6px rgba(56, 189, 248, 0.05);
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.05);
     }
     .sidebar-story-thumb {
         width: 40px;
         height: 40px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #38bdf8;
+        border: 2px solid #0284c7;
         flex-shrink: 0;
     }
     .sidebar-story-fallback {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: #38bdf8;
+        background: #0284c7;
         color: white;
         display: flex;
         align-items: center;
@@ -318,19 +335,20 @@ st.markdown("""
         flex-shrink: 0;
     }
     .sidebar-story-title {
-        font-size: 0.90rem;
+        font-size: 0.92rem;
         font-weight: 700;
         color: #0f172a !important;
         line-height: 1.25;
     }
 
+    /* Expander Container */
     [data-testid="stExpander"] {
         background-color: #ffffff !important;
-        border: 1.5px solid #d0ecfc !important;
+        border: 1.5px solid #93c5fd !important;
         border-radius: 14px !important;
         overflow: hidden !important;
         margin-bottom: 12px !important;
-        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.06) !important;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
     }
     [data-testid="stExpander"] details {
         background-color: #ffffff !important;
@@ -339,21 +357,21 @@ st.markdown("""
     [data-testid="stExpander"] summary,
     [data-testid="stExpander"] details summary,
     [data-testid="stExpander"] details[open] summary {
-        background-color: #f0f9ff !important;
-        color: #0284c7 !important;
+        background-color: #e0f2fe !important;
+        color: #0c4a6e !important;
         font-weight: 700 !important;
-        font-size: 0.86rem !important;
-        padding: 8px 12px !important;
-        border-bottom: 1px solid #e0f2fe !important;
+        font-size: 0.88rem !important;
+        padding: 9px 12px !important;
+        border-bottom: 1.5px solid #bae6fd !important;
     }
     [data-testid="stExpander"] summary:hover {
-        background-color: #e0f2fe !important;
-        color: #0369a1 !important;
+        background-color: #bae6fd !important;
+        color: #082f49 !important;
     }
     [data-testid="stExpander"] summary svg,
     [data-testid="stExpander"] summary span {
-        fill: #0284c7 !important;
-        color: #0284c7 !important;
+        fill: #0c4a6e !important;
+        color: #0c4a6e !important;
     }
 
     [data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
@@ -366,7 +384,7 @@ st.markdown("""
         height: 32px;
         border-radius: 50%;
         object-fit: cover;
-        border: 1.5px solid #38bdf8;
+        border: 1.5px solid #0284c7;
         margin-top: 3px;
     }
     .sidebar-char-fallback {
@@ -382,13 +400,14 @@ st.markdown("""
         margin-top: 3px;
     }
 
+    /* Character Selection Button inside Expander */
     [data-testid="stSidebar"] [data-testid="stExpander"] .stButton button {
         background-color: #ffffff !important;
-        color: #1e293b !important;
-        border: 1.5px solid #e2e8f0 !important;
+        color: #0f172a !important;
+        border: 1.5px solid #cbd5e1 !important;
         border-radius: 12px !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
+        font-size: 0.84rem !important;
+        font-weight: 700 !important;
         padding: 6px 10px !important;
         white-space: normal !important;
         word-break: break-word !important;
@@ -396,16 +415,17 @@ st.markdown("""
         min-height: 36px !important;
         line-height: 1.25 !important;
         text-align: left !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
         transition: all 0.2s ease !important;
     }
     [data-testid="stSidebar"] [data-testid="stExpander"] .stButton button:hover {
         background-color: #e0f2fe !important;
         color: #0284c7 !important;
-        border-color: #38bdf8 !important;
+        border-color: #0284c7 !important;
         transform: translateY(-1px) !important;
     }
 
+    /* Sticky Profile Card */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
@@ -415,8 +435,8 @@ st.markdown("""
         padding-top: 10px !important;
         padding-bottom: 8px !important;
         margin-top: auto !important;
-        box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.08) !important;
-        border-top: 1.5px solid #e0f2fe !important;
+        box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.12) !important;
+        border-top: 1.5px solid #cbd5e1 !important;
     }
 
     .light-profile-card {
@@ -424,7 +444,7 @@ st.markdown("""
         border-radius: 18px;
         padding: 12px 10px;
         text-align: center;
-        border: 1.5px solid #e2e8f0 !important;
+        border: 1.5px solid #cbd5e1 !important;
     }
     .light-profile-avatar {
         width: 64px;
@@ -433,14 +453,14 @@ st.markdown("""
         object-fit: cover;
         margin: 0 auto 6px auto;
         display: block;
-        border: 2.5px solid #38bdf8;
-        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+        border: 2.5px solid #0284c7;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
     .light-profile-avatar-fallback {
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: #38bdf8;
+        background: #0284c7;
         color: white;
         font-size: 30px;
         display: flex;
@@ -449,55 +469,56 @@ st.markdown("""
         margin: 0 auto 6px auto;
     }
     .light-profile-name {
-        font-size: 0.95rem;
+        font-size: 0.98rem;
         font-weight: 700;
         color: #0f172a !important;
         margin-bottom: 2px;
     }
     .light-profile-book {
-        font-size: 0.74rem;
-        color: #0284c7 !important;
-        font-weight: 600;
+        font-size: 0.78rem;
+        color: #0369a1 !important;
+        font-weight: 700;
         margin-bottom: 6px;
     }
     .light-profile-bio {
         background: #ffffff !important;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #cbd5e1;
         border-radius: 10px;
         padding: 8px 10px;
-        font-size: 0.78rem;
-        color: #334155 !important;
+        font-size: 0.80rem;
+        color: #1e293b !important;
         text-align: left;
-        line-height: 1.4;
+        line-height: 1.45;
+        font-weight: 500;
     }
 
     .clear-chat-container .stButton button {
         background-color: #ffffff !important;
-        color: #e11d48 !important;
-        border: 1.5px solid #fecdd3 !important;
+        color: #be123c !important;
+        border: 1.5px solid #fda4af !important;
         border-radius: 20px !important;
-        font-size: 0.80rem !important;
-        font-weight: 600 !important;
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
         padding: 6px 12px !important;
         margin-top: 6px !important;
         transition: all 0.2s ease !important;
     }
     .clear-chat-container .stButton button:hover {
         background-color: #ffe4e6 !important;
-        border-color: #fb7185 !important;
-        color: #be123c !important;
+        border-color: #f43f5e !important;
+        color: #9f1239 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 5. OpenRouter Connection (Configured for unrestricted paid tier)
+# 5. OpenRouter Connection
 api_key = st.secrets.get("OPENROUTER_API_KEY", "")
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=api_key or "missing_key"
 )
 
-# Paid model unrestricted for Hong Kong billing (Fast, excellent roleplay, ~$0.20 per 1M tokens)
+# Unrestricted paid tier model (fast, clear English, ~$0.20 per 1M tokens)
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
 
 # 6. Load Catalog
@@ -691,7 +712,6 @@ if user_query:
     conversation_payload = [
         {"role": "system", "content": system_instruction}
     ]
-    # Send recent dialogue for context
     for m in st.session_state.character_chats[current_char["name"]][-8:]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
