@@ -20,7 +20,7 @@ def get_hkt_time():
     hkt_zone = timezone(timedelta(hours=8))
     return datetime.now(hkt_zone).strftime("%I:%M %p")
 
-# 3. Helper to encode local images for web rendering
+# 3. Base64 Image Encoder
 def get_image_base64(relative_path):
     if not relative_path:
         return None
@@ -33,7 +33,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. WhatsApp Modern CSS
+# 4. WhatsApp Modern CSS + Collapsible Sidebar Styling
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap');
@@ -55,7 +55,7 @@ st.markdown("""
         max-width: 760px !important;
     }
 
-    /* Sticky WhatsApp Header */
+    /* WhatsApp Sticky Header */
     .wa-header {
         position: sticky;
         top: 0;
@@ -148,7 +148,6 @@ st.markdown("""
         background-color: #ffffff;
         border-radius: 0px 12px 12px 12px;
     }
-
     .bubble-time {
         position: absolute;
         bottom: 4px;
@@ -175,12 +174,12 @@ st.markdown("""
         font-size: 0.88rem;
     }
 
-    /* Suggested Question Buttons (Pill Chips) */
+    /* Chips & Buttons */
     .stButton button {
         background-color: #ffffff !important;
         color: #075e54 !important;
         border: 1px solid #c2dbd5 !important;
-        border-radius: 20px !important;
+        border-radius: 12px !important;
         font-size: 0.88rem !important;
         font-weight: 500 !important;
         padding: 6px 14px !important;
@@ -201,13 +200,75 @@ st.markdown("""
         border-right: 1px solid #e1e4ea;
     }
 
+    /* Story Bubble Item in Sidebar */
+    .story-card-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 10px;
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 8px;
+    }
+    .story-card-cover {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #128c7e;
+    }
+    .story-card-fallback {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #128c7e;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    .story-card-title {
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: #1a202c;
+    }
+
+    /* Character Sub-item */
+    .char-item-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 6px;
+    }
+    .char-item-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1.5px solid #25d366;
+    }
+    .char-item-fallback {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #25d366;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    /* Profile Card in Sidebar */
     .sidebar-profile-card {
         background: white;
         border-radius: 14px;
         padding: 16px;
         text-align: center;
         box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        margin-top: 15px;
+        margin-top: 10px;
         border: 1px solid #eef0f3;
     }
     .profile-avatar-lg {
@@ -236,13 +297,13 @@ st.markdown("""
         font-size: 1.1rem;
         font-weight: 600;
         color: #111b21;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
     .profile-book {
         font-size: 0.82rem;
         color: #128c7e;
         font-weight: 500;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
     }
     .profile-bio-box {
         background: #f0f2f5;
@@ -265,12 +326,21 @@ client = OpenAI(
 
 MODEL_NAME = "openrouter/free"
 
-# 6. Load Catalog
+# 6. Load Catalog (Uncached for instant edits)
 def load_catalog():
     with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
-        return json.load(f)
+        data = json.load(f)
+    # Ensure backwards compatibility if characters.json is list-based or dict-based
+    standardized = {}
+    for story_title, story_val in data.items():
+        if isinstance(story_val, list):
+            standardized[story_title] = {"cover": "", "characters": story_val}
+        else:
+            standardized[story_title] = story_val
+    return standardized
 
 catalog = load_catalog()
+all_stories = list(catalog.keys())
 
 # 7. Persistent Memory Initialization
 if "character_chats" not in st.session_state:
@@ -279,48 +349,97 @@ if "character_chats" not in st.session_state:
 if "failed_prompts" not in st.session_state:
     st.session_state.failed_prompts = {}
 
-# 8. Sidebar Contact Directory
-st.sidebar.markdown("### 💬 Chats")
+if "selected_story" not in st.session_state:
+    st.session_state.selected_story = all_stories[0]
 
-selected_story = st.sidebar.selectbox("Select Book / Story:", list(catalog.keys()))
-character_list = catalog[selected_story]
-char_dict = {c["name"]: c for c in character_list}
+first_char_name = catalog[st.session_state.selected_story]["characters"][0]["name"]
+if "selected_char" not in st.session_state:
+    st.session_state.selected_char = first_char_name
 
-selected_char_name = st.sidebar.radio(
-    "Choose Contact:",
-    options=list(char_dict.keys()),
-    key="char_radio_select"
-)
+if "show_directory" not in st.session_state:
+    st.session_state.show_directory = False
 
-current_char = char_dict[selected_char_name]
+# 8. Interactive Collapsible Sidebar
+st.sidebar.markdown("### 📚 Contacts")
+
+# Toggle Directory Button
+if st.session_state.show_directory:
+    if st.sidebar.button("🔽 Close Stories List", use_container_width=True):
+        st.session_state.show_directory = False
+        st.rerun()
+else:
+    if st.sidebar.button("📁 Change Story / Character", use_container_width=True):
+        st.session_state.show_directory = True
+        st.rerun()
+
+# When Directory is EXPANDED:
+if st.session_state.show_directory:
+    st.sidebar.caption("Select a story and character:")
+    for story_name, story_data in catalog.items():
+        cover_b64 = get_image_base64(story_data.get("cover", ""))
+        cover_html = f'<img class="story-card-cover" src="{cover_b64}">' if cover_b64 else '<div class="story-card-fallback">📖</div>'
+        
+        # Story folder card header
+        st.sidebar.markdown(f"""
+        <div class="story-card-item">
+            {cover_html}
+            <div class="story-card-title">{story_name}</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Display folder characters inside an expander
+        is_current_story = (story_name == st.session_state.selected_story)
+        with st.sidebar.expander(f"Characters in {story_name}", expanded=is_current_story):
+            for char_obj in story_data["characters"]:
+                char_b64 = get_image_base64(char_obj.get("avatar", ""))
+                char_thumb = f'<img class="char-item-avatar" src="{char_b64}">' if char_b64 else '<div class="char-item-fallback">👤</div>'
+                
+                col_thumb, col_btn = st.columns([1, 4])
+                with col_thumb:
+                    st.markdown(char_thumb, unsafe_allow_html=True)
+                with col_btn:
+                    if st.button(char_obj["name"], key=f"select_{story_name}_{char_obj['name']}", use_container_width=True):
+                        st.session_state.selected_story = story_name
+                        st.session_state.selected_char = char_obj["name"]
+                        st.session_state.show_directory = False  # Auto-collapse back to profile
+                        st.rerun()
+        st.sidebar.write("")
+
+# Retrieve Current Active Character Data
+selected_story = st.session_state.selected_story
+chars_in_story = catalog[selected_story]["characters"]
+current_char = next((c for c in chars_in_story if c["name"] == st.session_state.selected_char), chars_in_story[0])
+st.session_state.selected_char = current_char["name"]
+
 avatar_b64 = get_image_base64(current_char.get("avatar", ""))
 
-# Profile Card for Selected Character
-avatar_lg_html = f'<img class="profile-avatar-lg" src="{avatar_b64}">' if avatar_b64 else f'<div class="profile-avatar-lg-fallback">📖</div>'
-st.sidebar.markdown(f"""
-<div class="sidebar-profile-card">
-    {avatar_lg_html}
-    <div class="profile-name">{current_char['name']}</div>
-    <div class="profile-book">📖 {selected_story}</div>
-    <div class="profile-bio-box">
-        <b>About:</b><br>{current_char.get('tagline', '')}
+# When Directory is COLLAPSED (Default): Show Rich Contact Profile Card
+if not st.session_state.show_directory:
+    avatar_lg_html = f'<img class="profile-avatar-lg" src="{avatar_b64}">' if avatar_b64 else '<div class="profile-avatar-lg-fallback">📖</div>'
+    st.sidebar.markdown(f"""
+    <div class="sidebar-profile-card">
+        {avatar_lg_html}
+        <div class="profile-name">{current_char['name']}</div>
+        <div class="profile-book">📖 {selected_story}</div>
+        <div class="profile-bio-box">
+            <b>About:</b><br>{current_char.get('tagline', '')}
+        </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-st.sidebar.write("")
-if st.sidebar.button("🗑️ Clear This Chat History", use_container_width=True):
-    now = get_hkt_time()
-    st.session_state.character_chats[selected_char_name] = [
-        {"role": "assistant", "content": f"Hello! I am {selected_char_name}. What would you like to ask me?", "time": now}
-    ]
-    st.session_state.failed_prompts.pop(selected_char_name, None)
-    st.rerun()
+    st.sidebar.write("")
+    if st.sidebar.button("🗑️ Clear This Chat History", use_container_width=True):
+        now = get_hkt_time()
+        st.session_state.character_chats[current_char["name"]] = [
+            {"role": "assistant", "content": f"Hello! I am {current_char['name']}. What would you like to ask me?", "time": now}
+        ]
+        st.session_state.failed_prompts.pop(current_char["name"], None)
+        st.rerun()
 
 # 9. Initialize Conversation for Current Contact
 now_str = get_hkt_time()
-if selected_char_name not in st.session_state.character_chats:
-    st.session_state.character_chats[selected_char_name] = [
+if current_char["name"] not in st.session_state.character_chats:
+    st.session_state.character_chats[current_char["name"]] = [
         {
             "role": "assistant",
             "content": f"Hello! I am {current_char['name']}. What would you like to ask me?",
@@ -328,15 +447,15 @@ if selected_char_name not in st.session_state.character_chats:
         }
     ]
 
-# Automatic cleanup: Remove any empty ghost bubbles from chat history
-st.session_state.character_chats[selected_char_name] = [
-    m for m in st.session_state.character_chats[selected_char_name] 
+# Purge any empty ghost bubbles
+st.session_state.character_chats[current_char["name"]] = [
+    m for m in st.session_state.character_chats[current_char["name"]] 
     if m.get("content", "").strip() != ""
 ]
-current_messages = st.session_state.character_chats[selected_char_name]
+current_messages = st.session_state.character_chats[current_char["name"]]
 
 # 10. WhatsApp Top Header
-avatar_html = f'<img class="wa-avatar" src="{avatar_b64}">' if avatar_b64 else f'<div class="wa-avatar-fallback">📖</div>'
+avatar_html = f'<img class="wa-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="wa-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="wa-header">
     {avatar_html}
@@ -353,7 +472,7 @@ if len(current_messages) <= 1 and starters:
     st.caption("Suggested Questions:")
     cols = st.columns(len(starters))
     for idx, question in enumerate(starters):
-        if cols[idx].button(question, key=f"{selected_char_name}_starter_{idx}", use_container_width=True):
+        if cols[idx].button(question, key=f"{current_char['name']}_starter_{idx}", use_container_width=True):
             st.session_state.pending_prompt = question
             st.rerun()
 
@@ -368,18 +487,18 @@ for msg in current_messages:
         unsafe_allow_html=True
     )
 
-# 13. Persistent Retry Notification Bar (Rendered outside input logic)
-if selected_char_name in st.session_state.failed_prompts:
-    failed_text = st.session_state.failed_prompts[selected_char_name]
+# 13. Persistent Retry Notification Bar
+if current_char["name"] in st.session_state.failed_prompts:
+    failed_text = st.session_state.failed_prompts[current_char["name"]]
     st.warning(f"⚠️ Message failed: '{failed_text}'")
     col1, col2 = st.columns([1, 1])
     with col1:
         if st.button("🔄 Retry Message", key="retry_btn_action", use_container_width=True):
-            st.session_state.pending_prompt = st.session_state.failed_prompts.pop(selected_char_name)
+            st.session_state.pending_prompt = st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
     with col2:
         if st.button("❌ Dismiss", key="dismiss_btn_action", use_container_width=True):
-            st.session_state.failed_prompts.pop(selected_char_name)
+            st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
 # 14. Message Input & Execution
@@ -395,7 +514,7 @@ if user_query:
     current_time = get_hkt_time()
 
     # Save and display user message
-    st.session_state.character_chats[selected_char_name].append({
+    st.session_state.character_chats[current_char["name"]].append({
         "role": "user",
         "content": user_query,
         "time": current_time
@@ -409,7 +528,7 @@ if user_query:
     conversation_payload = [
         {"role": "system", "content": current_char["system_prompt"]}
     ]
-    for m in st.session_state.character_chats[selected_char_name]:
+    for m in st.session_state.character_chats[current_char["name"]]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
     # Show typing indicator
@@ -433,7 +552,6 @@ if user_query:
             content = chunk.choices[0].delta.content or ""
             response_text += content
             
-            # Remove typing box only once the first real word is received
             if not has_started_typing and response_text.strip():
                 typing_box.empty()
                 has_started_typing = True
@@ -446,15 +564,13 @@ if user_query:
 
         typing_box.empty()
 
-        # Only save if we actually received non-empty text
         if response_text.strip():
-            st.session_state.character_chats[selected_char_name].append({
+            st.session_state.character_chats[current_char["name"]].append({
                 "role": "assistant",
                 "content": response_text,
                 "time": current_time
             })
-            # Clear any failure flag if message succeeded
-            st.session_state.failed_prompts.pop(selected_char_name, None)
+            st.session_state.failed_prompts.pop(current_char["name"], None)
         else:
             bubble_placeholder.empty()
             raise Exception("AI returned an empty response. The server may be rate-limited.")
@@ -463,10 +579,9 @@ if user_query:
         typing_box.empty()
         bubble_placeholder.empty()
         
-        # Remove the unanswered user message so the log stays clean
-        if st.session_state.character_chats[selected_char_name] and st.session_state.character_chats[selected_char_name][-1]["role"] == "user":
-            st.session_state.character_chats[selected_char_name].pop()
+        # Clean up last user message if no response was given
+        if st.session_state.character_chats[current_char["name"]] and st.session_state.character_chats[current_char["name"]][-1]["role"] == "user":
+            st.session_state.character_chats[current_char["name"]].pop()
             
-        # Store for retry
-        st.session_state.failed_prompts[selected_char_name] = user_query
+        st.session_state.failed_prompts[current_char["name"]] = user_query
         st.rerun()
