@@ -39,9 +39,7 @@ def sanitize_ai_output(text: str) -> str:
     """Removes thinking tags or leaked analysis templates from reasoning models."""
     if not text:
         return ""
-    # Strip <think> tags (from DeepSeek/Qwen thinking models)
     cleaned = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
-    # Strip any leaked 'Analyze the Request' preambles
     if "Analyze the Request" in cleaned or "**Persona:**" in cleaned:
         paragraphs = cleaned.split("\n\n")
         safe_paragraphs = [
@@ -52,7 +50,7 @@ def sanitize_ai_output(text: str) -> str:
             cleaned = "\n\n".join(safe_paragraphs)
     return cleaned.strip()
 
-# 5. High-Contrast Light/Dark Resilient CSS
+# 5. Sky-Blue & Pure White Minimalist CSS with Theme-Resilient Sidebar
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -241,7 +239,7 @@ st.markdown("""
     }
 
     /* Starter Question Buttons */
-    .stButton button {
+    .block-container .stButton button {
         background-color: #ffffff !important;
         color: #0284c7 !important;
         border: 1.5px solid #bae6fd !important;
@@ -252,7 +250,7 @@ st.markdown("""
         transition: all 0.2s ease !important;
         box-shadow: 0 2px 6px rgba(56, 189, 248, 0.08) !important;
     }
-    .stButton button:hover {
+    .block-container .stButton button:hover {
         background: #38bdf8 !important;
         color: #ffffff !important;
         border-color: #38bdf8 !important;
@@ -260,9 +258,7 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(56, 189, 248, 0.25) !important;
     }
 
-    /* =========================================================
-       CHAT INPUT: Resilient to Dark Mode & Light Mode
-       ========================================================= */
+    /* Chat Input */
     [data-testid="stBottom"],
     [data-testid="stBottom"] > div,
     [data-testid="stBottom"] > div > div {
@@ -280,7 +276,6 @@ st.markdown("""
         margin-bottom: 8px !important;
     }
 
-    /* Force input textarea to stay white with dark text in dark mode */
     [data-testid="stChatInput"] > div,
     [data-testid="stChatInput"] textarea {
         background-color: #ffffff !important;
@@ -292,7 +287,6 @@ st.markdown("""
         color: #94a3b8 !important;
     }
 
-    /* Cyan Circular Send Button */
     [data-testid="stChatInput"] button {
         background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%) !important;
         color: #ffffff !important;
@@ -307,11 +301,11 @@ st.markdown("""
     }
 
     /* =========================================================
-       SIDEBAR & EXPANDERS: Resilient to Dark Mode
+       SIDEBAR: FULL SKY-BLUE & WHITE HARMONY (LIGHT & DARK RESILIENT)
        ========================================================= */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
-        border-right: 1px solid #e0f2fe !important;
+        border-right: 1.5px solid #e0f2fe !important;
     }
     [data-testid="stSidebar"] > div:first-child {
         display: flex;
@@ -319,6 +313,7 @@ st.markdown("""
         height: 100vh;
         overflow-y: auto;
         padding-bottom: 0 !important;
+        background-color: #ffffff !important;
     }
     [data-testid="stSidebar"] h1, 
     [data-testid="stSidebar"] h2, 
@@ -328,56 +323,30 @@ st.markdown("""
         font-weight: 700;
     }
 
-    /* Fix Native Expander Box Colors in Dark Mode */
-    [data-testid="stExpander"] {
-        background-color: #ffffff !important;
-        border: 1.5px solid #d0ecfc !important;
-        border-radius: 14px !important;
-        overflow: hidden !important;
-        margin-bottom: 8px !important;
-    }
-    [data-testid="stExpander"] details {
-        background-color: #ffffff !important;
-    }
-    [data-testid="stExpander"] summary {
-        color: #0284c7 !important;
-        font-weight: 600 !important;
-        font-size: 0.86rem !important;
-    }
-    [data-testid="stExpander"] summary svg {
-        fill: #0284c7 !important;
-    }
-    [data-testid="stExpander"] summary:hover {
-        color: #0369a1 !important;
-    }
-    [data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
-        background-color: #f8fafc !important;
-        padding: 8px 10px !important;
-    }
-
     /* Story Card Item */
     .sidebar-story-card {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 8px 10px;
-        background: #f0f9ff;
-        border-radius: 14px;
-        border: 1px solid #e0f2fe;
+        padding: 9px 12px;
+        background: #f0f9ff !important;
+        border-radius: 16px;
+        border: 1.5px solid #d0ecfc !important;
         margin-top: 10px;
         margin-bottom: 4px;
+        box-shadow: 0 2px 6px rgba(56, 189, 248, 0.05);
     }
     .sidebar-story-thumb {
-        width: 38px;
-        height: 38px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid #38bdf8;
         flex-shrink: 0;
     }
     .sidebar-story-fallback {
-        width: 38px;
-        height: 38px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         background: #38bdf8;
         color: white;
@@ -388,9 +357,52 @@ st.markdown("""
         flex-shrink: 0;
     }
     .sidebar-story-title {
-        font-size: 0.88rem;
+        font-size: 0.90rem;
         font-weight: 700;
         color: #0f172a !important;
+        line-height: 1.25;
+    }
+
+    /* Expander Container Overhaul */
+    [data-testid="stExpander"] {
+        background-color: #ffffff !important;
+        border: 1.5px solid #d0ecfc !important;
+        border-radius: 14px !important;
+        overflow: hidden !important;
+        margin-bottom: 12px !important;
+        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.06) !important;
+    }
+    [data-testid="stExpander"] details {
+        background-color: #ffffff !important;
+        border: none !important;
+    }
+
+    /* Expander Header (Summary Bar) - Forces Bright Sky-Blue Header */
+    [data-testid="stExpander"] summary,
+    [data-testid="stExpander"] details summary,
+    [data-testid="stExpander"] details[open] summary {
+        background-color: #f0f9ff !important;
+        color: #0284c7 !important;
+        font-weight: 700 !important;
+        font-size: 0.86rem !important;
+        padding: 8px 12px !important;
+        border-bottom: 1px solid #e0f2fe !important;
+        border-radius: 12px 12px 0 0 !important;
+    }
+    [data-testid="stExpander"] summary:hover {
+        background-color: #e0f2fe !important;
+        color: #0369a1 !important;
+    }
+    [data-testid="stExpander"] summary svg,
+    [data-testid="stExpander"] summary span {
+        fill: #0284c7 !important;
+        color: #0284c7 !important;
+    }
+
+    /* Expander Content Drawer */
+    [data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
+        background-color: #f8fafc !important;
+        padding: 8px 8px !important;
     }
 
     .sidebar-char-thumb {
@@ -399,7 +411,7 @@ st.markdown("""
         border-radius: 50%;
         object-fit: cover;
         border: 1.5px solid #38bdf8;
-        margin-top: 4px;
+        margin-top: 3px;
     }
     .sidebar-char-fallback {
         width: 32px;
@@ -411,26 +423,35 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         font-size: 14px;
-        margin-top: 4px;
+        margin-top: 3px;
     }
 
-    /* Sidebar Character Selection Buttons */
+    /* Character Selection Button Inside Expander (Wraps without cutting off) */
     [data-testid="stSidebar"] [data-testid="stExpander"] .stButton button {
         background-color: #ffffff !important;
         color: #1e293b !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 10px !important;
-        font-size: 0.80rem !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        font-size: 0.82rem !important;
         font-weight: 600 !important;
-        padding: 4px 8px !important;
+        padding: 6px 10px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        height: auto !important;
+        min-height: 36px !important;
+        line-height: 1.25 !important;
+        text-align: left !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+        transition: all 0.2s ease !important;
     }
     [data-testid="stSidebar"] [data-testid="stExpander"] .stButton button:hover {
         background-color: #e0f2fe !important;
         color: #0284c7 !important;
         border-color: #38bdf8 !important;
+        transform: translateY(-1px) !important;
     }
 
-    /* Pinned Bottom Profile Card */
+    /* Sticky Bottom Profile Card */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
@@ -438,7 +459,7 @@ st.markdown("""
         z-index: 1000 !important;
         background: #ffffff !important;
         padding-top: 10px !important;
-        padding-bottom: 12px !important;
+        padding-bottom: 8px !important;
         margin-top: auto !important;
         box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.08) !important;
         border-top: 1.5px solid #e0f2fe !important;
@@ -449,7 +470,7 @@ st.markdown("""
         border-radius: 18px;
         padding: 12px 10px;
         text-align: center;
-        border: 1px solid #e2e8f0;
+        border: 1.5px solid #e2e8f0 !important;
     }
     .light-profile-avatar {
         width: 64px;
@@ -495,6 +516,24 @@ st.markdown("""
         text-align: left;
         line-height: 1.4;
     }
+
+    /* Sleek Clear History Button */
+    .clear-chat-container .stButton button {
+        background-color: #ffffff !important;
+        color: #e11d48 !important;
+        border: 1.5px solid #fecdd3 !important;
+        border-radius: 20px !important;
+        font-size: 0.80rem !important;
+        font-weight: 600 !important;
+        padding: 6px 12px !important;
+        margin-top: 6px !important;
+        transition: all 0.2s ease !important;
+    }
+    .clear-chat-container .stButton button:hover {
+        background-color: #ffe4e6 !important;
+        border-color: #fb7185 !important;
+        color: #be123c !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -536,7 +575,7 @@ first_char_name = catalog[st.session_state.selected_story]["characters"][0]["nam
 if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
-# 9. "Conversations" Sidebar (Top Scrollable Zone)
+# 9. "Conversations" Sidebar (Scrollable Top Zone)
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -574,7 +613,7 @@ current_char = next((c for c in chars_in_story if c["name"] == st.session_state.
 st.session_state.selected_char = current_char["name"]
 avatar_b64 = get_image_base64(current_char.get("avatar", ""))
 
-# Locked / Sticky Profile Card at Bottom of Sidebar
+# 10. Locked / Sticky Profile Card at Bottom of Sidebar
 avatar_portrait_html = f'<img class="light-profile-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="light-profile-avatar-fallback">📖</div>'
 st.sidebar.markdown(f"""
 <div class="locked-profile-anchor">
@@ -589,15 +628,18 @@ st.sidebar.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-if st.sidebar.button("🗑️ Clear History", use_container_width=True):
-    now = get_hkt_time()
-    st.session_state.character_chats[current_char["name"]] = [
-        {"role": "assistant", "content": f"Hello! I am {current_char['name']}. What would you like to ask me?", "time": now}
-    ]
-    st.session_state.failed_prompts.pop(current_char["name"], None)
-    st.rerun()
+with st.sidebar.container():
+    st.markdown('<div class="clear-chat-container">', unsafe_allow_html=True)
+    if st.button("🗑️ Clear Chat History", key="clear_chat_history_btn", use_container_width=True):
+        now = get_hkt_time()
+        st.session_state.character_chats[current_char["name"]] = [
+            {"role": "assistant", "content": f"Hello! I am {current_char['name']}. What would you like to ask me?", "time": now}
+        ]
+        st.session_state.failed_prompts.pop(current_char["name"], None)
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# 10. Persistent Conversation Initialization
+# 11. Persistent Conversation Initialization
 now_str = get_hkt_time()
 if current_char["name"] not in st.session_state.character_chats:
     st.session_state.character_chats[current_char["name"]] = [
@@ -608,14 +650,13 @@ if current_char["name"] not in st.session_state.character_chats:
         }
     ]
 
-# Purge any empty messages
 st.session_state.character_chats[current_char["name"]] = [
     m for m in st.session_state.character_chats[current_char["name"]] 
     if m.get("content", "").strip() != ""
 ]
 current_messages = st.session_state.character_chats[current_char["name"]]
 
-# 11. Locked Top Header Bar with Glowing Green Status Dot
+# 12. Locked Top Header Bar with Glowing Green Status Dot
 top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="chat-top-header">
@@ -630,7 +671,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 12. Starter Questions
+# 13. Starter Questions
 starters = current_char.get("starter_questions", [])
 if len(current_messages) <= 1 and starters:
     cols = st.columns(len(starters))
@@ -639,7 +680,7 @@ if len(current_messages) <= 1 and starters:
             st.session_state.pending_prompt = question
             st.rerun()
 
-# 13. Render Clean Pill Chat Feed
+# 14. Render Clean Pill Chat Feed
 for msg in current_messages:
     role = msg["role"]
     content = msg["content"]
@@ -649,7 +690,7 @@ for msg in current_messages:
         unsafe_allow_html=True
     )
 
-# 14. Persistent Retry Notification Bar
+# 15. Persistent Retry Notification Bar
 if current_char["name"] in st.session_state.failed_prompts:
     failed_text = st.session_state.failed_prompts[current_char["name"]]
     st.warning(f"Connection dropped on: '{failed_text}'")
@@ -663,7 +704,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 15. Integrated Bottom Chat Input with Guardrails & Leak Prevention
+# 16. Integrated Bottom Chat Input with Guardrails & Leak Prevention
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -699,7 +740,6 @@ if user_query:
 
     full_system_prompt = f"{current_char['system_prompt']}\n\n{student_guardrail}"
 
-    # Build prompt payload
     conversation_payload = [
         {"role": "system", "content": full_system_prompt}
     ]
