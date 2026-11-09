@@ -48,9 +48,9 @@ st.markdown("""
         background: linear-gradient(145deg, #38bdf8 0%, #0ea5e9 100%);
     }
 
-    /* Main chat container styled as a modern rounded card */
+    /* Main chat container card */
     .block-container {
-        padding-top: 1rem !important;
+        padding-top: 0.8rem !important;
         padding-bottom: 6rem !important;
         max-width: 640px !important;
         background-color: #eef7fc;
@@ -62,18 +62,18 @@ st.markdown("""
         border: 4px solid #ffffff;
     }
 
-    /* Crisp White Curved Top Bar */
+    /* Locked / Sticky White Top Bar */
     .chat-top-header {
         position: sticky;
         top: 0;
-        z-index: 99;
+        z-index: 999;
         display: flex;
         align-items: center;
         justify-content: space-between;
         background: #ffffff;
         padding: 14px 22px;
-        border-radius: 28px;
-        box-shadow: 0 6px 18px rgba(56, 189, 248, 0.08);
+        border-radius: 26px;
+        box-shadow: 0 8px 22px rgba(56, 189, 248, 0.16);
         margin-bottom: 18px;
     }
     .header-left {
@@ -93,12 +93,37 @@ st.markdown("""
         color: #1e293b;
         letter-spacing: -0.01em;
     }
-    .header-titles .online-badge {
+
+    /* Glowing Green Status Badge */
+    .online-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         margin: 0;
         font-size: 0.82rem;
         font-weight: 600;
-        color: #38bdf8;
+        color: #059669;
     }
+    .status-dot-glow {
+        width: 8px;
+        height: 8px;
+        background-color: #10b981;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 6px #10b981, 0 0 12px rgba(16, 185, 129, 0.6);
+        animation: pulseGlow 2s infinite ease-in-out;
+    }
+    @keyframes pulseGlow {
+        0%, 100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 4px #10b981, 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+        50% {
+            transform: scale(1.15);
+            box-shadow: 0 0 8px #10b981, 0 0 16px rgba(16, 185, 129, 0.9);
+        }
+    }
+
     .header-avatar {
         width: 54px;
         height: 54px;
@@ -143,16 +168,15 @@ st.markdown("""
         white-space: pre-wrap;
     }
 
-    /* User Bubble: Vibrant Sky Blue Pill */
+    /* User Bubble: Sky Blue Pill */
     .msg-bubble.user {
-        background: #4fc3f7;
         background: linear-gradient(135deg, #4fc3f7 0%, #0ea5e9 100%);
         color: #ffffff;
         border-radius: 20px 20px 4px 20px;
         box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
     }
 
-    /* Character Bubble: Pure White Pill */
+    /* Assistant Bubble: Pure White Pill */
     .msg-bubble.assistant {
         background: #ffffff;
         color: #334155;
@@ -195,7 +219,7 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(56, 189, 248, 0.25) !important;
     }
 
-    /* Integrate Streamlit Chat Input Directly Into the Chat Body */
+    /* Floating Chat Input Bar */
     [data-testid="stBottom"] {
         background-color: transparent !important;
         border: none !important;
@@ -223,7 +247,6 @@ st.markdown("""
         color: #94a3b8 !important;
     }
 
-    /* Cyan Circular Send Button */
     [data-testid="stChatInput"] button {
         background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%) !important;
         color: #ffffff !important;
@@ -306,7 +329,6 @@ st.markdown("""
         margin-top: 4px;
     }
 
-    /* Clean Sidebar Profile Card */
     .light-profile-card {
         background: #f8fafc;
         border-radius: 20px;
@@ -415,7 +437,7 @@ for story_name, story_data in catalog.items():
     </div>
     """, unsafe_allow_html=True)
     
-    with st.sidebar.expander(f"Characters", expanded=is_active_story):
+    with st.sidebar.expander("Characters", expanded=is_active_story):
         for char_obj in story_data["characters"]:
             char_b64 = get_image_base64(char_obj.get("avatar", ""))
             char_thumb = f'<img class="sidebar-char-thumb" src="{char_b64}">' if char_b64 else '<div class="sidebar-char-fallback">👤</div>'
@@ -479,7 +501,7 @@ st.session_state.character_chats[current_char["name"]] = [
 ]
 current_messages = st.session_state.character_chats[current_char["name"]]
 
-# 10. Top Bar (Curved Header Card)
+# 10. Locked Top Header Bar with Glowing Green Status Dot
 top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="chat-top-header">
@@ -487,7 +509,7 @@ st.markdown(f"""
         <span class="back-arrow-btn">←</span>
         <div class="header-titles">
             <h3>{current_char['name']}</h3>
-            <span class="online-badge">Online</span>
+            <span class="online-badge"><span class="status-dot-glow"></span> Online</span>
         </div>
     </div>
     {top_avatar_html}
