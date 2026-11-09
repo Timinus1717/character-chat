@@ -33,7 +33,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. WhatsApp Modern CSS + Collapsible Sidebar Styling
+# 4. WhatsApp Modern CSS + Streamlined Sidebar Styling
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap');
@@ -148,6 +148,7 @@ st.markdown("""
         background-color: #ffffff;
         border-radius: 0px 12px 12px 12px;
     }
+
     .bubble-time {
         position: absolute;
         bottom: 4px;
@@ -174,7 +175,7 @@ st.markdown("""
         font-size: 0.88rem;
     }
 
-    /* Chips & Buttons */
+    /* Pill Buttons */
     .stButton button {
         background-color: #ffffff !important;
         color: #075e54 !important;
@@ -182,7 +183,7 @@ st.markdown("""
         border-radius: 12px !important;
         font-size: 0.88rem !important;
         font-weight: 500 !important;
-        padding: 6px 14px !important;
+        padding: 6px 12px !important;
         transition: all 0.2s ease !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
     }
@@ -200,16 +201,17 @@ st.markdown("""
         border-right: 1px solid #e1e4ea;
     }
 
-    /* Story Bubble Item in Sidebar */
+    /* Story Card Item */
     .story-card-item {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 8px 10px;
+        padding: 8px 12px;
         background: #ffffff;
         border-radius: 12px;
         border: 1px solid #e2e8f0;
-        margin-bottom: 8px;
+        margin-top: 10px;
+        margin-bottom: 4px;
     }
     .story-card-cover {
         width: 44px;
@@ -217,6 +219,7 @@ st.markdown("""
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid #128c7e;
+        flex-shrink: 0;
     }
     .story-card-fallback {
         width: 44px;
@@ -228,52 +231,50 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         font-size: 20px;
+        flex-shrink: 0;
     }
     .story-card-title {
         font-size: 0.92rem;
         font-weight: 600;
         color: #1a202c;
+        line-height: 1.25;
     }
 
-    /* Character Sub-item */
-    .char-item-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 4px 6px;
-    }
+    /* Character Sub-item Thumbnail */
     .char-item-avatar {
-        width: 32px;
-        height: 32px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         object-fit: cover;
         border: 1.5px solid #25d366;
+        margin-top: 4px;
     }
     .char-item-fallback {
-        width: 32px;
-        height: 32px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         background: #25d366;
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
+        font-size: 15px;
+        margin-top: 4px;
     }
 
-    /* Profile Card in Sidebar */
+    /* Persistent Profile Card */
     .sidebar-profile-card {
         background: white;
         border-radius: 14px;
         padding: 16px;
         text-align: center;
         box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        margin-top: 10px;
+        margin-top: 14px;
         border: 1px solid #eef0f3;
     }
     .profile-avatar-lg {
-        width: 90px;
-        height: 90px;
+        width: 88px;
+        height: 88px;
         border-radius: 50%;
         object-fit: cover;
         margin: 0 auto 10px auto;
@@ -282,25 +283,25 @@ st.markdown("""
         box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
     .profile-avatar-lg-fallback {
-        width: 90px;
-        height: 90px;
+        width: 88px;
+        height: 88px;
         border-radius: 50%;
         background: #128c7e;
         color: white;
-        font-size: 44px;
+        font-size: 42px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 10px auto;
     }
     .profile-name {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 600;
         color: #111b21;
         margin-bottom: 2px;
     }
     .profile-book {
-        font-size: 0.82rem;
+        font-size: 0.80rem;
         color: #128c7e;
         font-weight: 500;
         margin-bottom: 10px;
@@ -309,7 +310,7 @@ st.markdown("""
         background: #f0f2f5;
         border-radius: 10px;
         padding: 10px;
-        font-size: 0.85rem;
+        font-size: 0.84rem;
         color: #4a5568;
         text-align: left;
         line-height: 1.4;
@@ -326,11 +327,10 @@ client = OpenAI(
 
 MODEL_NAME = "openrouter/free"
 
-# 6. Load Catalog (Uncached for instant edits)
+# 6. Load Catalog (Uncached for instant live edits)
 def load_catalog():
     with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
         data = json.load(f)
-    # Ensure backwards compatibility if characters.json is list-based or dict-based
     standardized = {}
     for story_title, story_val in data.items():
         if isinstance(story_val, list):
@@ -356,85 +356,69 @@ first_char_name = catalog[st.session_state.selected_story]["characters"][0]["nam
 if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
-if "show_directory" not in st.session_state:
-    st.session_state.show_directory = False
+# 8. Clean Sidebar Directory
+st.sidebar.markdown("### 📚 Books & Characters")
 
-# 8. Interactive Collapsible Sidebar
-st.sidebar.markdown("### 📚 Contacts")
+# Display each story directly with its cover bubble
+for story_name, story_data in catalog.items():
+    is_active_story = (story_name == st.session_state.selected_story)
+    cover_b64 = get_image_base64(story_data.get("cover", ""))
+    cover_html = f'<img class="story-card-cover" src="{cover_b64}">' if cover_b64 else '<div class="story-card-fallback">📖</div>'
+    
+    # Story Bubble & Title
+    st.sidebar.markdown(f"""
+    <div class="story-card-item">
+        {cover_html}
+        <div class="story-card-title">{story_name}</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Expander showing the story's characters
+    with st.sidebar.expander(f"Characters in {story_name}", expanded=is_active_story):
+        for char_obj in story_data["characters"]:
+            char_b64 = get_image_base64(char_obj.get("avatar", ""))
+            char_thumb = f'<img class="char-item-avatar" src="{char_b64}">' if char_b64 else '<div class="char-item-fallback">👤</div>'
+            
+            col_thumb, col_btn = st.columns([1, 4])
+            with col_thumb:
+                st.markdown(char_thumb, unsafe_allow_html=True)
+            with col_btn:
+                is_selected = (char_obj["name"] == st.session_state.selected_char and is_active_story)
+                btn_label = f"🟢 {char_obj['name']}" if is_selected else char_obj["name"]
+                if st.button(btn_label, key=f"sel_{story_name}_{char_obj['name']}", use_container_width=True):
+                    st.session_state.selected_story = story_name
+                    st.session_state.selected_char = char_obj["name"]
+                    st.rerun()
 
-# Toggle Directory Button
-if st.session_state.show_directory:
-    if st.sidebar.button("🔽 Close Stories List", use_container_width=True):
-        st.session_state.show_directory = False
-        st.rerun()
-else:
-    if st.sidebar.button("📁 Change Story / Character", use_container_width=True):
-        st.session_state.show_directory = True
-        st.rerun()
-
-# When Directory is EXPANDED:
-if st.session_state.show_directory:
-    st.sidebar.caption("Select a story and character:")
-    for story_name, story_data in catalog.items():
-        cover_b64 = get_image_base64(story_data.get("cover", ""))
-        cover_html = f'<img class="story-card-cover" src="{cover_b64}">' if cover_b64 else '<div class="story-card-fallback">📖</div>'
-        
-        # Story folder card header
-        st.sidebar.markdown(f"""
-        <div class="story-card-item">
-            {cover_html}
-            <div class="story-card-title">{story_name}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Display folder characters inside an expander
-        is_current_story = (story_name == st.session_state.selected_story)
-        with st.sidebar.expander(f"Characters in {story_name}", expanded=is_current_story):
-            for char_obj in story_data["characters"]:
-                char_b64 = get_image_base64(char_obj.get("avatar", ""))
-                char_thumb = f'<img class="char-item-avatar" src="{char_b64}">' if char_b64 else '<div class="char-item-fallback">👤</div>'
-                
-                col_thumb, col_btn = st.columns([1, 4])
-                with col_thumb:
-                    st.markdown(char_thumb, unsafe_allow_html=True)
-                with col_btn:
-                    if st.button(char_obj["name"], key=f"select_{story_name}_{char_obj['name']}", use_container_width=True):
-                        st.session_state.selected_story = story_name
-                        st.session_state.selected_char = char_obj["name"]
-                        st.session_state.show_directory = False  # Auto-collapse back to profile
-                        st.rerun()
-        st.sidebar.write("")
-
-# Retrieve Current Active Character Data
+# Retrieve Active Character Details
 selected_story = st.session_state.selected_story
 chars_in_story = catalog[selected_story]["characters"]
 current_char = next((c for c in chars_in_story if c["name"] == st.session_state.selected_char), chars_in_story[0])
 st.session_state.selected_char = current_char["name"]
-
 avatar_b64 = get_image_base64(current_char.get("avatar", ""))
 
-# When Directory is COLLAPSED (Default): Show Rich Contact Profile Card
-if not st.session_state.show_directory:
-    avatar_lg_html = f'<img class="profile-avatar-lg" src="{avatar_b64}">' if avatar_b64 else '<div class="profile-avatar-lg-fallback">📖</div>'
-    st.sidebar.markdown(f"""
-    <div class="sidebar-profile-card">
-        {avatar_lg_html}
-        <div class="profile-name">{current_char['name']}</div>
-        <div class="profile-book">📖 {selected_story}</div>
-        <div class="profile-bio-box">
-            <b>About:</b><br>{current_char.get('tagline', '')}
-        </div>
+# Profile Card for Selected Character
+st.sidebar.markdown("---")
+avatar_lg_html = f'<img class="profile-avatar-lg" src="{avatar_b64}">' if avatar_b64 else '<div class="profile-avatar-lg-fallback">📖</div>'
+st.sidebar.markdown(f"""
+<div class="sidebar-profile-card">
+    {avatar_lg_html}
+    <div class="profile-name">{current_char['name']}</div>
+    <div class="profile-book">📖 {selected_story}</div>
+    <div class="profile-bio-box">
+        <b>About:</b><br>{current_char.get('tagline', '')}
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
-    st.sidebar.write("")
-    if st.sidebar.button("🗑️ Clear This Chat History", use_container_width=True):
-        now = get_hkt_time()
-        st.session_state.character_chats[current_char["name"]] = [
-            {"role": "assistant", "content": f"Hello! I am {current_char['name']}. What would you like to ask me?", "time": now}
-        ]
-        st.session_state.failed_prompts.pop(current_char["name"], None)
-        st.rerun()
+st.sidebar.write("")
+if st.sidebar.button("🗑️ Clear This Chat History", use_container_width=True):
+    now = get_hkt_time()
+    st.session_state.character_chats[current_char["name"]] = [
+        {"role": "assistant", "content": f"Hello! I am {current_char['name']}. What would you like to ask me?", "time": now}
+    ]
+    st.session_state.failed_prompts.pop(current_char["name"], None)
+    st.rerun()
 
 # 9. Initialize Conversation for Current Contact
 now_str = get_hkt_time()
