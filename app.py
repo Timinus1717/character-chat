@@ -22,7 +22,7 @@ FREE_MODELS = [
     "google/gemma-2-9b-it:free",
     "meta-llama/llama-3.2-3b-instruct:free",
     "deepseek/deepseek-chat:free"
-    ]
+]
 
 # 2. Load Book & Character Catalog
 @st.cache_data
