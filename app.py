@@ -63,6 +63,7 @@ st.markdown("""
         background-color: transparent !important;
     }
 
+    /* Sticky Header */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
@@ -154,6 +155,7 @@ st.markdown("""
         font-size: 24px;
     }
 
+    /* Chat Bubbles */
     .msg-row {
         display: flex;
         width: 100%;
@@ -210,6 +212,7 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.10);
     }
 
+    /* Starter Question Buttons */
     .block-container .stButton button {
         background-color: #ffffff !important;
         color: #0369a1 !important;
@@ -229,6 +232,7 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(2, 132, 199, 0.3) !important;
     }
 
+    /* Chat Input */
     [data-testid="stBottom"],
     [data-testid="stBottom"] > div,
     [data-testid="stBottom"] > div > div {
@@ -273,99 +277,71 @@ st.markdown("""
     }
 
     /* =========================================================
-       SIDEBAR: MOBILE AND DESKTOP ROCK-SOLID FLEXBOX
+       SIDEBAR: TIGHT SPACING WITHOUT HORIZONTAL OVERFLOW
        ========================================================= */
-    section[data-testid="stSidebar"],
-    section[data-testid="stSidebar"] > div,
-    [data-testid="stSidebarContent"],
-    [data-testid="stSidebarUserContent"] {
-        background-color: #ffffff !important;
-        background: #ffffff !important;
-        color: #0f172a !important;
+    [data-testid="stSidebar"],
+    [data-testid="stSidebar"] > div {
         overflow-x: hidden !important;
-        box-sizing: border-box !important;
+        max-width: 100vw !important;
+        background-color: #ffffff !important;
     }
-
-    section[data-testid="stSidebar"] {
+    [data-testid="stSidebar"] > div:first-child {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow-y: auto;
+        padding-bottom: 0 !important;
         border-right: 1.5px solid #cbd5e1 !important;
     }
-
-    [data-testid="stSidebar"] h1, 
-    [data-testid="stSidebar"] h2, 
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] p {
+    [data-testid="stSidebar"] h3 {
         color: #0f172a !important;
         font-weight: 700;
-        margin-bottom: 0.25rem !important;
+        margin-top: 0.2rem !important;
+        margin-bottom: 0.4rem !important;
+        padding-left: 4px !important;
     }
 
-    /* Tighten Streamlit default spacing */
+    /* Remove excessive block gap */
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        gap: 0.25rem !important;
-    }
-    [data-testid="stSidebar"] [data-testid="stElementContainer"] {
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
+        gap: 0.2rem !important;
     }
 
-    /* Prevent mobile column break & force clean side-by-side row */
+    /* Natural Flex Row (Never stacks, never overflows) */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         align-items: center !important;
+        gap: 6px !important;
         width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        gap: 8px !important;
         margin-top: 2px !important;
         margin-bottom: 2px !important;
     }
 
-    /* Column 1 (Thumbnail): Fixed anchor */
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child {
-        width: 40px !important;
-        min-width: 40px !important;
-        max-width: 40px !important;
-        flex: 0 0 40px !important;
+    /* Col 1 (Avatar): Shrinks tightly around the image */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: unset !important;
+        max-width: unset !important;
+        padding: 0 !important;
+        margin: 0 !important;
         display: flex !important;
         align-items: center !important;
-        justify-content: center !important;
-        padding: 0 !important;
-        box-sizing: border-box !important;
     }
 
-    /* Column 2 (Button): Elastic auto-fill without overflow */
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > [data-testid="column"]:last-child {
+    /* Col 2 (Button): Fills remaining width without pushing outside the drawer */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
+        flex: 1 1 0 !important;
         width: auto !important;
         min-width: 0 !important;
-        flex: 1 1 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
         display: flex !important;
         align-items: center !important;
-        padding: 0 !important;
-        box-sizing: border-box !important;
     }
 
-    /* Indented Character Rows (2-column layout with left margin) */
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb),
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb-active),
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-fallback) {
-        margin-left: 14px !important;
-        width: calc(100% - 14px) !important;
-        max-width: calc(100% - 14px) !important;
-        box-sizing: border-box !important;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb) > [data-testid="column"]:first-child,
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb-active) > [data-testid="column"]:first-child,
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-fallback) > [data-testid="column"]:first-child {
-        width: 34px !important;
-        min-width: 34px !important;
-        max-width: 34px !important;
-        flex: 0 0 34px !important;
-    }
-
-    /* Book Bubbles */
+    /* Book Avatar */
     .book-bubble-thumb {
         width: 38px;
         height: 38px;
@@ -374,7 +350,6 @@ st.markdown("""
         border: 2px solid #0284c7;
         box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
         display: block;
-        margin: auto;
     }
     .book-bubble-fallback {
         width: 38px;
@@ -387,10 +362,40 @@ st.markdown("""
         justify-content: center;
         font-size: 18px;
         box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
-        margin: auto;
     }
 
-    /* Character Bubbles */
+    /* Book Title Button */
+    .sidebar-book-btn {
+        width: 100% !important;
+    }
+    .sidebar-book-btn .stButton,
+    .sidebar-book-btn .stButton button {
+        width: 100% !important;
+    }
+    .sidebar-book-btn .stButton button {
+        background-color: #f0f9ff !important;
+        color: #0c4a6e !important;
+        border: 1.5px solid #bae6fd !important;
+        border-radius: 12px !important;
+        font-size: 0.85rem !important;
+        font-weight: 700 !important;
+        padding: 6px 10px !important;
+        text-align: left !important;
+        justify-content: flex-start !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.25 !important;
+        min-height: 36px !important;
+        box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
+        transition: all 0.2s ease !important;
+    }
+    .sidebar-book-btn .stButton button:hover {
+        background-color: #e0f2fe !important;
+        border-color: #0284c7 !important;
+        color: #0284c7 !important;
+    }
+
+    /* Character Avatar with CSS Indentation */
     .char-bubble-thumb {
         width: 30px;
         height: 30px;
@@ -398,7 +403,7 @@ st.markdown("""
         object-fit: cover;
         border: 1.5px solid #93c5fd;
         display: block;
-        margin: auto;
+        margin-left: 14px !important;
     }
     .char-bubble-thumb-active {
         width: 30px;
@@ -406,9 +411,9 @@ st.markdown("""
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid #0284c7;
-        box-shadow: 0 0 8px rgba(2, 132, 199, 0.45);
+        box-shadow: 0 0 6px rgba(2, 132, 199, 0.45);
         display: block;
-        margin: auto;
+        margin-left: 14px !important;
     }
     .char-bubble-fallback {
         width: 30px;
@@ -420,74 +425,44 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         font-size: 13px;
-        margin: auto;
+        margin-left: 14px !important;
     }
 
-    /* Sidebar Button Containers */
-    [data-testid="stSidebar"] .stButton {
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    [data-testid="stSidebar"] .stButton button {
-        width: 100% !important;
-        box-sizing: border-box !important;
-        white-space: normal !important;
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-    }
-
-    /* Book Title Buttons */
-    .sidebar-book-btn {
-        width: 100% !important;
-    }
-    .sidebar-book-btn .stButton button {
-        background-color: #f0f9ff !important;
-        color: #0c4a6e !important;
-        border: 1.5px solid #bae6fd !important;
-        border-radius: 12px !important;
-        font-size: 0.84rem !important;
-        font-weight: 700 !important;
-        padding: 6px 10px !important;
-        text-align: left !important;
-        justify-content: flex-start !important;
-        line-height: 1.25 !important;
-        box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
-        transition: all 0.2s ease !important;
-        min-height: 38px !important;
-    }
-    .sidebar-book-btn .stButton button:hover {
-        background-color: #e0f2fe !important;
-        border-color: #0284c7 !important;
-        color: #0284c7 !important;
-    }
-
-    /* Character Selection Buttons */
+    /* Character Selection Button */
     .sidebar-char-btn {
+        width: 100% !important;
+    }
+    .sidebar-char-btn .stButton,
+    .sidebar-char-btn .stButton button {
         width: 100% !important;
     }
     .sidebar-char-btn .stButton button {
         background-color: #ffffff !important;
-        color: #0f172a !important;
+        color: #1e293b !important;
         border: 1.5px solid #cbd5e1 !important;
         border-radius: 10px !important;
-        font-size: 0.81rem !important;
+        font-size: 0.82rem !important;
         font-weight: 600 !important;
         padding: 5px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
+        white-space: normal !important;
+        word-break: break-word !important;
         line-height: 1.2 !important;
+        min-height: 32px !important;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
         transition: all 0.2s ease !important;
-        min-height: 32px !important;
     }
     .sidebar-char-btn .stButton button:hover {
         background-color: #e0f2fe !important;
         color: #0284c7 !important;
         border-color: #0284c7 !important;
     }
-
     .sidebar-char-btn-active {
+        width: 100% !important;
+    }
+    .sidebar-char-btn-active .stButton,
+    .sidebar-char-btn-active .stButton button {
         width: 100% !important;
     }
     .sidebar-char-btn-active .stButton button {
@@ -495,17 +470,19 @@ st.markdown("""
         color: #ffffff !important;
         border: 1.5px solid #0284c7 !important;
         border-radius: 10px !important;
-        font-size: 0.81rem !important;
+        font-size: 0.82rem !important;
         font-weight: 700 !important;
         padding: 5px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
+        white-space: normal !important;
+        word-break: break-word !important;
         line-height: 1.2 !important;
-        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
         min-height: 32px !important;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
     }
 
-    /* Sticky Profile Card at Bottom of Sidebar */
+    /* Pinned Bottom Profile Card */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
@@ -515,35 +492,32 @@ st.markdown("""
         padding-top: 8px !important;
         padding-bottom: 8px !important;
         margin-top: auto !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        box-shadow: 0 -8px 20px -4px rgba(2, 132, 199, 0.12) !important;
+        box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.12) !important;
         border-top: 1.5px solid #cbd5e1 !important;
+        box-sizing: border-box !important;
     }
 
     .light-profile-card {
         background: #f8fafc !important;
-        border-radius: 18px;
+        border-radius: 16px;
         padding: 8px 10px;
         text-align: center;
         border: 1.5px solid #cbd5e1 !important;
-        width: 100% !important;
         box-sizing: border-box !important;
     }
     .light-profile-avatar {
-        width: 50px;
-        height: 50px;
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
         object-fit: cover;
         margin: 0 auto 4px auto;
         display: block;
-        border: 2px solid #0284c7;
+        border: 2.5px solid #0284c7;
         box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
     .light-profile-avatar-fallback {
-        width: 50px;
-        height: 50px;
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
@@ -560,7 +534,7 @@ st.markdown("""
         margin-bottom: 1px;
     }
     .light-profile-book {
-        font-size: 0.72rem;
+        font-size: 0.74rem;
         color: #0369a1 !important;
         font-weight: 700;
         margin-bottom: 4px;
@@ -570,7 +544,7 @@ st.markdown("""
         border: 1px solid #cbd5e1;
         border-radius: 10px;
         padding: 6px 8px;
-        font-size: 0.74rem;
+        font-size: 0.76rem;
         color: #1e293b !important;
         text-align: left;
         line-height: 1.35;
@@ -582,7 +556,7 @@ st.markdown("""
         color: #be123c !important;
         border: 1.5px solid #fda4af !important;
         border-radius: 16px !important;
-        font-size: 0.76rem !important;
+        font-size: 0.78rem !important;
         font-weight: 700 !important;
         padding: 4px 10px !important;
         margin-top: 4px !important;
@@ -639,7 +613,7 @@ if "selected_char" not in st.session_state:
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 8. Sidebar Directory: Direct Story & Character Bubbles
+# 8. Sidebar Directory: Direct Story & Character Bubbles (Natural Auto-Fit)
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -647,8 +621,8 @@ for story_name, story_data in catalog.items():
     cover_b64 = get_image_base64(story_data.get("cover", ""))
     cover_html = f'<img class="book-bubble-thumb" src="{cover_b64}">' if cover_b64 else '<div class="book-bubble-fallback">📖</div>'
     
-    # Story Bubble & Title Row (Elastic 2-column flex)
-    col_b_thumb, col_b_btn = st.sidebar.columns([1, 4])
+    # Story Bubble & Title Row
+    col_b_thumb, col_b_btn = st.sidebar.columns([1, 6])
     with col_b_thumb:
         st.markdown(cover_html, unsafe_allow_html=True)
     with col_b_btn:
@@ -662,7 +636,7 @@ for story_name, story_data in catalog.items():
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Indented Character Bubbles (Elastic 2-column flex + CSS indent)
+    # Indented Character Bubbles
     if is_expanded:
         for char_obj in story_data["characters"]:
             is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
@@ -671,7 +645,7 @@ for story_name, story_data in catalog.items():
             thumb_class = "char-bubble-thumb-active" if is_active else "char-bubble-thumb"
             char_thumb_html = f'<img class="{thumb_class}" src="{char_b64}">' if char_b64 else '<div class="char-bubble-fallback">👤</div>'
             
-            col_c_thumb, col_c_btn = st.sidebar.columns([1, 4])
+            col_c_thumb, col_c_btn = st.sidebar.columns([1, 6])
             with col_c_thumb:
                 st.markdown(char_thumb_html, unsafe_allow_html=True)
             with col_c_btn:
