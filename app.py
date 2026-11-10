@@ -34,7 +34,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. High-Contrast Sky-Blue & Pure White CSS (Mobile Responsive)
+# 4. Mobile-Responsive & High-Contrast CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -273,20 +273,23 @@ st.markdown("""
     }
 
     /* =========================================================
-       SIDEBAR: MOBILE-RESILIENT HORIZONTAL ALIGNMENT
+       SIDEBAR: MOBILE AND DESKTOP ROCK-SOLID FLEXBOX
        ========================================================= */
-    [data-testid="stSidebar"] {
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] > div,
+    [data-testid="stSidebarContent"],
+    [data-testid="stSidebarUserContent"] {
         background-color: #ffffff !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    section[data-testid="stSidebar"] {
         border-right: 1.5px solid #cbd5e1 !important;
     }
-    [data-testid="stSidebar"] > div:first-child {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        overflow-y: auto;
-        padding-bottom: 0 !important;
-        background-color: #ffffff !important;
-    }
+
     [data-testid="stSidebar"] h1, 
     [data-testid="stSidebar"] h2, 
     [data-testid="stSidebar"] h3,
@@ -296,7 +299,7 @@ st.markdown("""
         margin-bottom: 0.25rem !important;
     }
 
-    /* Tighten Streamlit default vertical gaps */
+    /* Tighten Streamlit default spacing */
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
         gap: 0.25rem !important;
     }
@@ -305,86 +308,133 @@ st.markdown("""
         padding-bottom: 0 !important;
     }
 
-    /* FORCE HORIZONTAL ROW ALIGNMENT ON BOTH MOBILE AND DESKTOP */
+    /* Prevent mobile column break & force clean side-by-side row */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         align-items: center !important;
         width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
         gap: 8px !important;
         margin-top: 2px !important;
-        margin-bottom: 3px !important;
+        margin-bottom: 2px !important;
     }
 
-    /* Column 1 (Thumbnail): Fixed Width, NEVER Stacks on Mobile */
+    /* Column 1 (Thumbnail): Fixed anchor */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child {
-        width: 44px !important;
-        min-width: 44px !important;
-        max-width: 44px !important;
-        flex: 0 0 44px !important;
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        flex: 0 0 40px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         padding: 0 !important;
+        box-sizing: border-box !important;
     }
 
-    /* Column 2 (Button): Fills Remaining Space */
+    /* Column 2 (Button): Elastic auto-fill without overflow */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > [data-testid="column"]:last-child {
-        width: calc(100% - 52px) !important;
+        width: auto !important;
         min-width: 0 !important;
-        flex: 1 1 auto !important;
+        flex: 1 1 0 !important;
         display: flex !important;
         align-items: center !important;
         padding: 0 !important;
+        box-sizing: border-box !important;
     }
 
-    /* Indented Character Rows (2-Column Layout with Padding) */
+    /* Indented Character Rows (2-column layout with left margin) */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb),
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb-active),
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-fallback) {
-        padding-left: 18px !important;
+        margin-left: 14px !important;
+        width: calc(100% - 14px) !important;
+        max-width: calc(100% - 14px) !important;
         box-sizing: border-box !important;
     }
 
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb) > [data-testid="column"]:first-child,
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb-active) > [data-testid="column"]:first-child,
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-fallback) > [data-testid="column"]:first-child {
-        width: 36px !important;
-        min-width: 36px !important;
-        max-width: 36px !important;
-        flex: 0 0 36px !important;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb) > [data-testid="column"]:last-child,
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb-active) > [data-testid="column"]:last-child,
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-fallback) > [data-testid="column"]:last-child {
-        width: calc(100% - 44px) !important;
+        width: 34px !important;
+        min-width: 34px !important;
+        max-width: 34px !important;
+        flex: 0 0 34px !important;
     }
 
     /* Book Bubbles */
     .book-bubble-thumb {
-        width: 42px;
-        height: 42px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2.5px solid #0284c7;
+        border: 2px solid #0284c7;
         box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
         display: block;
         margin: auto;
     }
     .book-bubble-fallback {
-        width: 42px;
-        height: 42px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 19px;
+        font-size: 18px;
         box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
         margin: auto;
+    }
+
+    /* Character Bubbles */
+    .char-bubble-thumb {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1.5px solid #93c5fd;
+        display: block;
+        margin: auto;
+    }
+    .char-bubble-thumb-active {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #0284c7;
+        box-shadow: 0 0 8px rgba(2, 132, 199, 0.45);
+        display: block;
+        margin: auto;
+    }
+    .char-bubble-fallback {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #e0f2fe;
+        color: #0284c7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        margin: auto;
+    }
+
+    /* Sidebar Button Containers */
+    [data-testid="stSidebar"] .stButton {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    [data-testid="stSidebar"] .stButton button {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
     }
 
     /* Book Title Buttons */
@@ -396,57 +446,20 @@ st.markdown("""
         color: #0c4a6e !important;
         border: 1.5px solid #bae6fd !important;
         border-radius: 12px !important;
-        font-size: 0.86rem !important;
+        font-size: 0.84rem !important;
         font-weight: 700 !important;
         padding: 6px 10px !important;
         text-align: left !important;
         justify-content: flex-start !important;
-        white-space: normal !important;
-        word-break: break-word !important;
         line-height: 1.25 !important;
-        width: 100% !important;
         box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
         transition: all 0.2s ease !important;
         min-height: 38px !important;
-        margin: 0 !important;
     }
     .sidebar-book-btn .stButton button:hover {
         background-color: #e0f2fe !important;
         border-color: #0284c7 !important;
         color: #0284c7 !important;
-    }
-
-    /* Character Bubbles */
-    .char-bubble-thumb {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 1.5px solid #93c5fd;
-        display: block;
-        margin: auto;
-    }
-    .char-bubble-thumb-active {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #0284c7;
-        box-shadow: 0 0 8px rgba(2, 132, 199, 0.45);
-        display: block;
-        margin: auto;
-    }
-    .char-bubble-fallback {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: #e0f2fe;
-        color: #0284c7;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        margin: auto;
     }
 
     /* Character Selection Buttons */
@@ -455,28 +468,25 @@ st.markdown("""
     }
     .sidebar-char-btn .stButton button {
         background-color: #ffffff !important;
-        color: #1e293b !important;
+        color: #0f172a !important;
         border: 1.5px solid #cbd5e1 !important;
         border-radius: 10px !important;
-        font-size: 0.82rem !important;
+        font-size: 0.81rem !important;
         font-weight: 600 !important;
         padding: 5px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
-        white-space: normal !important;
-        word-break: break-word !important;
         line-height: 1.2 !important;
-        width: 100% !important;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
         transition: all 0.2s ease !important;
         min-height: 32px !important;
-        margin: 0 !important;
     }
     .sidebar-char-btn .stButton button:hover {
         background-color: #e0f2fe !important;
         color: #0284c7 !important;
         border-color: #0284c7 !important;
     }
+
     .sidebar-char-btn-active {
         width: 100% !important;
     }
@@ -485,18 +495,14 @@ st.markdown("""
         color: #ffffff !important;
         border: 1.5px solid #0284c7 !important;
         border-radius: 10px !important;
-        font-size: 0.82rem !important;
+        font-size: 0.81rem !important;
         font-weight: 700 !important;
         padding: 5px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
-        white-space: normal !important;
-        word-break: break-word !important;
         line-height: 1.2 !important;
-        width: 100% !important;
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
         min-height: 32px !important;
-        margin: 0 !important;
     }
 
     /* Sticky Profile Card at Bottom of Sidebar */
@@ -509,7 +515,10 @@ st.markdown("""
         padding-top: 8px !important;
         padding-bottom: 8px !important;
         margin-top: auto !important;
-        box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.12) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        box-shadow: 0 -8px 20px -4px rgba(2, 132, 199, 0.12) !important;
         border-top: 1.5px solid #cbd5e1 !important;
     }
 
@@ -519,37 +528,39 @@ st.markdown("""
         padding: 8px 10px;
         text-align: center;
         border: 1.5px solid #cbd5e1 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     .light-profile-avatar {
-        width: 54px;
-        height: 54px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         object-fit: cover;
         margin: 0 auto 4px auto;
         display: block;
-        border: 2.5px solid #0284c7;
+        border: 2px solid #0284c7;
         box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
     .light-profile-avatar-fallback {
-        width: 54px;
-        height: 54px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
-        font-size: 26px;
+        font-size: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 4px auto;
     }
     .light-profile-name {
-        font-size: 0.94rem;
+        font-size: 0.92rem;
         font-weight: 700;
         color: #0f172a !important;
         margin-bottom: 1px;
     }
     .light-profile-book {
-        font-size: 0.74rem;
+        font-size: 0.72rem;
         color: #0369a1 !important;
         font-weight: 700;
         margin-bottom: 4px;
@@ -559,7 +570,7 @@ st.markdown("""
         border: 1px solid #cbd5e1;
         border-radius: 10px;
         padding: 6px 8px;
-        font-size: 0.76rem;
+        font-size: 0.74rem;
         color: #1e293b !important;
         text-align: left;
         line-height: 1.35;
@@ -571,7 +582,7 @@ st.markdown("""
         color: #be123c !important;
         border: 1.5px solid #fda4af !important;
         border-radius: 16px !important;
-        font-size: 0.78rem !important;
+        font-size: 0.76rem !important;
         font-weight: 700 !important;
         padding: 4px 10px !important;
         margin-top: 4px !important;
@@ -628,7 +639,7 @@ if "selected_char" not in st.session_state:
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 8. Sidebar Directory: Direct Story & Character Bubbles (Mobile-Friendly 2-Column Grid)
+# 8. Sidebar Directory: Direct Story & Character Bubbles
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -636,7 +647,7 @@ for story_name, story_data in catalog.items():
     cover_b64 = get_image_base64(story_data.get("cover", ""))
     cover_html = f'<img class="book-bubble-thumb" src="{cover_b64}">' if cover_b64 else '<div class="book-bubble-fallback">📖</div>'
     
-    # Story Bubble & Title Row
+    # Story Bubble & Title Row (Elastic 2-column flex)
     col_b_thumb, col_b_btn = st.sidebar.columns([1, 4])
     with col_b_thumb:
         st.markdown(cover_html, unsafe_allow_html=True)
@@ -651,7 +662,7 @@ for story_name, story_data in catalog.items():
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Indented Character Bubbles (Uses identical 2-column layout to prevent mobile stacking)
+    # Indented Character Bubbles (Elastic 2-column flex + CSS indent)
     if is_expanded:
         for char_obj in story_data["characters"]:
             is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
@@ -780,7 +791,6 @@ if user_query:
 
     current_time = get_hkt_time()
 
-    # Save and display user message immediately
     st.session_state.character_chats[current_char["name"]].append({
         "role": "user",
         "content": user_query,
@@ -791,7 +801,6 @@ if user_query:
         unsafe_allow_html=True
     )
 
-    # Clean roleplay instructions tailored for primary school learners
     system_instruction = (
         f"You are roleplaying as {current_char['name']} from the book '{selected_story}'.\n"
         f"{current_char['system_prompt']}\n\n"
@@ -808,7 +817,6 @@ if user_query:
     for m in st.session_state.character_chats[current_char["name"]][-8:]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
-    # Realistic typing indicator display
     typing_box = st.empty()
     typing_box.markdown(f'''
     <div class="typing-pill">
@@ -816,7 +824,6 @@ if user_query:
     </div>
     ''', unsafe_allow_html=True)
 
-    # 1.4-second natural pause before words start streaming
     time.sleep(1.4)
 
     bubble_placeholder = st.empty()
@@ -839,7 +846,7 @@ if user_query:
 
             for char in content:
                 full_response_text += char
-                time.sleep(0.015)  # 15ms per character typing cadence
+                time.sleep(0.015)
                 
                 if not has_started_typing and full_response_text.strip():
                     typing_box.empty()
