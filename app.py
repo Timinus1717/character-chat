@@ -272,7 +272,9 @@ st.markdown("""
         fill: #ffffff !important;
     }
 
-    /* SIDEBAR */
+    /* =========================================================
+       SIDEBAR: DIRECT BUBBLE & TITLE NAVIGATION
+       ========================================================= */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-right: 1.5px solid #cbd5e1 !important;
@@ -293,127 +295,135 @@ st.markdown("""
         font-weight: 700;
     }
 
-    .sidebar-story-card {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 9px 12px;
-        background: #f0f9ff !important;
-        border-radius: 16px;
-        border: 1.5px solid #bae6fd !important;
-        margin-top: 10px;
-        margin-bottom: 4px;
-        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.05);
+    /* Vertically align image columns with button columns */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
+        align-items: center !important;
+        margin-bottom: 6px !important;
     }
-    .sidebar-story-thumb {
-        width: 40px;
-        height: 40px;
+
+    /* Book Bubbles */
+    .book-bubble-thumb {
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #0284c7;
-        flex-shrink: 0;
+        border: 2.5px solid #0284c7;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
+        display: block;
+        margin: auto;
     }
-    .sidebar-story-fallback {
-        width: 40px;
-        height: 40px;
+    .book-bubble-fallback {
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
-        flex-shrink: 0;
-    }
-    .sidebar-story-title {
-        font-size: 0.92rem;
-        font-weight: 700;
-        color: #0f172a !important;
-        line-height: 1.25;
+        font-size: 20px;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
+        margin: auto;
     }
 
-    [data-testid="stExpander"] {
-        background-color: #ffffff !important;
-        border: 1.5px solid #93c5fd !important;
+    /* Book Title Buttons */
+    .sidebar-book-btn .stButton button {
+        background-color: #f0f9ff !important;
+        color: #0c4a6e !important;
+        border: 1.5px solid #bae6fd !important;
         border-radius: 14px !important;
-        overflow: hidden !important;
-        margin-bottom: 12px !important;
-        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08) !important;
-    }
-    [data-testid="stExpander"] details {
-        background-color: #ffffff !important;
-        border: none !important;
-    }
-    [data-testid="stExpander"] summary,
-    [data-testid="stExpander"] details summary,
-    [data-testid="stExpander"] details[open] summary {
-        background-color: #e0f2fe !important;
-        color: #0c4a6e !important;
-        font-weight: 700 !important;
         font-size: 0.88rem !important;
-        padding: 9px 12px !important;
-        border-bottom: 1.5px solid #bae6fd !important;
+        font-weight: 700 !important;
+        padding: 8px 12px !important;
+        text-align: left !important;
+        justify-content: flex-start !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.25 !important;
+        width: 100% !important;
+        box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
+        transition: all 0.2s ease !important;
     }
-    [data-testid="stExpander"] summary:hover {
-        background-color: #bae6fd !important;
-        color: #082f49 !important;
-    }
-    [data-testid="stExpander"] summary svg,
-    [data-testid="stExpander"] summary span {
-        fill: #0c4a6e !important;
-        color: #0c4a6e !important;
+    .sidebar-book-btn .stButton button:hover {
+        background-color: #e0f2fe !important;
+        border-color: #0284c7 !important;
+        color: #0284c7 !important;
     }
 
-    [data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
-        background-color: #f8fafc !important;
-        padding: 8px 8px !important;
-    }
-
-    .sidebar-char-thumb {
-        width: 32px;
-        height: 32px;
+    /* Indented Character Bubbles */
+    .char-bubble-thumb {
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         object-fit: cover;
-        border: 1.5px solid #0284c7;
-        margin-top: 3px;
+        border: 1.5px solid #93c5fd;
+        display: block;
+        margin: auto;
     }
-    .sidebar-char-fallback {
-        width: 32px;
-        height: 32px;
+    .char-bubble-thumb-active {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #0284c7;
+        box-shadow: 0 0 8px rgba(2, 132, 199, 0.45);
+        display: block;
+        margin: auto;
+    }
+    .char-bubble-fallback {
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         background: #e0f2fe;
         color: #0284c7;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
-        margin-top: 3px;
+        font-size: 15px;
+        margin: auto;
     }
 
-    [data-testid="stSidebar"] [data-testid="stExpander"] .stButton button {
+    /* Character Selection Buttons */
+    .sidebar-char-btn .stButton button {
         background-color: #ffffff !important;
-        color: #0f172a !important;
+        color: #1e293b !important;
         border: 1.5px solid #cbd5e1 !important;
         border-radius: 12px !important;
-        font-size: 0.84rem !important;
-        font-weight: 700 !important;
+        font-size: 0.83rem !important;
+        font-weight: 600 !important;
         padding: 6px 10px !important;
+        text-align: left !important;
+        justify-content: flex-start !important;
         white-space: normal !important;
         word-break: break-word !important;
-        height: auto !important;
-        min-height: 36px !important;
-        line-height: 1.25 !important;
-        text-align: left !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+        line-height: 1.2 !important;
+        width: 100% !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
         transition: all 0.2s ease !important;
     }
-    [data-testid="stSidebar"] [data-testid="stExpander"] .stButton button:hover {
+    .sidebar-char-btn .stButton button:hover {
         background-color: #e0f2fe !important;
         color: #0284c7 !important;
         border-color: #0284c7 !important;
-        transform: translateY(-1px) !important;
+    }
+    .sidebar-char-btn-active .stButton button {
+        background-color: #0284c7 !important;
+        color: #ffffff !important;
+        border: 1.5px solid #0284c7 !important;
+        border-radius: 12px !important;
+        font-size: 0.83rem !important;
+        font-weight: 700 !important;
+        padding: 6px 10px !important;
+        text-align: left !important;
+        justify-content: flex-start !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.2 !important;
+        width: 100% !important;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
     }
 
+    /* Sticky Profile Card at Bottom of Sidebar */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
@@ -506,7 +516,7 @@ client = OpenAI(
     api_key=api_key or "missing_key"
 )
 
-# Unrestricted paid tier model
+# Unrestricted paid tier model (Dedicated compute, fast, simple English roleplay)
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
 
 # 6. Load Catalog
@@ -538,36 +548,56 @@ first_char_name = catalog[st.session_state.selected_story]["characters"][0]["nam
 if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
-# 8. Sidebar Directory
+# Track open dropdowns (default first story expanded)
+if "expanded_stories" not in st.session_state:
+    st.session_state.expanded_stories = {st.session_state.selected_story}
+
+# 8. Sidebar Directory: Direct Story & Character Bubbles
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
-    is_active_story = (story_name == st.session_state.selected_story)
+    is_expanded = story_name in st.session_state.expanded_stories
     cover_b64 = get_image_base64(story_data.get("cover", ""))
-    cover_html = f'<img class="sidebar-story-thumb" src="{cover_b64}">' if cover_b64 else '<div class="sidebar-story-fallback">📖</div>'
+    cover_html = f'<img class="book-bubble-thumb" src="{cover_b64}">' if cover_b64 else '<div class="book-bubble-fallback">📖</div>'
     
-    st.sidebar.markdown(f"""
-    <div class="sidebar-story-card">
-        {cover_html}
-        <div class="sidebar-story-title">{story_name}</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    with st.sidebar.expander("Characters", expanded=is_active_story):
+    # Story Bubble & Title Row
+    col_b_thumb, col_b_btn = st.sidebar.columns([1, 4])
+    with col_b_thumb:
+        st.markdown(cover_html, unsafe_allow_html=True)
+    with col_b_btn:
+        st.markdown('<div class="sidebar-book-btn">', unsafe_allow_html=True)
+        arrow = "▾" if is_expanded else "▸"
+        if st.button(f"{arrow} {story_name}", key=f"book_toggle_{story_name}", use_container_width=True):
+            if is_expanded:
+                st.session_state.expanded_stories.remove(story_name)
+            else:
+                st.session_state.expanded_stories.add(story_name)
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Indented Character Bubbles (only visible when story is expanded)
+    if is_expanded:
         for char_obj in story_data["characters"]:
+            is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
             char_b64 = get_image_base64(char_obj.get("avatar", ""))
-            char_thumb = f'<img class="sidebar-char-thumb" src="{char_b64}">' if char_b64 else '<div class="sidebar-char-fallback">👤</div>'
             
-            col_thumb, col_btn = st.columns([1, 4])
-            with col_thumb:
-                st.markdown(char_thumb, unsafe_allow_html=True)
-            with col_btn:
-                is_selected = (char_obj["name"] == st.session_state.selected_char and is_active_story)
-                label = f"💬 {char_obj['name']}" if is_selected else char_obj["name"]
+            thumb_class = "char-bubble-thumb-active" if is_active else "char-bubble-thumb"
+            char_thumb_html = f'<img class="{thumb_class}" src="{char_b64}">' if char_b64 else '<div class="char-bubble-fallback">👤</div>'
+            
+            # 3-column layout provides the clean visual indentation
+            col_ind, col_c_thumb, col_c_btn = st.sidebar.columns([0.35, 0.9, 3.75])
+            with col_c_thumb:
+                st.markdown(char_thumb_html, unsafe_allow_html=True)
+            with col_c_btn:
+                btn_class = "sidebar-char-btn-active" if is_active else "sidebar-char-btn"
+                st.markdown(f'<div class="{btn_class}">', unsafe_allow_html=True)
+                
+                label = f"💬 {char_obj['name']}" if is_active else char_obj["name"]
                 if st.button(label, key=f"sel_{story_name}_{char_obj['name']}", use_container_width=True):
                     st.session_state.selected_story = story_name
                     st.session_state.selected_char = char_obj["name"]
                     st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
 
 # Retrieve Active Character Details
 selected_story = st.session_state.selected_story
@@ -576,7 +606,7 @@ current_char = next((c for c in chars_in_story if c["name"] == st.session_state.
 st.session_state.selected_char = current_char["name"]
 avatar_b64 = get_image_base64(current_char.get("avatar", ""))
 
-# Locked Profile Card in Sidebar
+# 9. Locked Profile Card in Sidebar
 avatar_portrait_html = f'<img class="light-profile-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="light-profile-avatar-fallback">📖</div>'
 st.sidebar.markdown(f"""
 <div class="locked-profile-anchor">
@@ -602,7 +632,7 @@ with st.sidebar.container():
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 9. Initialize Conversation
+# 10. Initialize Conversation
 now_str = get_hkt_time()
 if current_char["name"] not in st.session_state.character_chats:
     st.session_state.character_chats[current_char["name"]] = [
@@ -615,7 +645,7 @@ if current_char["name"] not in st.session_state.character_chats:
 
 current_messages = st.session_state.character_chats[current_char["name"]]
 
-# 10. Locked Top Header Bar with Glowing Green Status Dot
+# 11. Locked Top Header Bar with Glowing Green Status Dot
 top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="chat-top-header">
@@ -630,7 +660,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 11. Starter Questions
+# 12. Starter Questions
 starters = current_char.get("starter_questions", [])
 if len(current_messages) <= 1 and starters:
     cols = st.columns(len(starters))
@@ -639,7 +669,7 @@ if len(current_messages) <= 1 and starters:
             st.session_state.pending_prompt = question
             st.rerun()
 
-# 12. Render Chat Feed
+# 13. Render Chat Feed
 for msg in current_messages:
     role = msg["role"]
     content = msg["content"]
@@ -649,7 +679,7 @@ for msg in current_messages:
         unsafe_allow_html=True
     )
 
-# 13. Persistent Retry Notification Bar
+# 14. Persistent Retry Notification Bar
 if current_char["name"] in st.session_state.failed_prompts:
     failed_text = st.session_state.failed_prompts[current_char["name"]]
     st.warning(f"Connection dropped on: '{failed_text}'")
@@ -663,7 +693,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 14. Integrated Bottom Chat Input with Natural Typing Pace
+# 15. Integrated Bottom Chat Input with Natural Typing Pace
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -711,8 +741,8 @@ if user_query:
     </div>
     ''', unsafe_allow_html=True)
 
-    # 1.5-second natural pause before words start streaming
-    time.sleep(1.5)
+    # 1.4-second natural pause before words start streaming
+    time.sleep(1.4)
 
     bubble_placeholder = st.empty()
     full_response_text = ""
@@ -732,7 +762,6 @@ if user_query:
             if not content:
                 continue
 
-            # Stream words with a smooth, readable micro-delay
             for char in content:
                 full_response_text += char
                 time.sleep(0.015)  # 15ms per character typing cadence
