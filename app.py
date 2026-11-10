@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import re
 import base64
 from datetime import datetime, timezone, timedelta
 import streamlit as st
@@ -27,11 +28,8 @@ def get_image_base64(relative_path):
         return None
     
     full_path = os.path.join(BASE_DIR, relative_path)
-    
-    # Check if exact path exists
     candidate_paths = [full_path]
     
-    # Also check alternative extensions if user uploaded .jpeg / .jpg / .png
     root, ext = os.path.splitext(full_path)
     for alt_ext in [".jpeg", ".jpg", ".png"]:
         if alt_ext != ext.lower():
@@ -48,14 +46,11 @@ def get_image_base64(relative_path):
 
 # 4. Helper to Load Story Text from books/
 def load_story_text(story_name: str) -> str:
-    """Loads plain text file matching the story title from the books/ folder."""
     base_slug = story_name.lower().replace(" ", "-").replace("'", "")
-    
     candidates = [
         f"{base_slug}.txt",
         f"{base_slug.replace('-', '_')}.txt"
     ]
-    
     books_dir = os.path.join(BASE_DIR, "books")
     for filename in candidates:
         filepath = os.path.join(books_dir, filename)
@@ -64,7 +59,55 @@ def load_story_text(story_name: str) -> str:
                 return f.read().strip()
     return ""
 
-# 5. High-Contrast Sky-Blue & Pure White CSS
+# 5. Media Parser: Converts [IMAGE:key] and [VIDEO:key] into visual embeds
+def render_media_content(text: str, story_resources: dict) -> str:
+    """Replaces [IMAGE:key] and [VIDEO:key] tags with inline image and video HTML."""
+    if not text:
+        return ""
+    
+    images_map = story_resources.get("images", {})
+    videos_map = story_resources.get("videos", {})
+
+    # Replace [IMAGE:key]
+    def replace_img(match):
+        key = match.group(1).strip()
+        rel_path = images_map.get(key)
+        if rel_path:
+            img_b64 = get_image_base64(rel_path)
+            if img_b64:
+                return (
+                    f'<div class="chat-media-container">'
+                    f'<img src="{img_b64}" class="chat-embedded-img" alt="{key}" />'
+                    f'</div>'
+                )
+        return ""
+
+    # Replace [VIDEO:key]
+    def replace_vid(match):
+        key = match.group(1).strip()
+        vid_info = videos_map.get(key)
+        if vid_info:
+            url = vid_info.get("url", "")
+            # Extract YouTube video ID
+            yt_match = re.search(r'(?:v=|\/|youtu\.be\/)([0-9A-Za-z_-]{11})', url)
+            if yt_match:
+                vid_id = yt_match.group(1)
+                return (
+                    f'<div class="chat-media-container">'
+                    f'<div class="video-responsive-wrapper">'
+                    f'<iframe src="https://www.youtube.com/embed/{vid_id}" '
+                    f'title="{vid_info.get("title", "Video")}" frameborder="0" '
+                    f'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" '
+                    f'allowfullscreen></iframe>'
+                    f'</div></div>'
+                )
+        return ""
+
+    processed = re.sub(r'\[IMAGE:([a-zA-Z0-9_\-]+)\]', replace_img, text)
+    processed = re.sub(r'\[VIDEO:([a-zA-Z0-9_\-]+)\]', replace_vid, processed)
+    return processed
+
+# 6. High-Contrast Sky-Blue & Pure White CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -202,7 +245,7 @@ st.markdown("""
 
     .msg-bubble {
         position: relative;
-        max-width: 82%;
+        max-width: 85%;
         padding: 13px 18px;
         font-size: 0.97rem;
         line-height: 1.55;
@@ -227,6 +270,37 @@ st.markdown("""
         border: 1.5px solid #cbd5e1 !important;
     }
 
+    /* Embedded Chat Media */
+    .chat-media-container {
+        margin-top: 10px;
+        margin-bottom: 4px;
+        width: 100%;
+    }
+    .chat-embedded-img {
+        max-width: 100%;
+        border-radius: 14px;
+        border: 1.5px solid #cbd5e1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        display: block;
+    }
+    .video-responsive-wrapper {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 ratio */
+        height: 0;
+        overflow: hidden;
+        border-radius: 14px;
+        border: 1.5px solid #cbd5e1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .video-responsive-wrapper iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+
     .typing-pill {
         display: inline-flex;
         align-items: center;
@@ -242,7 +316,6 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.10);
     }
 
-    /* Starter Question Buttons */
     .block-container .stButton button {
         background-color: #ffffff !important;
         color: #0369a1 !important;
@@ -323,7 +396,7 @@ st.markdown("""
     }
     [data-testid="stSidebar"] h1, 
     [data-testid="stSidebar"] h2, 
-    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h3, 
     [data-testid="stSidebar"] p {
         color: #0f172a !important;
         font-weight: 700;
@@ -338,7 +411,6 @@ st.markdown("""
         padding-bottom: 0 !important;
     }
 
-    /* Prevent vertical overlap in column containers */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
         align-items: center !important;
         margin-top: 2px !important;
@@ -558,32 +630,33 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 6. OpenRouter Connection
+# 7. OpenRouter Connection
 api_key = st.secrets.get("OPENROUTER_API_KEY", "")
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=api_key or "missing_key"
 )
 
-# Unrestricted paid tier model
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
 
-# 7. Load Catalog
+# 8. Load Catalog
 def load_catalog():
     with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
         data = json.load(f)
     standardized = {}
     for story_title, story_val in data.items():
         if isinstance(story_val, list):
-            standardized[story_title] = {"cover": "", "characters": story_val}
+            standardized[story_title] = {"cover": "", "characters": story_val, "resources": {}}
         else:
+            if "resources" not in story_val:
+                story_val["resources"] = {}
             standardized[story_title] = story_val
     return standardized
 
 catalog = load_catalog()
 all_stories = list(catalog.keys())
 
-# 8. Persistent Session Initialization
+# 9. Persistent Session Initialization
 if "character_chats" not in st.session_state:
     st.session_state.character_chats = {}
 
@@ -597,11 +670,10 @@ first_char_name = catalog[st.session_state.selected_story]["characters"][0]["nam
 if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
-# Track open dropdowns (default first story expanded)
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 9. Sidebar Directory: Direct Story & Character Bubbles
+# 10. Sidebar Directory
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -609,7 +681,6 @@ for story_name, story_data in catalog.items():
     cover_b64 = get_image_base64(story_data.get("cover", ""))
     cover_html = f'<img class="book-bubble-thumb" src="{cover_b64}">' if cover_b64 else '<div class="book-bubble-fallback">📖</div>'
     
-    # Story Bubble & Title Row
     col_b_thumb, col_b_btn = st.sidebar.columns([1, 4])
     with col_b_thumb:
         st.markdown(cover_html, unsafe_allow_html=True)
@@ -624,7 +695,6 @@ for story_name, story_data in catalog.items():
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Indented Character Bubbles
     if is_expanded:
         for char_obj in story_data["characters"]:
             is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
@@ -647,14 +717,15 @@ for story_name, story_data in catalog.items():
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
 
-# Retrieve Active Character Details
 selected_story = st.session_state.selected_story
 chars_in_story = catalog[selected_story]["characters"]
+story_resources = catalog[selected_story].get("resources", {})
+
 current_char = next((c for c in chars_in_story if c["name"] == st.session_state.selected_char), chars_in_story[0])
 st.session_state.selected_char = current_char["name"]
 avatar_b64 = get_image_base64(current_char.get("avatar", ""))
 
-# 10. Locked Profile Card in Sidebar
+# 11. Locked Profile Card in Sidebar
 avatar_portrait_html = f'<img class="light-profile-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="light-profile-avatar-fallback">📖</div>'
 st.sidebar.markdown(f"""
 <div class="locked-profile-anchor">
@@ -680,7 +751,7 @@ with st.sidebar.container():
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 11. Initialize Conversation
+# 12. Initialize Conversation
 now_str = get_hkt_time()
 if current_char["name"] not in st.session_state.character_chats:
     st.session_state.character_chats[current_char["name"]] = [
@@ -693,7 +764,7 @@ if current_char["name"] not in st.session_state.character_chats:
 
 current_messages = st.session_state.character_chats[current_char["name"]]
 
-# 12. Locked Top Header Bar with Glowing Green Status Dot
+# 13. Locked Top Header Bar with Glowing Green Status Dot
 top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="chat-top-header">
@@ -708,7 +779,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 13. Starter Questions
+# 14. Starter Questions
 starters = current_char.get("starter_questions", [])
 if len(current_messages) <= 1 and starters:
     cols = st.columns(len(starters))
@@ -717,17 +788,20 @@ if len(current_messages) <= 1 and starters:
             st.session_state.pending_prompt = question
             st.rerun()
 
-# 14. Render Chat Feed
+# 15. Render Chat Feed
 for msg in current_messages:
     role = msg["role"]
-    content = msg["content"]
+    raw_content = msg["content"]
+    
+    # Process [IMAGE:key] and [VIDEO:key] embeds for assistant replies
+    rendered_content = render_media_content(raw_content, story_resources) if role == "assistant" else raw_content
     
     st.markdown(
-        f'<div class="msg-row {role}"><div class="msg-bubble {role}">{content}</div></div>',
+        f'<div class="msg-row {role}"><div class="msg-bubble {role}">{rendered_content}</div></div>',
         unsafe_allow_html=True
     )
 
-# 15. Persistent Retry Notification Bar
+# 16. Persistent Retry Notification Bar
 if current_char["name"] in st.session_state.failed_prompts:
     failed_text = st.session_state.failed_prompts[current_char["name"]]
     st.warning(f"Connection dropped on: '{failed_text}'")
@@ -741,7 +815,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 16. Integrated Bottom Chat Input with Natural Typing Pace & Story Reference
+# 17. Integrated Bottom Chat Input with Media Capabilities
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -753,7 +827,6 @@ if user_query:
 
     current_time = get_hkt_time()
 
-    # Save and display user message immediately
     st.session_state.character_chats[current_char["name"]].append({
         "role": "user",
         "content": user_query,
@@ -764,7 +837,7 @@ if user_query:
         unsafe_allow_html=True
     )
 
-    # Dynamic Story Text Injection from books/
+    # Load Story Text
     book_content = load_story_text(selected_story)
     story_context = ""
     if book_content:
@@ -773,7 +846,19 @@ if user_query:
             f'"""\n{book_content}\n"""'
         )
 
-    # Clean roleplay instructions tailored for primary school learners
+    # Dynamic Media Aids Instruction
+    media_instructions = ""
+    if story_resources:
+        available_imgs = list(story_resources.get("images", {}).keys())
+        available_vids = list(story_resources.get("videos", {}).keys())
+        media_instructions = (
+            "\n\nLEARNING AIDS YOU CAN SHARE:\n"
+            "- If the student asks for the complete crane instructions or overall diagram, output: [IMAGE:crane_steps]\n"
+            "- If the student asks for a specific step (e.g. step 1, step 2, up to step 16), output the matching tag: [IMAGE:crane_steps_1] through [IMAGE:crane_steps_16]\n"
+            "- If the student asks for a video demonstration, tutorial, or movie, output: [VIDEO:crane_video]\n"
+            "Only include these tags when the student explicitly asks to see how to fold, asks for steps, or asks for a video."
+        )
+
     system_instruction = (
         f"You are roleplaying as {current_char['name']} from the book '{selected_story}'.\n"
         f"{current_char['system_prompt']}\n\n"
@@ -782,7 +867,8 @@ if user_query:
         "2. Ground your answers strictly in the events and facts from the STORY TEXT REFERENCE.\n"
         "3. Keep your answer brief: 2 to 3 sentences maximum.\n"
         "4. Do NOT repeat or echo the student's question.\n"
-        "5. Output only your spoken words. Never write outlines, notes, or bullet points."
+        "5. Output only your spoken words and any requested media tags. Never write outlines, notes, or bullet points."
+        f"{media_instructions}"
         f"{story_context}"
     )
 
@@ -792,7 +878,6 @@ if user_query:
     for m in st.session_state.character_chats[current_char["name"]][-8:]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
-    # Realistic typing indicator display
     typing_box = st.empty()
     typing_box.markdown(f'''
     <div class="typing-pill">
@@ -800,7 +885,6 @@ if user_query:
     </div>
     ''', unsafe_allow_html=True)
 
-    # 1.4-second natural pause before words start streaming
     time.sleep(1.4)
 
     bubble_placeholder = st.empty()
@@ -812,7 +896,7 @@ if user_query:
             messages=conversation_payload,
             stream=True,
             temperature=0.7,
-            max_tokens=150
+            max_tokens=160
         )
         
         has_started_typing = False
@@ -823,15 +907,17 @@ if user_query:
 
             for char in content:
                 full_response_text += char
-                time.sleep(0.015)  # 15ms per character typing cadence
+                time.sleep(0.015)
                 
                 if not has_started_typing and full_response_text.strip():
                     typing_box.empty()
                     has_started_typing = True
 
                 if has_started_typing:
+                    # Render live text while streaming (media tags resolve cleanly once completed)
+                    display_content = render_media_content(full_response_text, story_resources)
                     bubble_placeholder.markdown(
-                        f'<div class="msg-row assistant"><div class="msg-bubble assistant">{full_response_text}</div></div>',
+                        f'<div class="msg-row assistant"><div class="msg-bubble assistant">{display_content}</div></div>',
                         unsafe_allow_html=True
                     )
 
@@ -844,6 +930,7 @@ if user_query:
                 "time": current_time
             })
             st.session_state.failed_prompts.pop(current_char["name"], None)
+            st.rerun()
         else:
             bubble_placeholder.empty()
             raise Exception("No response received from the model.")
