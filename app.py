@@ -34,7 +34,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. Mobile & Desktop Unified CSS
+# 4. High-Contrast Sky-Blue & Pure White CSS (Tight Sidebar Spacing)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -63,7 +63,6 @@ st.markdown("""
         background-color: transparent !important;
     }
 
-    /* Locked sticky chat header */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
@@ -155,7 +154,6 @@ st.markdown("""
         font-size: 24px;
     }
 
-    /* Chat Bubbles */
     .msg-row {
         display: flex;
         width: 100%;
@@ -212,7 +210,6 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.10);
     }
 
-    /* Starter Question Buttons */
     .block-container .stButton button {
         background-color: #ffffff !important;
         color: #0369a1 !important;
@@ -232,7 +229,6 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(2, 132, 199, 0.3) !important;
     }
 
-    /* Bottom Chat Input */
     [data-testid="stBottom"],
     [data-testid="stBottom"] > div,
     [data-testid="stBottom"] > div > div {
@@ -277,13 +273,11 @@ st.markdown("""
     }
 
     /* =========================================================
-       SIDEBAR: BULLET-PROOF 2-COLUMN ROWS (DESKTOP & MOBILE)
+       SIDEBAR: TIGHTENED VERTICAL NAVIGATION SPACING
        ========================================================= */
-    [data-testid="stSidebar"],
-    [data-testid="stSidebar"] > div {
-        overflow-x: hidden !important;
-        max-width: 100vw !important;
+    [data-testid="stSidebar"] {
         background-color: #ffffff !important;
+        border-right: 1.5px solid #cbd5e1 !important;
     }
     [data-testid="stSidebar"] > div:first-child {
         display: flex;
@@ -291,179 +285,166 @@ st.markdown("""
         height: 100vh;
         overflow-y: auto;
         padding-bottom: 0 !important;
-        border-right: 1.5px solid #cbd5e1 !important;
+        background-color: #ffffff !important;
     }
-    [data-testid="stSidebar"] h3 {
+    [data-testid="stSidebar"] h1, 
+    [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] p {
         color: #0f172a !important;
         font-weight: 700;
-        margin-top: 0.2rem !important;
-        margin-bottom: 0.4rem !important;
-        padding-left: 2px !important;
+        margin-bottom: 0.25rem !important;
     }
 
+    /* Tighten default Streamlit vertical block gaps */
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        gap: 0.2rem !important;
+        gap: 0.25rem !important;
+    }
+    [data-testid="stSidebar"] [data-testid="stElementContainer"] {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
     }
 
-    /* Force the Streamlit columns row to STAY horizontal on ALL screen sizes */
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
+    /* Vertically align image columns with button columns & minimize vertical margins */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
         align-items: center !important;
-        gap: 6px !important;
-        width: 100% !important;
         margin-top: 1px !important;
         margin-bottom: 2px !important;
+        gap: 0.35rem !important;
     }
 
-    /* Column 1 (Avatar Column): Exact fixed size */
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
-        width: 42px !important;
-        min-width: 42px !important;
-        max-width: 42px !important;
-        flex: 0 0 42px !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-
-    /* Column 2 (Button Column): Fills remaining width without pushing boundary */
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
-        width: calc(100% - 48px) !important;
-        min-width: 0 !important;
-        flex: 1 1 auto !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child .stButton,
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child .stButton button {
-        width: 100% !important;
-        margin: 0 !important;
-    }
-
-    /* Book Avatar Bubble */
+    /* Book Bubbles */
     .book-bubble-thumb {
-        width: 38px;
-        height: 38px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #0284c7;
+        border: 2.5px solid #0284c7;
         box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
         display: block;
+        margin: auto;
     }
     .book-bubble-fallback {
-        width: 38px;
-        height: 38px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 20px;
         box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
+        margin: auto;
     }
 
-    /* Book Button Style */
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.story-anchor) .stButton button {
+    /* Book Title Buttons - Compact vertical padding */
+    .sidebar-book-btn {
+        margin-top: 3px !important;
+    }
+    .sidebar-book-btn .stButton button {
         background-color: #f0f9ff !important;
         color: #0c4a6e !important;
         border: 1.5px solid #bae6fd !important;
         border-radius: 12px !important;
-        font-size: 0.85rem !important;
+        font-size: 0.88rem !important;
         font-weight: 700 !important;
-        padding: 6px 10px !important;
+        padding: 5px 10px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
         word-break: break-word !important;
         line-height: 1.25 !important;
-        min-height: 36px !important;
+        width: 100% !important;
         box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
+        transition: all 0.2s ease !important;
+        min-height: 40px !important;
+        margin: 0 !important;
     }
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.story-anchor) .stButton button:hover {
+    .sidebar-book-btn .stButton button:hover {
         background-color: #e0f2fe !important;
         border-color: #0284c7 !important;
         color: #0284c7 !important;
     }
 
-    /* Indented Character Rows */
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-anchor) {
-        padding-left: 14px !important;
-        box-sizing: border-box !important;
-    }
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-anchor) > div[data-testid="column"]:first-child {
-        width: 34px !important;
-        min-width: 34px !important;
-        max-width: 34px !important;
-        flex: 0 0 34px !important;
-    }
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-anchor) > div[data-testid="column"]:last-child {
-        width: calc(100% - 40px) !important;
-    }
-
-    /* Character Avatar Bubble */
+    /* Indented Character Bubbles */
     .char-bubble-thumb {
-        width: 28px;
-        height: 28px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         object-fit: cover;
         border: 1.5px solid #93c5fd;
         display: block;
+        margin: auto;
     }
-    .char-bubble-thumb.active {
+    .char-bubble-thumb-active {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        object-fit: cover;
         border: 2px solid #0284c7;
-        box-shadow: 0 0 6px rgba(2, 132, 199, 0.45);
+        box-shadow: 0 0 8px rgba(2, 132, 199, 0.45);
+        display: block;
+        margin: auto;
     }
     .char-bubble-fallback {
-        width: 28px;
-        height: 28px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         background: #e0f2fe;
         color: #0284c7;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 13px;
+        font-size: 15px;
+        margin: auto;
     }
 
-    /* Inactive Character Button Style */
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-anchor) .stButton button {
+    /* Character Selection Buttons - Compact vertical padding */
+    .sidebar-char-btn .stButton button {
         background-color: #ffffff !important;
         color: #1e293b !important;
         border: 1.5px solid #cbd5e1 !important;
         border-radius: 10px !important;
-        font-size: 0.82rem !important;
+        font-size: 0.83rem !important;
         font-weight: 600 !important;
-        padding: 5px 8px !important;
+        padding: 4px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
         word-break: break-word !important;
         line-height: 1.2 !important;
-        min-height: 32px !important;
+        width: 100% !important;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        transition: all 0.2s ease !important;
+        min-height: 32px !important;
+        margin: 0 !important;
     }
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-anchor) .stButton button:hover {
+    .sidebar-char-btn .stButton button:hover {
         background-color: #e0f2fe !important;
         color: #0284c7 !important;
         border-color: #0284c7 !important;
     }
-
-    /* Active Character Button Style */
-    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-active-indicator) .stButton button {
+    .sidebar-char-btn-active .stButton button {
         background-color: #0284c7 !important;
         color: #ffffff !important;
         border: 1.5px solid #0284c7 !important;
+        border-radius: 10px !important;
+        font-size: 0.83rem !important;
         font-weight: 700 !important;
+        padding: 4px 8px !important;
+        text-align: left !important;
+        justify-content: flex-start !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.2 !important;
+        width: 100% !important;
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
+        min-height: 32px !important;
+        margin: 0 !important;
     }
 
-    /* Pinned Bottom Profile Card */
+    /* Sticky Profile Card at Bottom of Sidebar */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
@@ -475,20 +456,18 @@ st.markdown("""
         margin-top: auto !important;
         box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.12) !important;
         border-top: 1.5px solid #cbd5e1 !important;
-        box-sizing: border-box !important;
     }
 
     .light-profile-card {
         background: #f8fafc !important;
-        border-radius: 16px;
-        padding: 8px 10px;
+        border-radius: 18px;
+        padding: 10px 10px;
         text-align: center;
         border: 1.5px solid #cbd5e1 !important;
-        box-sizing: border-box !important;
     }
     .light-profile-avatar {
-        width: 52px;
-        height: 52px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         object-fit: cover;
         margin: 0 auto 4px auto;
@@ -497,25 +476,25 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
     .light-profile-avatar-fallback {
-        width: 52px;
-        height: 52px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
-        font-size: 24px;
+        font-size: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 4px auto;
     }
     .light-profile-name {
-        font-size: 0.92rem;
+        font-size: 0.96rem;
         font-weight: 700;
         color: #0f172a !important;
         margin-bottom: 1px;
     }
     .light-profile-book {
-        font-size: 0.74rem;
+        font-size: 0.76rem;
         color: #0369a1 !important;
         font-weight: 700;
         margin-bottom: 4px;
@@ -525,10 +504,10 @@ st.markdown("""
         border: 1px solid #cbd5e1;
         border-radius: 10px;
         padding: 6px 8px;
-        font-size: 0.76rem;
+        font-size: 0.78rem;
         color: #1e293b !important;
         text-align: left;
-        line-height: 1.35;
+        line-height: 1.4;
         font-weight: 500;
     }
 
@@ -537,9 +516,9 @@ st.markdown("""
         color: #be123c !important;
         border: 1.5px solid #fda4af !important;
         border-radius: 16px !important;
-        font-size: 0.78rem !important;
+        font-size: 0.80rem !important;
         font-weight: 700 !important;
-        padding: 4px 10px !important;
+        padding: 5px 10px !important;
         margin-top: 4px !important;
         transition: all 0.2s ease !important;
     }
@@ -590,50 +569,55 @@ first_char_name = catalog[st.session_state.selected_story]["characters"][0]["nam
 if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
-# Track open dropdowns
+# Track open dropdowns (default first story expanded)
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 8. Sidebar Directory (Isolated Valid Columns with Row Alignment)
+# 8. Sidebar Directory: Direct Story & Character Bubbles (Tight Spacing)
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
     is_expanded = story_name in st.session_state.expanded_stories
     cover_b64 = get_image_base64(story_data.get("cover", ""))
     cover_html = f'<img class="book-bubble-thumb" src="{cover_b64}">' if cover_b64 else '<div class="book-bubble-fallback">📖</div>'
-    arrow = "▾" if is_expanded else "▸"
-
-    # Story Item Row
-    col_b_thumb, col_b_btn = st.sidebar.columns([1, 6])
+    
+    # Story Bubble & Title Row
+    col_b_thumb, col_b_btn = st.sidebar.columns([1, 4])
     with col_b_thumb:
-        st.markdown(f'<div class="story-anchor">{cover_html}</div>', unsafe_allow_html=True)
+        st.markdown(cover_html, unsafe_allow_html=True)
     with col_b_btn:
+        st.markdown('<div class="sidebar-book-btn">', unsafe_allow_html=True)
+        arrow = "▾" if is_expanded else "▸"
         if st.button(f"{arrow} {story_name}", key=f"book_toggle_{story_name}", use_container_width=True):
             if is_expanded:
                 st.session_state.expanded_stories.remove(story_name)
             else:
                 st.session_state.expanded_stories.add(story_name)
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    # Indented Character Rows
+    # Indented Character Bubbles
     if is_expanded:
         for char_obj in story_data["characters"]:
             is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
             char_b64 = get_image_base64(char_obj.get("avatar", ""))
             
-            thumb_class = "char-bubble-thumb active" if is_active else "char-bubble-thumb"
+            thumb_class = "char-bubble-thumb-active" if is_active else "char-bubble-thumb"
             char_thumb_html = f'<img class="{thumb_class}" src="{char_b64}">' if char_b64 else '<div class="char-bubble-fallback">👤</div>'
-            anchor_class = "char-anchor char-active-indicator" if is_active else "char-anchor"
-
-            col_c_thumb, col_c_btn = st.sidebar.columns([1, 6])
+            
+            col_ind, col_c_thumb, col_c_btn = st.sidebar.columns([0.35, 0.9, 3.75])
             with col_c_thumb:
-                st.markdown(f'<div class="{anchor_class}">{char_thumb_html}</div>', unsafe_allow_html=True)
+                st.markdown(char_thumb_html, unsafe_allow_html=True)
             with col_c_btn:
+                btn_class = "sidebar-char-btn-active" if is_active else "sidebar-char-btn"
+                st.markdown(f'<div class="{btn_class}">', unsafe_allow_html=True)
+                
                 label = f"💬 {char_obj['name']}" if is_active else char_obj["name"]
-                if st.button(label, key=f"char_sel_{story_name}_{char_obj['name']}", use_container_width=True):
+                if st.button(label, key=f"sel_{story_name}_{char_obj['name']}", use_container_width=True):
                     st.session_state.selected_story = story_name
                     st.session_state.selected_char = char_obj["name"]
                     st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
 
 # Retrieve Active Character Details
 selected_story = st.session_state.selected_story
@@ -741,6 +725,7 @@ if user_query:
 
     current_time = get_hkt_time()
 
+    # Save and display user message immediately
     st.session_state.character_chats[current_char["name"]].append({
         "role": "user",
         "content": user_query,
@@ -751,6 +736,7 @@ if user_query:
         unsafe_allow_html=True
     )
 
+    # Clean roleplay instructions tailored for primary school learners
     system_instruction = (
         f"You are roleplaying as {current_char['name']} from the book '{selected_story}'.\n"
         f"{current_char['system_prompt']}\n\n"
@@ -767,6 +753,7 @@ if user_query:
     for m in st.session_state.character_chats[current_char["name"]][-8:]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
+    # Realistic typing indicator display
     typing_box = st.empty()
     typing_box.markdown(f'''
     <div class="typing-pill">
@@ -774,6 +761,7 @@ if user_query:
     </div>
     ''', unsafe_allow_html=True)
 
+    # 1.4-second natural pause before words start streaming
     time.sleep(1.4)
 
     bubble_placeholder = st.empty()
@@ -796,7 +784,7 @@ if user_query:
 
             for char in content:
                 full_response_text += char
-                time.sleep(0.015)
+                time.sleep(0.015)  # 15ms per character typing cadence
                 
                 if not has_started_typing and full_response_text.strip():
                     typing_box.empty()
