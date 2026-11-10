@@ -21,20 +21,50 @@ def get_hkt_time():
     hkt_zone = timezone(timedelta(hours=8))
     return datetime.now(hkt_zone).strftime("%I:%M %p").lower()
 
-# 3. Base64 Image Encoder
+# 3. Base64 Image Encoder (Supports PNG, JPEG, JPG seamlessly)
 def get_image_base64(relative_path):
     if not relative_path:
         return None
+    
     full_path = os.path.join(BASE_DIR, relative_path)
-    if os.path.isfile(full_path):
-        with open(full_path, "rb") as f:
-            encoded = base64.b64encode(f.read()).decode()
-            ext = os.path.splitext(full_path)[1].lower().replace(".", "")
-            mime = "jpeg" if ext in ["jpg", "jpeg"] else ext
-            return f"data:image/{mime};base64,{encoded}"
+    
+    # Check if exact path exists
+    candidate_paths = [full_path]
+    
+    # Also check alternative extensions if user uploaded .jpeg / .jpg / .png
+    root, ext = os.path.splitext(full_path)
+    for alt_ext in [".jpeg", ".jpg", ".png"]:
+        if alt_ext != ext.lower():
+            candidate_paths.append(root + alt_ext)
+            
+    for path in candidate_paths:
+        if os.path.isfile(path):
+            with open(path, "rb") as f:
+                encoded = base64.b64encode(f.read()).decode()
+                cur_ext = os.path.splitext(path)[1].lower().replace(".", "")
+                mime = "jpeg" if cur_ext in ["jpg", "jpeg"] else cur_ext
+                return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. High-Contrast Sky-Blue & Pure White CSS
+# 4. Helper to Load Story Text from books/
+def load_story_text(story_name: str) -> str:
+    """Loads plain text file matching the story title from the books/ folder."""
+    base_slug = story_name.lower().replace(" ", "-").replace("'", "")
+    
+    candidates = [
+        f"{base_slug}.txt",
+        f"{base_slug.replace('-', '_')}.txt"
+    ]
+    
+    books_dir = os.path.join(BASE_DIR, "books")
+    for filename in candidates:
+        filepath = os.path.join(books_dir, filename)
+        if os.path.isfile(filepath):
+            with open(filepath, "r", encoding="utf-8") as f:
+                return f.read().strip()
+    return ""
+
+# 5. High-Contrast Sky-Blue & Pure White CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -63,6 +93,7 @@ st.markdown("""
         background-color: transparent !important;
     }
 
+    /* Sticky Chat Header */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
@@ -154,6 +185,7 @@ st.markdown("""
         font-size: 24px;
     }
 
+    /* Message Rows & Bubbles */
     .msg-row {
         display: flex;
         width: 100%;
@@ -210,6 +242,7 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.10);
     }
 
+    /* Starter Question Buttons */
     .block-container .stButton button {
         background-color: #ffffff !important;
         color: #0369a1 !important;
@@ -229,6 +262,7 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(2, 132, 199, 0.3) !important;
     }
 
+    /* Floating Chat Input */
     [data-testid="stBottom"],
     [data-testid="stBottom"] > div,
     [data-testid="stBottom"] > div > div {
@@ -304,7 +338,7 @@ st.markdown("""
         padding-bottom: 0 !important;
     }
 
-    /* Prevent vertical overlap in the column containers */
+    /* Prevent vertical overlap in column containers */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
         align-items: center !important;
         margin-top: 2px !important;
@@ -524,7 +558,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 5. OpenRouter Connection
+# 6. OpenRouter Connection
 api_key = st.secrets.get("OPENROUTER_API_KEY", "")
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
@@ -534,7 +568,7 @@ client = OpenAI(
 # Unrestricted paid tier model
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
 
-# 6. Load Catalog
+# 7. Load Catalog
 def load_catalog():
     with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -549,7 +583,7 @@ def load_catalog():
 catalog = load_catalog()
 all_stories = list(catalog.keys())
 
-# 7. Persistent Session Initialization
+# 8. Persistent Session Initialization
 if "character_chats" not in st.session_state:
     st.session_state.character_chats = {}
 
@@ -567,7 +601,7 @@ if "selected_char" not in st.session_state:
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 8. Sidebar Directory: Direct Story & Character Bubbles
+# 9. Sidebar Directory: Direct Story & Character Bubbles
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -620,7 +654,7 @@ current_char = next((c for c in chars_in_story if c["name"] == st.session_state.
 st.session_state.selected_char = current_char["name"]
 avatar_b64 = get_image_base64(current_char.get("avatar", ""))
 
-# 9. Locked Profile Card in Sidebar
+# 10. Locked Profile Card in Sidebar
 avatar_portrait_html = f'<img class="light-profile-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="light-profile-avatar-fallback">📖</div>'
 st.sidebar.markdown(f"""
 <div class="locked-profile-anchor">
@@ -646,7 +680,7 @@ with st.sidebar.container():
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 10. Initialize Conversation
+# 11. Initialize Conversation
 now_str = get_hkt_time()
 if current_char["name"] not in st.session_state.character_chats:
     st.session_state.character_chats[current_char["name"]] = [
@@ -659,7 +693,7 @@ if current_char["name"] not in st.session_state.character_chats:
 
 current_messages = st.session_state.character_chats[current_char["name"]]
 
-# 11. Locked Top Header Bar with Glowing Green Status Dot
+# 12. Locked Top Header Bar with Glowing Green Status Dot
 top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="chat-top-header">
@@ -674,7 +708,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 12. Starter Questions
+# 13. Starter Questions
 starters = current_char.get("starter_questions", [])
 if len(current_messages) <= 1 and starters:
     cols = st.columns(len(starters))
@@ -683,7 +717,7 @@ if len(current_messages) <= 1 and starters:
             st.session_state.pending_prompt = question
             st.rerun()
 
-# 13. Render Chat Feed
+# 14. Render Chat Feed
 for msg in current_messages:
     role = msg["role"]
     content = msg["content"]
@@ -693,7 +727,7 @@ for msg in current_messages:
         unsafe_allow_html=True
     )
 
-# 14. Persistent Retry Notification Bar
+# 15. Persistent Retry Notification Bar
 if current_char["name"] in st.session_state.failed_prompts:
     failed_text = st.session_state.failed_prompts[current_char["name"]]
     st.warning(f"Connection dropped on: '{failed_text}'")
@@ -707,7 +741,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 15. Integrated Bottom Chat Input with Natural Typing Pace
+# 16. Integrated Bottom Chat Input with Natural Typing Pace & Story Reference
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -719,6 +753,7 @@ if user_query:
 
     current_time = get_hkt_time()
 
+    # Save and display user message immediately
     st.session_state.character_chats[current_char["name"]].append({
         "role": "user",
         "content": user_query,
@@ -729,14 +764,26 @@ if user_query:
         unsafe_allow_html=True
     )
 
+    # Dynamic Story Text Injection from books/
+    book_content = load_story_text(selected_story)
+    story_context = ""
+    if book_content:
+        story_context = (
+            f"\n\nSTORY TEXT REFERENCE (Use this for all book facts, plot events, and memories):\n"
+            f'"""\n{book_content}\n"""'
+        )
+
+    # Clean roleplay instructions tailored for primary school learners
     system_instruction = (
         f"You are roleplaying as {current_char['name']} from the book '{selected_story}'.\n"
         f"{current_char['system_prompt']}\n\n"
         "Rules for speaking to the student:\n"
         "1. Speak directly in character using simple, everyday English words suitable for primary school students.\n"
-        "2. Keep your answer brief: 2 to 3 sentences maximum.\n"
-        "3. Do NOT repeat or echo the student's question.\n"
-        "4. Output only your spoken words. Never write outlines, notes, or bullet points."
+        "2. Ground your answers strictly in the events and facts from the STORY TEXT REFERENCE.\n"
+        "3. Keep your answer brief: 2 to 3 sentences maximum.\n"
+        "4. Do NOT repeat or echo the student's question.\n"
+        "5. Output only your spoken words. Never write outlines, notes, or bullet points."
+        f"{story_context}"
     )
 
     conversation_payload = [
@@ -745,6 +792,7 @@ if user_query:
     for m in st.session_state.character_chats[current_char["name"]][-8:]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
+    # Realistic typing indicator display
     typing_box = st.empty()
     typing_box.markdown(f'''
     <div class="typing-pill">
@@ -752,6 +800,7 @@ if user_query:
     </div>
     ''', unsafe_allow_html=True)
 
+    # 1.4-second natural pause before words start streaming
     time.sleep(1.4)
 
     bubble_placeholder = st.empty()
@@ -774,7 +823,7 @@ if user_query:
 
             for char in content:
                 full_response_text += char
-                time.sleep(0.015)
+                time.sleep(0.015)  # 15ms per character typing cadence
                 
                 if not has_started_typing and full_response_text.strip():
                     typing_box.empty()
