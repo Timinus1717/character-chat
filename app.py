@@ -34,7 +34,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. High-Contrast Sky-Blue CSS + Tight Compact Sidebar
+# 4. High-Contrast Sky-Blue & Pure White CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -273,7 +273,7 @@ st.markdown("""
     }
 
     /* =========================================================
-       SIDEBAR: TIGHT COMPACT SPACING
+       SIDEBAR: DIRECT BUBBLE & TITLE NAVIGATION
        ========================================================= */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
@@ -285,77 +285,64 @@ st.markdown("""
         height: 100vh;
         overflow-y: auto;
         padding-bottom: 0 !important;
-        padding-top: 1.2rem !important;
         background-color: #ffffff !important;
     }
-    [data-testid="stSidebar"] h3 {
+    [data-testid="stSidebar"] h1, 
+    [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] p {
         color: #0f172a !important;
         font-weight: 700;
-        font-size: 1.1rem !important;
-        margin-bottom: 8px !important;
-        margin-top: 0px !important;
     }
 
-    /* Collapse excess Streamlit element margins inside sidebar */
-    [data-testid="stSidebar"] div[data-testid="stElementContainer"] {
-        margin-bottom: 3px !important;
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-    }
-
-    /* Align thumbnail column cleanly with button column */
+    /* Vertically align image columns with button columns */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
         align-items: center !important;
-        gap: 6px !important;
-        margin-bottom: 2px !important;
+        margin-bottom: 6px !important;
     }
 
-    [data-testid="stSidebar"] div[data-testid="stColumn"] {
-        padding: 0 !important;
-        min-width: 0 !important;
-    }
-
-    /* Book Thumbnail */
+    /* Book Bubbles */
     .book-bubble-thumb {
-        width: 36px;
-        height: 36px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #0284c7;
+        border: 2.5px solid #0284c7;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
         display: block;
         margin: auto;
     }
     .book-bubble-fallback {
-        width: 36px;
-        height: 36px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
+        font-size: 20px;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
         margin: auto;
     }
 
-    /* Compact Story Row Button */
+    /* Book Title Buttons */
     .sidebar-book-btn .stButton button {
         background-color: #f0f9ff !important;
         color: #0c4a6e !important;
         border: 1.5px solid #bae6fd !important;
-        border-radius: 11px !important;
-        font-size: 0.84rem !important;
+        border-radius: 14px !important;
+        font-size: 0.88rem !important;
         font-weight: 700 !important;
-        padding: 5px 10px !important;
-        min-height: 36px !important;
+        padding: 8px 12px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
         word-break: break-word !important;
-        line-height: 1.2 !important;
+        line-height: 1.25 !important;
         width: 100% !important;
-        box-shadow: 0 1px 2px rgba(2, 132, 199, 0.04) !important;
-        transition: all 0.15s ease !important;
+        box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
+        transition: all 0.2s ease !important;
     }
     .sidebar-book-btn .stButton button:hover {
         background-color: #e0f2fe !important;
@@ -363,10 +350,10 @@ st.markdown("""
         color: #0284c7 !important;
     }
 
-    /* Character Thumbnail */
+    /* Indented Character Bubbles */
     .char-bubble-thumb {
-        width: 28px;
-        height: 28px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         object-fit: cover;
         border: 1.5px solid #93c5fd;
@@ -374,46 +361,45 @@ st.markdown("""
         margin: auto;
     }
     .char-bubble-thumb-active {
-        width: 28px;
-        height: 28px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid #0284c7;
-        box-shadow: 0 0 6px rgba(2, 132, 199, 0.4);
+        box-shadow: 0 0 8px rgba(2, 132, 199, 0.45);
         display: block;
         margin: auto;
     }
     .char-bubble-fallback {
-        width: 28px;
-        height: 28px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         background: #e0f2fe;
         color: #0284c7;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 13px;
+        font-size: 15px;
         margin: auto;
     }
 
-    /* Compact Character Selection Button */
+    /* Character Selection Buttons */
     .sidebar-char-btn .stButton button {
         background-color: #ffffff !important;
         color: #1e293b !important;
-        border: 1.5px solid #e2e8f0 !important;
-        border-radius: 9px !important;
-        font-size: 0.80rem !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 12px !important;
+        font-size: 0.83rem !important;
         font-weight: 600 !important;
-        padding: 4px 8px !important;
-        min-height: 30px !important;
+        padding: 6px 10px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
         word-break: break-word !important;
-        line-height: 1.15 !important;
+        line-height: 1.2 !important;
         width: 100% !important;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
-        transition: all 0.15s ease !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        transition: all 0.2s ease !important;
     }
     .sidebar-char-btn .stButton button:hover {
         background-color: #e0f2fe !important;
@@ -424,18 +410,17 @@ st.markdown("""
         background-color: #0284c7 !important;
         color: #ffffff !important;
         border: 1.5px solid #0284c7 !important;
-        border-radius: 9px !important;
-        font-size: 0.80rem !important;
+        border-radius: 12px !important;
+        font-size: 0.83rem !important;
         font-weight: 700 !important;
-        padding: 4px 8px !important;
-        min-height: 30px !important;
+        padding: 6px 10px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
         word-break: break-word !important;
-        line-height: 1.15 !important;
+        line-height: 1.2 !important;
         width: 100% !important;
-        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25) !important;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
     }
 
     /* Sticky Profile Card at Bottom of Sidebar */
@@ -445,63 +430,63 @@ st.markdown("""
         bottom: 0 !important;
         z-index: 1000 !important;
         background: #ffffff !important;
-        padding-top: 8px !important;
-        padding-bottom: 6px !important;
+        padding-top: 10px !important;
+        padding-bottom: 8px !important;
         margin-top: auto !important;
-        box-shadow: 0 -10px 20px -4px rgba(2, 132, 199, 0.10) !important;
+        box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.12) !important;
         border-top: 1.5px solid #cbd5e1 !important;
     }
 
     .light-profile-card {
         background: #f8fafc !important;
-        border-radius: 16px;
-        padding: 10px 8px;
+        border-radius: 18px;
+        padding: 12px 10px;
         text-align: center;
         border: 1.5px solid #cbd5e1 !important;
     }
     .light-profile-avatar {
-        width: 58px;
-        height: 58px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
         object-fit: cover;
-        margin: 0 auto 5px auto;
+        margin: 0 auto 6px auto;
         display: block;
-        border: 2px solid #0284c7;
-        box-shadow: 0 3px 10px rgba(2, 132, 199, 0.22);
+        border: 2.5px solid #0284c7;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
     .light-profile-avatar-fallback {
-        width: 58px;
-        height: 58px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
-        font-size: 26px;
+        font-size: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 5px auto;
+        margin: 0 auto 6px auto;
     }
     .light-profile-name {
-        font-size: 0.94rem;
+        font-size: 0.98rem;
         font-weight: 700;
         color: #0f172a !important;
-        margin-bottom: 1px;
+        margin-bottom: 2px;
     }
     .light-profile-book {
-        font-size: 0.76rem;
+        font-size: 0.78rem;
         color: #0369a1 !important;
         font-weight: 700;
-        margin-bottom: 5px;
+        margin-bottom: 6px;
     }
     .light-profile-bio {
         background: #ffffff !important;
         border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 6px 8px;
-        font-size: 0.78rem;
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-size: 0.80rem;
         color: #1e293b !important;
         text-align: left;
-        line-height: 1.4;
+        line-height: 1.45;
         font-weight: 500;
     }
 
@@ -509,11 +494,11 @@ st.markdown("""
         background-color: #ffffff !important;
         color: #be123c !important;
         border: 1.5px solid #fda4af !important;
-        border-radius: 18px !important;
-        font-size: 0.78rem !important;
+        border-radius: 20px !important;
+        font-size: 0.82rem !important;
         font-weight: 700 !important;
-        padding: 4px 10px !important;
-        margin-top: 4px !important;
+        padding: 6px 12px !important;
+        margin-top: 6px !important;
         transition: all 0.2s ease !important;
     }
     .clear-chat-container .stButton button:hover {
@@ -531,7 +516,7 @@ client = OpenAI(
     api_key=api_key or "missing_key"
 )
 
-# Unrestricted paid tier model
+# Unrestricted paid tier model (Dedicated compute, fast, simple English roleplay)
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
 
 # 6. Load Catalog
@@ -567,7 +552,7 @@ if "selected_char" not in st.session_state:
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 8. Sidebar Directory: Direct Story & Character Bubbles (Tight Spacing)
+# 8. Sidebar Directory: Direct Story & Character Bubbles
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -575,8 +560,8 @@ for story_name, story_data in catalog.items():
     cover_b64 = get_image_base64(story_data.get("cover", ""))
     cover_html = f'<img class="book-bubble-thumb" src="{cover_b64}">' if cover_b64 else '<div class="book-bubble-fallback">📖</div>'
     
-    # Story Bubble & Title Row (Tight ratio, no excess margin)
-    col_b_thumb, col_b_btn = st.sidebar.columns([0.7, 4.3], gap="small")
+    # Story Bubble & Title Row
+    col_b_thumb, col_b_btn = st.sidebar.columns([1, 4])
     with col_b_thumb:
         st.markdown(cover_html, unsafe_allow_html=True)
     with col_b_btn:
@@ -590,7 +575,7 @@ for story_name, story_data in catalog.items():
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Indented Character Bubbles (Tight, subtle offset)
+    # Indented Character Bubbles (only visible when story is expanded)
     if is_expanded:
         for char_obj in story_data["characters"]:
             is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
@@ -599,8 +584,8 @@ for story_name, story_data in catalog.items():
             thumb_class = "char-bubble-thumb-active" if is_active else "char-bubble-thumb"
             char_thumb_html = f'<img class="{thumb_class}" src="{char_b64}">' if char_b64 else '<div class="char-bubble-fallback">👤</div>'
             
-            # Subtle indentation with 0.2 spacer column
-            col_ind, col_c_thumb, col_c_btn = st.sidebar.columns([0.2, 0.65, 4.15], gap="small")
+            # 3-column layout provides the clean visual indentation
+            col_ind, col_c_thumb, col_c_btn = st.sidebar.columns([0.35, 0.9, 3.75])
             with col_c_thumb:
                 st.markdown(char_thumb_html, unsafe_allow_html=True)
             with col_c_btn:
@@ -720,6 +705,7 @@ if user_query:
 
     current_time = get_hkt_time()
 
+    # Save and display user message immediately
     st.session_state.character_chats[current_char["name"]].append({
         "role": "user",
         "content": user_query,
@@ -730,6 +716,7 @@ if user_query:
         unsafe_allow_html=True
     )
 
+    # Clean roleplay instructions tailored for primary school learners
     system_instruction = (
         f"You are roleplaying as {current_char['name']} from the book '{selected_story}'.\n"
         f"{current_char['system_prompt']}\n\n"
@@ -746,6 +733,7 @@ if user_query:
     for m in st.session_state.character_chats[current_char["name"]][-8:]:
         conversation_payload.append({"role": m["role"], "content": m["content"]})
 
+    # Realistic typing indicator display
     typing_box = st.empty()
     typing_box.markdown(f'''
     <div class="typing-pill">
@@ -753,6 +741,7 @@ if user_query:
     </div>
     ''', unsafe_allow_html=True)
 
+    # 1.4-second natural pause before words start streaming
     time.sleep(1.4)
 
     bubble_placeholder = st.empty()
@@ -775,7 +764,7 @@ if user_query:
 
             for char in content:
                 full_response_text += char
-                time.sleep(0.015)
+                time.sleep(0.015)  # 15ms per character typing cadence
                 
                 if not has_started_typing and full_response_text.strip():
                     typing_box.empty()
