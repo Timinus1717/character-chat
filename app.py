@@ -34,7 +34,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. Streamlined Mobile-First CSS
+# 4. Mobile & Desktop Unified CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -63,7 +63,7 @@ st.markdown("""
         background-color: transparent !important;
     }
 
-    /* Sticky Chat Header */
+    /* Locked sticky chat header */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
@@ -212,6 +212,7 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.10);
     }
 
+    /* Starter Question Buttons */
     .block-container .stButton button {
         background-color: #ffffff !important;
         color: #0369a1 !important;
@@ -276,7 +277,7 @@ st.markdown("""
     }
 
     /* =========================================================
-       SIDEBAR: RESILIENT SINGLE-ROW NAVIGATION (NO ST.COLUMNS)
+       SIDEBAR: BULLET-PROOF 2-COLUMN ROWS (DESKTOP & MOBILE)
        ========================================================= */
     [data-testid="stSidebar"],
     [data-testid="stSidebar"] > div {
@@ -301,82 +302,74 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        gap: 0.25rem !important;
+        gap: 0.2rem !important;
     }
 
-    /* Single Row Wrapper: Holds image + button in strict 1-line flex */
-    .nav-row-item {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        margin-bottom: 3px;
-        box-sizing: border-box;
-    }
-    .nav-row-item.char-row {
-        padding-left: 14px; /* CSS Indentation for characters */
-    }
-
-    /* Inline Avatar Bubbles */
-    .inline-bubble {
-        flex: 0 0 auto;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-right: 6px !important; /* EXACT 6px GAP */
-        display: block;
-    }
-    .inline-bubble.book-thumb {
-        width: 38px;
-        height: 38px;
-        border: 2px solid #0284c7;
-        box-shadow: 0 2px 5px rgba(2, 132, 199, 0.15);
-    }
-    .inline-bubble.char-thumb {
-        width: 30px;
-        height: 30px;
-        border: 1.5px solid #93c5fd;
-    }
-    .inline-bubble.char-thumb.active {
-        border: 2px solid #0284c7;
-        box-shadow: 0 0 6px rgba(2, 132, 199, 0.45);
-    }
-
-    .inline-fallback {
-        flex: 0 0 auto;
-        border-radius: 50%;
-        margin-right: 6px !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .inline-fallback.book-thumb {
-        width: 38px;
-        height: 38px;
-        background: #0284c7;
-        color: white;
-        font-size: 18px;
-    }
-    .inline-fallback.char-thumb {
-        width: 30px;
-        height: 30px;
-        background: #e0f2fe;
-        color: #0284c7;
-        font-size: 13px;
-    }
-
-    /* Embedded Button container inside flex */
-    .nav-btn-target {
-        flex: 1 1 auto;
-        min-width: 0;
-    }
-    .nav-btn-target .stButton,
-    .nav-btn-target .stButton button {
+    /* Force the Streamlit columns row to STAY horizontal on ALL screen sizes */
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 6px !important;
         width: 100% !important;
+        margin-top: 1px !important;
+        margin-bottom: 2px !important;
+    }
+
+    /* Column 1 (Avatar Column): Exact fixed size */
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
+        width: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        flex: 0 0 42px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Column 2 (Button Column): Fills remaining width without pushing boundary */
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
+        width: calc(100% - 48px) !important;
         min-width: 0 !important;
+        flex: 1 1 auto !important;
+        padding: 0 !important;
         margin: 0 !important;
     }
 
-    /* Book Button */
-    .book-btn-style .stButton button {
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child .stButton,
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child .stButton button {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* Book Avatar Bubble */
+    .book-bubble-thumb {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #0284c7;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
+        display: block;
+    }
+    .book-bubble-fallback {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #0284c7;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
+    }
+
+    /* Book Button Style */
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.story-anchor) .stButton button {
         background-color: #f0f9ff !important;
         color: #0c4a6e !important;
         border: 1.5px solid #bae6fd !important;
@@ -392,14 +385,54 @@ st.markdown("""
         min-height: 36px !important;
         box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
     }
-    .book-btn-style .stButton button:hover {
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.story-anchor) .stButton button:hover {
         background-color: #e0f2fe !important;
         border-color: #0284c7 !important;
         color: #0284c7 !important;
     }
 
-    /* Inactive Character Button */
-    .char-btn-style .stButton button {
+    /* Indented Character Rows */
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-anchor) {
+        padding-left: 14px !important;
+        box-sizing: border-box !important;
+    }
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-anchor) > div[data-testid="column"]:first-child {
+        width: 34px !important;
+        min-width: 34px !important;
+        max-width: 34px !important;
+        flex: 0 0 34px !important;
+    }
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-anchor) > div[data-testid="column"]:last-child {
+        width: calc(100% - 40px) !important;
+    }
+
+    /* Character Avatar Bubble */
+    .char-bubble-thumb {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1.5px solid #93c5fd;
+        display: block;
+    }
+    .char-bubble-thumb.active {
+        border: 2px solid #0284c7;
+        box-shadow: 0 0 6px rgba(2, 132, 199, 0.45);
+    }
+    .char-bubble-fallback {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #e0f2fe;
+        color: #0284c7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+    }
+
+    /* Inactive Character Button Style */
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-anchor) .stButton button {
         background-color: #ffffff !important;
         color: #1e293b !important;
         border: 1.5px solid #cbd5e1 !important;
@@ -415,27 +448,18 @@ st.markdown("""
         min-height: 32px !important;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     }
-    .char-btn-style .stButton button:hover {
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-anchor) .stButton button:hover {
         background-color: #e0f2fe !important;
         color: #0284c7 !important;
         border-color: #0284c7 !important;
     }
 
-    /* Active Character Button */
-    .char-btn-style-active .stButton button {
+    /* Active Character Button Style */
+    [data-testid="stSidebar"] div[data-testid="stHorizontalBlock"]:has(.char-active-indicator) .stButton button {
         background-color: #0284c7 !important;
         color: #ffffff !important;
         border: 1.5px solid #0284c7 !important;
-        border-radius: 10px !important;
-        font-size: 0.82rem !important;
         font-weight: 700 !important;
-        padding: 5px 8px !important;
-        text-align: left !important;
-        justify-content: flex-start !important;
-        white-space: normal !important;
-        word-break: break-word !important;
-        line-height: 1.2 !important;
-        min-height: 32px !important;
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
     }
 
@@ -570,42 +594,46 @@ if "selected_char" not in st.session_state:
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 8. Sidebar Directory (Unified HTML Flex Rows, No st.columns)
+# 8. Sidebar Directory (Isolated Valid Columns with Row Alignment)
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
     is_expanded = story_name in st.session_state.expanded_stories
     cover_b64 = get_image_base64(story_data.get("cover", ""))
-    cover_html = f'<img class="inline-bubble book-thumb" src="{cover_b64}">' if cover_b64 else '<div class="inline-fallback book-thumb">📖</div>'
+    cover_html = f'<img class="book-bubble-thumb" src="{cover_b64}">' if cover_b64 else '<div class="book-bubble-fallback">📖</div>'
     arrow = "▾" if is_expanded else "▸"
 
-    # Story Item in single HTML flex container
-    st.sidebar.markdown(f'<div class="nav-row-item">{cover_html}<div class="nav-btn-target book-btn-style">', unsafe_allow_html=True)
-    if st.sidebar.button(f"{arrow} {story_name}", key=f"book_btn_{story_name}", use_container_width=True):
-        if is_expanded:
-            st.session_state.expanded_stories.remove(story_name)
-        else:
-            st.session_state.expanded_stories.add(story_name)
-        st.rerun()
-    st.sidebar.markdown('</div></div>', unsafe_allow_html=True)
+    # Story Item Row
+    col_b_thumb, col_b_btn = st.sidebar.columns([1, 6])
+    with col_b_thumb:
+        st.markdown(f'<div class="story-anchor">{cover_html}</div>', unsafe_allow_html=True)
+    with col_b_btn:
+        if st.button(f"{arrow} {story_name}", key=f"book_toggle_{story_name}", use_container_width=True):
+            if is_expanded:
+                st.session_state.expanded_stories.remove(story_name)
+            else:
+                st.session_state.expanded_stories.add(story_name)
+            st.rerun()
 
-    # Indented Characters in single HTML flex containers
+    # Indented Character Rows
     if is_expanded:
         for char_obj in story_data["characters"]:
             is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
             char_b64 = get_image_base64(char_obj.get("avatar", ""))
             
-            active_class = "active" if is_active else ""
-            char_html = f'<img class="inline-bubble char-thumb {active_class}" src="{char_b64}">' if char_b64 else '<div class="inline-fallback char-thumb">👤</div>'
-            btn_style_class = "char-btn-style-active" if is_active else "char-btn-style"
-            
-            st.sidebar.markdown(f'<div class="nav-row-item char-row">{char_html}<div class="nav-btn-target {btn_style_class}">', unsafe_allow_html=True)
-            label = f"💬 {char_obj['name']}" if is_active else char_obj["name"]
-            if st.sidebar.button(label, key=f"char_btn_{story_name}_{char_obj['name']}", use_container_width=True):
-                st.session_state.selected_story = story_name
-                st.session_state.selected_char = char_obj["name"]
-                st.rerun()
-            st.sidebar.markdown('</div></div>', unsafe_allow_html=True)
+            thumb_class = "char-bubble-thumb active" if is_active else "char-bubble-thumb"
+            char_thumb_html = f'<img class="{thumb_class}" src="{char_b64}">' if char_b64 else '<div class="char-bubble-fallback">👤</div>'
+            anchor_class = "char-anchor char-active-indicator" if is_active else "char-anchor"
+
+            col_c_thumb, col_c_btn = st.sidebar.columns([1, 6])
+            with col_c_thumb:
+                st.markdown(f'<div class="{anchor_class}">{char_thumb_html}</div>', unsafe_allow_html=True)
+            with col_c_btn:
+                label = f"💬 {char_obj['name']}" if is_active else char_obj["name"]
+                if st.button(label, key=f"char_sel_{story_name}_{char_obj['name']}", use_container_width=True):
+                    st.session_state.selected_story = story_name
+                    st.session_state.selected_char = char_obj["name"]
+                    st.rerun()
 
 # Retrieve Active Character Details
 selected_story = st.session_state.selected_story
