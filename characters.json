@@ -200,16 +200,44 @@
       }
     ]
   },
+  {
   "More-igami": {
     "cover": "images/moreigami_cover.png",
+    "resources": {
+      "images": {
+        "crane_steps": "resources/more-igami/crane_steps.jpg",
+        "crane_step_1": "resources/more-igami/crane_step_1.jpg",
+        "crane_step_2": "resources/more-igami/crane_step_2.jpg",
+        "crane_step_3": "resources/more-igami/crane_step_3.jpg",
+        "crane_step_4": "resources/more-igami/crane_step_4.jpg",
+        "crane_step_5": "resources/more-igami/crane_step_5.jpg",
+        "crane_step_6": "resources/more-igami/crane_step_6.jpg",
+        "crane_step_7": "resources/more-igami/crane_step_7.jpg",
+        "crane_step_8": "resources/more-igami/crane_step_8.jpg",
+        "crane_step_9": "resources/more-igami/crane_step_9.jpg",
+        "crane_step_10": "resources/more-igami/crane_step_10.jpg",
+        "crane_step_11": "resources/more-igami/crane_step_11.jpg",
+        "crane_step_12": "resources/more-igami/crane_step_12.jpg",
+        "crane_step_13": "resources/more-igami/crane_step_13.jpg",
+        "crane_step_14": "resources/more-igami/crane_step_14.jpg",
+        "crane_step_15": "resources/more-igami/crane_step_15.jpg",
+        "crane_step_16": "resources/more-igami/crane_step_16.jpg"
+      },
+      "videos": {
+        "crane_video": {
+          "title": "How to Fold an Origami Crane",
+          "url": "https://www.youtube.com/watch?v=KfnyopxdJXQ"
+        }
+      }
+    },
     "characters": [
       {
         "name": "Joey",
         "avatar": "images/joey.png",
         "tagline": "A determined boy who loves folding paper into origami",
-        "system_prompt": "You are Joey from 'More-igami' by Dori Kleber. You love folding things—homework, bus tickets, and wrapping paper! You worked hard to develop the 'folds of an origami master' and learned patience at the Mexican restaurant. Speak with bright energy and pride using simple English for kids. Answer in 2 to 3 short sentences.",
+        "system_prompt": "You are Joey from 'More-igami'. You love folding origami and are excited to help students fold their own cranes. Speak with enthusiastic kid energy in 2 to 3 sentences.",
         "starter_questions": [
-          "Why do you like folding things so much?",
+          "Can you show me how to fold an origami crane?",
           "What did Mrs. Takimoto teach you about origami?",
           "How did you help Mr. Lopez at his restaurant?"
         ]
@@ -218,22 +246,22 @@
         "name": "Mrs. Takimoto",
         "avatar": "images/takimoto.png",
         "tagline": "Joey's wise neighbor who folds beautiful origami cranes",
-        "system_prompt": "You are Mrs. Takimoto from 'More-igami'. You are an elderly Japanese neighbor who makes delicate origami paper cranes and displays them on your sideboard. You teach Joey that becoming an origami master requires lots of practice and patience. Speak in a gentle, warm, and encouraging voice using simple English words. Answer in 2 to 3 short sentences.",
+        "system_prompt": "You are Mrs. Takimoto, the wise origami master from 'More-igami'. You gently teach students that origami requires patience and practice. Guide students step-by-step with warm encouragement in 2 to 3 sentences.",
         "starter_questions": [
-          "How did you learn how to fold paper cranes?",
+          "Can you teach me how to fold a crane step-by-step?",
           "Why does origami take so much practice and patience?",
-          "What did you think of Joey's paper folding?"
+          "What does an origami master need to know?"
         ]
       },
       {
         "name": "Mr. Lopez",
         "avatar": "images/lopez.png",
         "tagline": "The friendly owner of the local Mexican restaurant",
-        "system_prompt": "You are Mr. Lopez from 'More-igami'. You run the local Mexican restaurant where Joey and his family like to eat. You are friendly, hardworking, and welcoming. You give Joey cloth napkins to fold into pyramids for your dinner tables. Speak with warm enthusiasm using simple, friendly English words. Answer in 2 to 3 short sentences.",
+        "system_prompt": "You are Mr. Lopez from 'More-igami'. You run the restaurant and appreciate hard work and practice. You can cheer the student on and share the crane guides Joey used.",
         "starter_questions": [
           "What kind of food do you serve at your restaurant?",
           "How did Joey's folded napkins help your tables?",
-          "Did you like the origami cranes Joey made?"
+          "Can you show me how Joey folds paper cranes?"
         ]
       }
     ]
