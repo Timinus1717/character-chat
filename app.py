@@ -34,7 +34,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. High-Contrast Sky-Blue & Pure White CSS
+# 4. High-Contrast Sky-Blue & Pure White CSS (Tight Sidebar Spacing)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -273,7 +273,7 @@ st.markdown("""
     }
 
     /* =========================================================
-       SIDEBAR: DIRECT BUBBLE & TITLE NAVIGATION
+       SIDEBAR: TIGHTENED VERTICAL NAVIGATION SPACING
        ========================================================= */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
@@ -293,12 +293,24 @@ st.markdown("""
     [data-testid="stSidebar"] p {
         color: #0f172a !important;
         font-weight: 700;
+        margin-bottom: 0.25rem !important;
     }
 
-    /* Vertically align image columns with button columns */
+    /* Tighten default Streamlit vertical block gaps */
+    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+        gap: 0.25rem !important;
+    }
+    [data-testid="stSidebar"] [data-testid="stElementContainer"] {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* Vertically align image columns with button columns & minimize vertical margins */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
         align-items: center !important;
-        margin-bottom: 6px !important;
+        margin-top: 1px !important;
+        margin-bottom: 2px !important;
+        gap: 0.35rem !important;
     }
 
     /* Book Bubbles */
@@ -326,15 +338,18 @@ st.markdown("""
         margin: auto;
     }
 
-    /* Book Title Buttons */
+    /* Book Title Buttons - Compact vertical padding */
+    .sidebar-book-btn {
+        margin-top: 3px !important;
+    }
     .sidebar-book-btn .stButton button {
         background-color: #f0f9ff !important;
         color: #0c4a6e !important;
         border: 1.5px solid #bae6fd !important;
-        border-radius: 14px !important;
+        border-radius: 12px !important;
         font-size: 0.88rem !important;
         font-weight: 700 !important;
-        padding: 8px 12px !important;
+        padding: 5px 10px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
@@ -343,6 +358,8 @@ st.markdown("""
         width: 100% !important;
         box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
         transition: all 0.2s ease !important;
+        min-height: 40px !important;
+        margin: 0 !important;
     }
     .sidebar-book-btn .stButton button:hover {
         background-color: #e0f2fe !important;
@@ -383,15 +400,15 @@ st.markdown("""
         margin: auto;
     }
 
-    /* Character Selection Buttons */
+    /* Character Selection Buttons - Compact vertical padding */
     .sidebar-char-btn .stButton button {
         background-color: #ffffff !important;
         color: #1e293b !important;
         border: 1.5px solid #cbd5e1 !important;
-        border-radius: 12px !important;
+        border-radius: 10px !important;
         font-size: 0.83rem !important;
         font-weight: 600 !important;
-        padding: 6px 10px !important;
+        padding: 4px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
@@ -400,6 +417,8 @@ st.markdown("""
         width: 100% !important;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
         transition: all 0.2s ease !important;
+        min-height: 32px !important;
+        margin: 0 !important;
     }
     .sidebar-char-btn .stButton button:hover {
         background-color: #e0f2fe !important;
@@ -410,10 +429,10 @@ st.markdown("""
         background-color: #0284c7 !important;
         color: #ffffff !important;
         border: 1.5px solid #0284c7 !important;
-        border-radius: 12px !important;
+        border-radius: 10px !important;
         font-size: 0.83rem !important;
         font-weight: 700 !important;
-        padding: 6px 10px !important;
+        padding: 4px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
@@ -421,6 +440,8 @@ st.markdown("""
         line-height: 1.2 !important;
         width: 100% !important;
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
+        min-height: 32px !important;
+        margin: 0 !important;
     }
 
     /* Sticky Profile Card at Bottom of Sidebar */
@@ -430,7 +451,7 @@ st.markdown("""
         bottom: 0 !important;
         z-index: 1000 !important;
         background: #ffffff !important;
-        padding-top: 10px !important;
+        padding-top: 8px !important;
         padding-bottom: 8px !important;
         margin-top: auto !important;
         box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.12) !important;
@@ -440,53 +461,53 @@ st.markdown("""
     .light-profile-card {
         background: #f8fafc !important;
         border-radius: 18px;
-        padding: 12px 10px;
+        padding: 10px 10px;
         text-align: center;
         border: 1.5px solid #cbd5e1 !important;
     }
     .light-profile-avatar {
-        width: 64px;
-        height: 64px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         object-fit: cover;
-        margin: 0 auto 6px auto;
+        margin: 0 auto 4px auto;
         display: block;
         border: 2.5px solid #0284c7;
         box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
     .light-profile-avatar-fallback {
-        width: 64px;
-        height: 64px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
-        font-size: 30px;
+        font-size: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 6px auto;
+        margin: 0 auto 4px auto;
     }
     .light-profile-name {
-        font-size: 0.98rem;
+        font-size: 0.96rem;
         font-weight: 700;
         color: #0f172a !important;
-        margin-bottom: 2px;
+        margin-bottom: 1px;
     }
     .light-profile-book {
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         color: #0369a1 !important;
         font-weight: 700;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
     .light-profile-bio {
         background: #ffffff !important;
         border: 1px solid #cbd5e1;
         border-radius: 10px;
-        padding: 8px 10px;
-        font-size: 0.80rem;
+        padding: 6px 8px;
+        font-size: 0.78rem;
         color: #1e293b !important;
         text-align: left;
-        line-height: 1.45;
+        line-height: 1.4;
         font-weight: 500;
     }
 
@@ -494,11 +515,11 @@ st.markdown("""
         background-color: #ffffff !important;
         color: #be123c !important;
         border: 1.5px solid #fda4af !important;
-        border-radius: 20px !important;
-        font-size: 0.82rem !important;
+        border-radius: 16px !important;
+        font-size: 0.80rem !important;
         font-weight: 700 !important;
-        padding: 6px 12px !important;
-        margin-top: 6px !important;
+        padding: 5px 10px !important;
+        margin-top: 4px !important;
         transition: all 0.2s ease !important;
     }
     .clear-chat-container .stButton button:hover {
@@ -516,7 +537,7 @@ client = OpenAI(
     api_key=api_key or "missing_key"
 )
 
-# Unrestricted paid tier model (Dedicated compute, fast, simple English roleplay)
+# Unrestricted paid tier model
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
 
 # 6. Load Catalog
@@ -552,7 +573,7 @@ if "selected_char" not in st.session_state:
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 8. Sidebar Directory: Direct Story & Character Bubbles
+# 8. Sidebar Directory: Direct Story & Character Bubbles (Tight Spacing)
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -575,7 +596,7 @@ for story_name, story_data in catalog.items():
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Indented Character Bubbles (only visible when story is expanded)
+    # Indented Character Bubbles
     if is_expanded:
         for char_obj in story_data["characters"]:
             is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
@@ -584,7 +605,6 @@ for story_name, story_data in catalog.items():
             thumb_class = "char-bubble-thumb-active" if is_active else "char-bubble-thumb"
             char_thumb_html = f'<img class="{thumb_class}" src="{char_b64}">' if char_b64 else '<div class="char-bubble-fallback">👤</div>'
             
-            # 3-column layout provides the clean visual indentation
             col_ind, col_c_thumb, col_c_btn = st.sidebar.columns([0.35, 0.9, 3.75])
             with col_c_thumb:
                 st.markdown(char_thumb_html, unsafe_allow_html=True)
