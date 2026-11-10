@@ -205,22 +205,22 @@
     "resources": {
       "images": {
         "crane_steps": "resources/more-igami/crane_steps.jpg",
-        "crane_step_1": "resources/more-igami/crane_step_1.jpg",
-        "crane_step_2": "resources/more-igami/crane_step_2.jpg",
-        "crane_step_3": "resources/more-igami/crane_step_3.jpg",
-        "crane_step_4": "resources/more-igami/crane_step_4.jpg",
-        "crane_step_5": "resources/more-igami/crane_step_5.jpg",
-        "crane_step_6": "resources/more-igami/crane_step_6.jpg",
-        "crane_step_7": "resources/more-igami/crane_step_7.jpg",
-        "crane_step_8": "resources/more-igami/crane_step_8.jpg",
-        "crane_step_9": "resources/more-igami/crane_step_9.jpg",
-        "crane_step_10": "resources/more-igami/crane_step_10.jpg",
-        "crane_step_11": "resources/more-igami/crane_step_11.jpg",
-        "crane_step_12": "resources/more-igami/crane_step_12.jpg",
-        "crane_step_13": "resources/more-igami/crane_step_13.jpg",
-        "crane_step_14": "resources/more-igami/crane_step_14.jpg",
-        "crane_step_15": "resources/more-igami/crane_step_15.jpg",
-        "crane_step_16": "resources/more-igami/crane_step_16.jpg"
+        "crane_step_1": "resources/more-igami/crane_steps_1.jpg",
+        "crane_step_2": "resources/more-igami/crane_steps_2.jpg",
+        "crane_step_3": "resources/more-igami/crane_steps_3.jpg",
+        "crane_step_4": "resources/more-igami/crane_steps_4.jpg",
+        "crane_step_5": "resources/more-igami/crane_steps_5.jpg",
+        "crane_step_6": "resources/more-igami/crane_steps_6.jpg",
+        "crane_step_7": "resources/more-igami/crane_steps_7.jpg",
+        "crane_step_8": "resources/more-igami/crane_steps_8.jpg",
+        "crane_step_9": "resources/more-igami/crane_steps_9.jpg",
+        "crane_step_10": "resources/more-igami/crane_steps_10.jpg",
+        "crane_step_11": "resources/more-igami/crane_steps_11.jpg",
+        "crane_step_12": "resources/more-igami/crane_steps_12.jpg",
+        "crane_step_13": "resources/more-igami/crane_steps_13.jpg",
+        "crane_step_14": "resources/more-igami/crane_steps_14.jpg",
+        "crane_step_15": "resources/more-igami/crane_steps_15.jpg",
+        "crane_step_16": "resources/more-igami/crane_steps_16.jpg"
       },
       "videos": {
         "crane_video": {
