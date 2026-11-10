@@ -34,7 +34,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. High-Contrast Sky-Blue & Pure White CSS (Tight Sidebar Spacing)
+# 4. High-Contrast Sky-Blue & Pure White CSS (Mobile Responsive)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -273,7 +273,7 @@ st.markdown("""
     }
 
     /* =========================================================
-       SIDEBAR: TIGHTENED VERTICAL NAVIGATION SPACING
+       SIDEBAR: MOBILE-RESILIENT HORIZONTAL ALIGNMENT
        ========================================================= */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
@@ -296,7 +296,7 @@ st.markdown("""
         margin-bottom: 0.25rem !important;
     }
 
-    /* Tighten default Streamlit vertical block gaps */
+    /* Tighten Streamlit default vertical gaps */
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
         gap: 0.25rem !important;
     }
@@ -305,18 +305,67 @@ st.markdown("""
         padding-bottom: 0 !important;
     }
 
-    /* Vertically align image columns with button columns & minimize vertical margins */
+    /* FORCE HORIZONTAL ROW ALIGNMENT ON BOTH MOBILE AND DESKTOP */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
         align-items: center !important;
-        margin-top: 1px !important;
-        margin-bottom: 2px !important;
-        gap: 0.35rem !important;
+        width: 100% !important;
+        gap: 8px !important;
+        margin-top: 2px !important;
+        margin-bottom: 3px !important;
+    }
+
+    /* Column 1 (Thumbnail): Fixed Width, NEVER Stacks on Mobile */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child {
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        flex: 0 0 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+    }
+
+    /* Column 2 (Button): Fills Remaining Space */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > [data-testid="column"]:last-child {
+        width: calc(100% - 52px) !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 !important;
+    }
+
+    /* Indented Character Rows (2-Column Layout with Padding) */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb),
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb-active),
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-fallback) {
+        padding-left: 18px !important;
+        box-sizing: border-box !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb) > [data-testid="column"]:first-child,
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb-active) > [data-testid="column"]:first-child,
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-fallback) > [data-testid="column"]:first-child {
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        flex: 0 0 36px !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb) > [data-testid="column"]:last-child,
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-thumb-active) > [data-testid="column"]:last-child,
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.char-bubble-fallback) > [data-testid="column"]:last-child {
+        width: calc(100% - 44px) !important;
     }
 
     /* Book Bubbles */
     .book-bubble-thumb {
-        width: 44px;
-        height: 44px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
         object-fit: cover;
         border: 2.5px solid #0284c7;
@@ -325,31 +374,31 @@ st.markdown("""
         margin: auto;
     }
     .book-bubble-fallback {
-        width: 44px;
-        height: 44px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: 19px;
         box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
         margin: auto;
     }
 
-    /* Book Title Buttons - Compact vertical padding */
+    /* Book Title Buttons */
     .sidebar-book-btn {
-        margin-top: 3px !important;
+        width: 100% !important;
     }
     .sidebar-book-btn .stButton button {
         background-color: #f0f9ff !important;
         color: #0c4a6e !important;
         border: 1.5px solid #bae6fd !important;
         border-radius: 12px !important;
-        font-size: 0.88rem !important;
+        font-size: 0.86rem !important;
         font-weight: 700 !important;
-        padding: 5px 10px !important;
+        padding: 6px 10px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
@@ -358,7 +407,7 @@ st.markdown("""
         width: 100% !important;
         box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
         transition: all 0.2s ease !important;
-        min-height: 40px !important;
+        min-height: 38px !important;
         margin: 0 !important;
     }
     .sidebar-book-btn .stButton button:hover {
@@ -367,10 +416,10 @@ st.markdown("""
         color: #0284c7 !important;
     }
 
-    /* Indented Character Bubbles */
+    /* Character Bubbles */
     .char-bubble-thumb {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         object-fit: cover;
         border: 1.5px solid #93c5fd;
@@ -378,8 +427,8 @@ st.markdown("""
         margin: auto;
     }
     .char-bubble-thumb-active {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid #0284c7;
@@ -388,27 +437,30 @@ st.markdown("""
         margin: auto;
     }
     .char-bubble-fallback {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         background: #e0f2fe;
         color: #0284c7;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 15px;
+        font-size: 14px;
         margin: auto;
     }
 
-    /* Character Selection Buttons - Compact vertical padding */
+    /* Character Selection Buttons */
+    .sidebar-char-btn {
+        width: 100% !important;
+    }
     .sidebar-char-btn .stButton button {
         background-color: #ffffff !important;
         color: #1e293b !important;
         border: 1.5px solid #cbd5e1 !important;
         border-radius: 10px !important;
-        font-size: 0.83rem !important;
+        font-size: 0.82rem !important;
         font-weight: 600 !important;
-        padding: 4px 8px !important;
+        padding: 5px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
@@ -425,14 +477,17 @@ st.markdown("""
         color: #0284c7 !important;
         border-color: #0284c7 !important;
     }
+    .sidebar-char-btn-active {
+        width: 100% !important;
+    }
     .sidebar-char-btn-active .stButton button {
         background-color: #0284c7 !important;
         color: #ffffff !important;
         border: 1.5px solid #0284c7 !important;
         border-radius: 10px !important;
-        font-size: 0.83rem !important;
+        font-size: 0.82rem !important;
         font-weight: 700 !important;
-        padding: 4px 8px !important;
+        padding: 5px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
@@ -461,13 +516,13 @@ st.markdown("""
     .light-profile-card {
         background: #f8fafc !important;
         border-radius: 18px;
-        padding: 10px 10px;
+        padding: 8px 10px;
         text-align: center;
         border: 1.5px solid #cbd5e1 !important;
     }
     .light-profile-avatar {
-        width: 60px;
-        height: 60px;
+        width: 54px;
+        height: 54px;
         border-radius: 50%;
         object-fit: cover;
         margin: 0 auto 4px auto;
@@ -476,25 +531,25 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
     .light-profile-avatar-fallback {
-        width: 60px;
-        height: 60px;
+        width: 54px;
+        height: 54px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
-        font-size: 28px;
+        font-size: 26px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 4px auto;
     }
     .light-profile-name {
-        font-size: 0.96rem;
+        font-size: 0.94rem;
         font-weight: 700;
         color: #0f172a !important;
         margin-bottom: 1px;
     }
     .light-profile-book {
-        font-size: 0.76rem;
+        font-size: 0.74rem;
         color: #0369a1 !important;
         font-weight: 700;
         margin-bottom: 4px;
@@ -504,10 +559,10 @@ st.markdown("""
         border: 1px solid #cbd5e1;
         border-radius: 10px;
         padding: 6px 8px;
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         color: #1e293b !important;
         text-align: left;
-        line-height: 1.4;
+        line-height: 1.35;
         font-weight: 500;
     }
 
@@ -516,9 +571,9 @@ st.markdown("""
         color: #be123c !important;
         border: 1.5px solid #fda4af !important;
         border-radius: 16px !important;
-        font-size: 0.80rem !important;
+        font-size: 0.78rem !important;
         font-weight: 700 !important;
-        padding: 5px 10px !important;
+        padding: 4px 10px !important;
         margin-top: 4px !important;
         transition: all 0.2s ease !important;
     }
@@ -573,7 +628,7 @@ if "selected_char" not in st.session_state:
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 8. Sidebar Directory: Direct Story & Character Bubbles (Tight Spacing)
+# 8. Sidebar Directory: Direct Story & Character Bubbles (Mobile-Friendly 2-Column Grid)
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -596,7 +651,7 @@ for story_name, story_data in catalog.items():
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Indented Character Bubbles
+    # Indented Character Bubbles (Uses identical 2-column layout to prevent mobile stacking)
     if is_expanded:
         for char_obj in story_data["characters"]:
             is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
@@ -605,7 +660,7 @@ for story_name, story_data in catalog.items():
             thumb_class = "char-bubble-thumb-active" if is_active else "char-bubble-thumb"
             char_thumb_html = f'<img class="{thumb_class}" src="{char_b64}">' if char_b64 else '<div class="char-bubble-fallback">👤</div>'
             
-            col_ind, col_c_thumb, col_c_btn = st.sidebar.columns([0.35, 0.9, 3.75])
+            col_c_thumb, col_c_btn = st.sidebar.columns([1, 4])
             with col_c_thumb:
                 st.markdown(char_thumb_html, unsafe_allow_html=True)
             with col_c_btn:
