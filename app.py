@@ -22,7 +22,7 @@ def get_hkt_time():
     hkt_zone = timezone(timedelta(hours=8))
     return datetime.now(hkt_zone).strftime("%I:%M %p").lower()
 
-# 3. Base64 Image Encoder (Supports PNG, JPEG, JPG seamlessly)
+# 3. Base64 Image Encoder (Handles PNG/JPEG/JPG, case variations, and 1 vs 01 padding)
 def get_image_base64(relative_path):
     if not relative_path:
         return None
@@ -30,11 +30,34 @@ def get_image_base64(relative_path):
     full_path = os.path.join(BASE_DIR, relative_path)
     candidate_paths = [full_path]
     
+    # Check alternate extensions
     root, ext = os.path.splitext(full_path)
-    for alt_ext in [".jpeg", ".jpg", ".png"]:
-        if alt_ext != ext.lower():
+    for alt_ext in [".jpeg", ".jpg", ".png", ".JPG", ".JPEG", ".PNG"]:
+        if alt_ext != ext:
             candidate_paths.append(root + alt_ext)
             
+    # Check zero-padding differences (e.g. crane_steps_1.jpg <-> crane_steps_01.jpg)
+    base_dir_part = os.path.dirname(full_path)
+    filename_part = os.path.basename(full_path)
+    
+    # If ends in _1 to _9, also test _01 to _09
+    match_single = re.search(r'_([1-9])\.', filename_part)
+    if match_single:
+        num = match_single.group(1)
+        padded_name = filename_part.replace(f"_{num}.", f"_0{num}.")
+        candidate_paths.append(os.path.join(base_dir_part, padded_name))
+        for alt_ext in [".jpeg", ".jpg", ".png", ".JPG", ".JPEG", ".PNG"]:
+            candidate_paths.append(os.path.join(base_dir_part, os.path.splitext(padded_name)[0] + alt_ext))
+        
+    # If ends in _01 to _09, also test _1 to _9
+    match_padded = re.search(r'_0([1-9])\.', filename_part)
+    if match_padded:
+        num = match_padded.group(1)
+        unpadded_name = filename_part.replace(f"_0{num}.", f"_{num}.")
+        candidate_paths.append(os.path.join(base_dir_part, unpadded_name))
+        for alt_ext in [".jpeg", ".jpg", ".png", ".JPG", ".JPEG", ".PNG"]:
+            candidate_paths.append(os.path.join(base_dir_part, os.path.splitext(unpadded_name)[0] + alt_ext))
+
     for path in candidate_paths:
         if os.path.isfile(path):
             with open(path, "rb") as f:
@@ -60,7 +83,7 @@ def load_story_text(story_name: str) -> str:
     return ""
 
 # 5. Media Parser: Converts [IMAGE:key] and [VIDEO:key] into visual embeds
-def render_media_content(text: str, story_resources: dict) -> str:
+def render_media_content(text: str, story_resources: dict, current_story_slug: str) -> str:
     """Replaces [IMAGE:key] and [VIDEO:key] tags with inline image and video HTML."""
     if not text:
         return ""
@@ -71,15 +94,28 @@ def render_media_content(text: str, story_resources: dict) -> str:
     # Replace [IMAGE:key]
     def replace_img(match):
         key = match.group(1).strip()
+        
+        # 1. Exact match in JSON resources
         rel_path = images_map.get(key)
-        if rel_path:
-            img_b64 = get_image_base64(rel_path)
-            if img_b64:
-                return (
-                    f'<div class="chat-media-container">'
-                    f'<img src="{img_b64}" class="chat-embedded-img" alt="{key}" />'
-                    f'</div>'
-                )
+        
+        # 2. Check unpadded/padded variation in JSON
+        if not rel_path and re.search(r'_\d+$', key):
+            prefix, num_str = key.rsplit('_', 1)
+            num_val = int(num_str)
+            alt_key = f"{prefix}_{num_val:02d}" if len(num_str) == 1 else f"{prefix}_{num_val}"
+            rel_path = images_map.get(alt_key)
+            
+        # 3. Direct file system fallback
+        if not rel_path:
+            rel_path = f"resources/{current_story_slug}/{key}.jpg"
+            
+        img_b64 = get_image_base64(rel_path)
+        if img_b64:
+            return (
+                f'<div class="chat-media-container">'
+                f'<img src="{img_b64}" class="chat-embedded-img" alt="{key}" />'
+                f'</div>'
+            )
         return ""
 
     # Replace [VIDEO:key]
@@ -88,7 +124,6 @@ def render_media_content(text: str, story_resources: dict) -> str:
         vid_info = videos_map.get(key)
         if vid_info:
             url = vid_info.get("url", "")
-            # Extract YouTube video ID
             yt_match = re.search(r'(?:v=|\/|youtu\.be\/)([0-9A-Za-z_-]{11})', url)
             if yt_match:
                 vid_id = yt_match.group(1)
@@ -103,8 +138,8 @@ def render_media_content(text: str, story_resources: dict) -> str:
                 )
         return ""
 
-    processed = re.sub(r'\[IMAGE:([a-zA-Z0-9_\-]+)\]', replace_img, text)
-    processed = re.sub(r'\[VIDEO:([a-zA-Z0-9_\-]+)\]', replace_vid, processed)
+    processed = re.sub(r'\[IMAGE:\s*([a-zA-Z0-9_\-]+)\s*\]', replace_img, text)
+    processed = re.sub(r'\[VIDEO:\s*([a-zA-Z0-9_\-]+)\s*\]', replace_vid, processed)
     return processed
 
 # 6. High-Contrast Sky-Blue & Pure White CSS
@@ -720,6 +755,7 @@ for story_name, story_data in catalog.items():
 selected_story = st.session_state.selected_story
 chars_in_story = catalog[selected_story]["characters"]
 story_resources = catalog[selected_story].get("resources", {})
+story_slug = selected_story.lower().replace(" ", "-").replace("'", "")
 
 current_char = next((c for c in chars_in_story if c["name"] == st.session_state.selected_char), chars_in_story[0])
 st.session_state.selected_char = current_char["name"]
@@ -793,8 +829,7 @@ for msg in current_messages:
     role = msg["role"]
     raw_content = msg["content"]
     
-    # Process [IMAGE:key] and [VIDEO:key] embeds for assistant replies
-    rendered_content = render_media_content(raw_content, story_resources) if role == "assistant" else raw_content
+    rendered_content = render_media_content(raw_content, story_resources, story_slug) if role == "assistant" else raw_content
     
     st.markdown(
         f'<div class="msg-row {role}"><div class="msg-bubble {role}">{rendered_content}</div></div>',
@@ -849,8 +884,6 @@ if user_query:
     # Dynamic Media Aids Instruction
     media_instructions = ""
     if story_resources:
-        available_imgs = list(story_resources.get("images", {}).keys())
-        available_vids = list(story_resources.get("videos", {}).keys())
         media_instructions = (
             "\n\nLEARNING AIDS YOU CAN SHARE:\n"
             "- If the student asks for the complete crane instructions or overall diagram, output: [IMAGE:crane_steps]\n"
@@ -914,8 +947,7 @@ if user_query:
                     has_started_typing = True
 
                 if has_started_typing:
-                    # Render live text while streaming (media tags resolve cleanly once completed)
-                    display_content = render_media_content(full_response_text, story_resources)
+                    display_content = render_media_content(full_response_text, story_resources, story_slug)
                     bubble_placeholder.markdown(
                         f'<div class="msg-row assistant"><div class="msg-bubble assistant">{display_content}</div></div>',
                         unsafe_allow_html=True
