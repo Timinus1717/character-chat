@@ -34,7 +34,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. Mobile-Responsive & High-Contrast CSS
+# 4. Streamlined Mobile-First CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -63,7 +63,7 @@ st.markdown("""
         background-color: transparent !important;
     }
 
-    /* Sticky Header */
+    /* Sticky Chat Header */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
@@ -212,7 +212,6 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(2, 132, 199, 0.10);
     }
 
-    /* Starter Question Buttons */
     .block-container .stButton button {
         background-color: #ffffff !important;
         color: #0369a1 !important;
@@ -232,7 +231,7 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(2, 132, 199, 0.3) !important;
     }
 
-    /* Chat Input */
+    /* Bottom Chat Input */
     [data-testid="stBottom"],
     [data-testid="stBottom"] > div,
     [data-testid="stBottom"] > div > div {
@@ -277,7 +276,7 @@ st.markdown("""
     }
 
     /* =========================================================
-       SIDEBAR: TIGHT SPACING WITHOUT HORIZONTAL OVERFLOW
+       SIDEBAR: RESILIENT SINGLE-ROW NAVIGATION (NO ST.COLUMNS)
        ========================================================= */
     [data-testid="stSidebar"],
     [data-testid="stSidebar"] > div {
@@ -298,81 +297,86 @@ st.markdown("""
         font-weight: 700;
         margin-top: 0.2rem !important;
         margin-bottom: 0.4rem !important;
-        padding-left: 4px !important;
+        padding-left: 2px !important;
     }
 
-    /* Remove excessive block gap */
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        gap: 0.2rem !important;
+        gap: 0.25rem !important;
     }
 
-    /* Natural Flex Row (Never stacks, never overflows) */
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        gap: 6px !important;
-        width: 100% !important;
-        margin-top: 2px !important;
-        margin-bottom: 2px !important;
+    /* Single Row Wrapper: Holds image + button in strict 1-line flex */
+    .nav-row-item {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 3px;
+        box-sizing: border-box;
+    }
+    .nav-row-item.char-row {
+        padding-left: 14px; /* CSS Indentation for characters */
     }
 
-    /* Col 1 (Avatar): Shrinks tightly around the image */
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
-        flex: 0 0 auto !important;
-        width: auto !important;
-        min-width: unset !important;
-        max-width: unset !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    /* Col 2 (Button): Fills remaining width without pushing outside the drawer */
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
-        flex: 1 1 0 !important;
-        width: auto !important;
-        min-width: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    /* Book Avatar */
-    .book-bubble-thumb {
-        width: 38px;
-        height: 38px;
+    /* Inline Avatar Bubbles */
+    .inline-bubble {
+        flex: 0 0 auto;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #0284c7;
-        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
+        margin-right: 6px !important; /* EXACT 6px GAP */
         display: block;
     }
-    .book-bubble-fallback {
+    .inline-bubble.book-thumb {
         width: 38px;
         height: 38px;
+        border: 2px solid #0284c7;
+        box-shadow: 0 2px 5px rgba(2, 132, 199, 0.15);
+    }
+    .inline-bubble.char-thumb {
+        width: 30px;
+        height: 30px;
+        border: 1.5px solid #93c5fd;
+    }
+    .inline-bubble.char-thumb.active {
+        border: 2px solid #0284c7;
+        box-shadow: 0 0 6px rgba(2, 132, 199, 0.45);
+    }
+
+    .inline-fallback {
+        flex: 0 0 auto;
         border-radius: 50%;
-        background: #0284c7;
-        color: white;
+        margin-right: 6px !important;
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+    .inline-fallback.book-thumb {
+        width: 38px;
+        height: 38px;
+        background: #0284c7;
+        color: white;
         font-size: 18px;
-        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
+    }
+    .inline-fallback.char-thumb {
+        width: 30px;
+        height: 30px;
+        background: #e0f2fe;
+        color: #0284c7;
+        font-size: 13px;
     }
 
-    /* Book Title Button */
-    .sidebar-book-btn {
-        width: 100% !important;
+    /* Embedded Button container inside flex */
+    .nav-btn-target {
+        flex: 1 1 auto;
+        min-width: 0;
     }
-    .sidebar-book-btn .stButton,
-    .sidebar-book-btn .stButton button {
+    .nav-btn-target .stButton,
+    .nav-btn-target .stButton button {
         width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
     }
-    .sidebar-book-btn .stButton button {
+
+    /* Book Button */
+    .book-btn-style .stButton button {
         background-color: #f0f9ff !important;
         color: #0c4a6e !important;
         border: 1.5px solid #bae6fd !important;
@@ -387,56 +391,15 @@ st.markdown("""
         line-height: 1.25 !important;
         min-height: 36px !important;
         box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
-        transition: all 0.2s ease !important;
     }
-    .sidebar-book-btn .stButton button:hover {
+    .book-btn-style .stButton button:hover {
         background-color: #e0f2fe !important;
         border-color: #0284c7 !important;
         color: #0284c7 !important;
     }
 
-    /* Character Avatar with CSS Indentation */
-    .char-bubble-thumb {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 1.5px solid #93c5fd;
-        display: block;
-        margin-left: 14px !important;
-    }
-    .char-bubble-thumb-active {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #0284c7;
-        box-shadow: 0 0 6px rgba(2, 132, 199, 0.45);
-        display: block;
-        margin-left: 14px !important;
-    }
-    .char-bubble-fallback {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: #e0f2fe;
-        color: #0284c7;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 13px;
-        margin-left: 14px !important;
-    }
-
-    /* Character Selection Button */
-    .sidebar-char-btn {
-        width: 100% !important;
-    }
-    .sidebar-char-btn .stButton,
-    .sidebar-char-btn .stButton button {
-        width: 100% !important;
-    }
-    .sidebar-char-btn .stButton button {
+    /* Inactive Character Button */
+    .char-btn-style .stButton button {
         background-color: #ffffff !important;
         color: #1e293b !important;
         border: 1.5px solid #cbd5e1 !important;
@@ -451,21 +414,15 @@ st.markdown("""
         line-height: 1.2 !important;
         min-height: 32px !important;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
-        transition: all 0.2s ease !important;
     }
-    .sidebar-char-btn .stButton button:hover {
+    .char-btn-style .stButton button:hover {
         background-color: #e0f2fe !important;
         color: #0284c7 !important;
         border-color: #0284c7 !important;
     }
-    .sidebar-char-btn-active {
-        width: 100% !important;
-    }
-    .sidebar-char-btn-active .stButton,
-    .sidebar-char-btn-active .stButton button {
-        width: 100% !important;
-    }
-    .sidebar-char-btn-active .stButton button {
+
+    /* Active Character Button */
+    .char-btn-style-active .stButton button {
         background-color: #0284c7 !important;
         color: #ffffff !important;
         border: 1.5px solid #0284c7 !important;
@@ -609,55 +566,46 @@ first_char_name = catalog[st.session_state.selected_story]["characters"][0]["nam
 if "selected_char" not in st.session_state:
     st.session_state.selected_char = first_char_name
 
-# Track open dropdowns (default first story expanded)
+# Track open dropdowns
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 8. Sidebar Directory: Direct Story & Character Bubbles (Natural Auto-Fit)
+# 8. Sidebar Directory (Unified HTML Flex Rows, No st.columns)
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
     is_expanded = story_name in st.session_state.expanded_stories
     cover_b64 = get_image_base64(story_data.get("cover", ""))
-    cover_html = f'<img class="book-bubble-thumb" src="{cover_b64}">' if cover_b64 else '<div class="book-bubble-fallback">📖</div>'
-    
-    # Story Bubble & Title Row
-    col_b_thumb, col_b_btn = st.sidebar.columns([1, 6])
-    with col_b_thumb:
-        st.markdown(cover_html, unsafe_allow_html=True)
-    with col_b_btn:
-        st.markdown('<div class="sidebar-book-btn">', unsafe_allow_html=True)
-        arrow = "▾" if is_expanded else "▸"
-        if st.button(f"{arrow} {story_name}", key=f"book_toggle_{story_name}", use_container_width=True):
-            if is_expanded:
-                st.session_state.expanded_stories.remove(story_name)
-            else:
-                st.session_state.expanded_stories.add(story_name)
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+    cover_html = f'<img class="inline-bubble book-thumb" src="{cover_b64}">' if cover_b64 else '<div class="inline-fallback book-thumb">📖</div>'
+    arrow = "▾" if is_expanded else "▸"
 
-    # Indented Character Bubbles
+    # Story Item in single HTML flex container
+    st.sidebar.markdown(f'<div class="nav-row-item">{cover_html}<div class="nav-btn-target book-btn-style">', unsafe_allow_html=True)
+    if st.sidebar.button(f"{arrow} {story_name}", key=f"book_btn_{story_name}", use_container_width=True):
+        if is_expanded:
+            st.session_state.expanded_stories.remove(story_name)
+        else:
+            st.session_state.expanded_stories.add(story_name)
+        st.rerun()
+    st.sidebar.markdown('</div></div>', unsafe_allow_html=True)
+
+    # Indented Characters in single HTML flex containers
     if is_expanded:
         for char_obj in story_data["characters"]:
             is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
             char_b64 = get_image_base64(char_obj.get("avatar", ""))
             
-            thumb_class = "char-bubble-thumb-active" if is_active else "char-bubble-thumb"
-            char_thumb_html = f'<img class="{thumb_class}" src="{char_b64}">' if char_b64 else '<div class="char-bubble-fallback">👤</div>'
+            active_class = "active" if is_active else ""
+            char_html = f'<img class="inline-bubble char-thumb {active_class}" src="{char_b64}">' if char_b64 else '<div class="inline-fallback char-thumb">👤</div>'
+            btn_style_class = "char-btn-style-active" if is_active else "char-btn-style"
             
-            col_c_thumb, col_c_btn = st.sidebar.columns([1, 6])
-            with col_c_thumb:
-                st.markdown(char_thumb_html, unsafe_allow_html=True)
-            with col_c_btn:
-                btn_class = "sidebar-char-btn-active" if is_active else "sidebar-char-btn"
-                st.markdown(f'<div class="{btn_class}">', unsafe_allow_html=True)
-                
-                label = f"💬 {char_obj['name']}" if is_active else char_obj["name"]
-                if st.button(label, key=f"sel_{story_name}_{char_obj['name']}", use_container_width=True):
-                    st.session_state.selected_story = story_name
-                    st.session_state.selected_char = char_obj["name"]
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
+            st.sidebar.markdown(f'<div class="nav-row-item char-row">{char_html}<div class="nav-btn-target {btn_style_class}">', unsafe_allow_html=True)
+            label = f"💬 {char_obj['name']}" if is_active else char_obj["name"]
+            if st.sidebar.button(label, key=f"char_btn_{story_name}_{char_obj['name']}", use_container_width=True):
+                st.session_state.selected_story = story_name
+                st.session_state.selected_char = char_obj["name"]
+                st.rerun()
+            st.sidebar.markdown('</div></div>', unsafe_allow_html=True)
 
 # Retrieve Active Character Details
 selected_story = st.session_state.selected_story
