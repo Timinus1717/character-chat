@@ -34,7 +34,7 @@ def get_image_base64(relative_path):
             return f"data:image/{mime};base64,{encoded}"
     return None
 
-# 4. High-Contrast Sky-Blue & Pure White CSS (Tight Sidebar Spacing)
+# 4. High-Contrast Sky-Blue & Pure White CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -273,7 +273,7 @@ st.markdown("""
     }
 
     /* =========================================================
-       SIDEBAR: TIGHTENED VERTICAL NAVIGATION SPACING
+       SIDEBAR & STABLE COLUMN RENDERING
        ========================================================= */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
@@ -296,7 +296,6 @@ st.markdown("""
         margin-bottom: 0.25rem !important;
     }
 
-    /* Tighten default Streamlit vertical block gaps */
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
         gap: 0.25rem !important;
     }
@@ -305,43 +304,39 @@ st.markdown("""
         padding-bottom: 0 !important;
     }
 
-    /* Vertically align image columns with button columns & minimize vertical margins */
+    /* Prevent vertical overlap in the column containers */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
         align-items: center !important;
-        margin-top: 1px !important;
+        margin-top: 2px !important;
         margin-bottom: 2px !important;
-        gap: 0.35rem !important;
+        gap: 0.4rem !important;
     }
 
     /* Book Bubbles */
     .book-bubble-thumb {
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2.5px solid #0284c7;
+        border: 2px solid #0284c7;
         box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
         display: block;
         margin: auto;
     }
     .book-bubble-fallback {
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         background: #0284c7;
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: 19px;
         box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
         margin: auto;
     }
 
-    /* Book Title Buttons - Compact vertical padding */
-    .sidebar-book-btn {
-        margin-top: 3px !important;
-    }
     .sidebar-book-btn .stButton button {
         background-color: #f0f9ff !important;
         color: #0c4a6e !important;
@@ -349,7 +344,7 @@ st.markdown("""
         border-radius: 12px !important;
         font-size: 0.88rem !important;
         font-weight: 700 !important;
-        padding: 5px 10px !important;
+        padding: 6px 10px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
@@ -358,7 +353,7 @@ st.markdown("""
         width: 100% !important;
         box-shadow: 0 1px 3px rgba(2, 132, 199, 0.06) !important;
         transition: all 0.2s ease !important;
-        min-height: 40px !important;
+        min-height: 38px !important;
         margin: 0 !important;
     }
     .sidebar-book-btn .stButton button:hover {
@@ -367,10 +362,10 @@ st.markdown("""
         color: #0284c7 !important;
     }
 
-    /* Indented Character Bubbles */
+    /* Character Bubbles */
     .char-bubble-thumb {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         object-fit: cover;
         border: 1.5px solid #93c5fd;
@@ -378,8 +373,8 @@ st.markdown("""
         margin: auto;
     }
     .char-bubble-thumb-active {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid #0284c7;
@@ -388,19 +383,18 @@ st.markdown("""
         margin: auto;
     }
     .char-bubble-fallback {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         background: #e0f2fe;
         color: #0284c7;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 15px;
+        font-size: 14px;
         margin: auto;
     }
 
-    /* Character Selection Buttons - Compact vertical padding */
     .sidebar-char-btn .stButton button {
         background-color: #ffffff !important;
         color: #1e293b !important;
@@ -408,7 +402,7 @@ st.markdown("""
         border-radius: 10px !important;
         font-size: 0.83rem !important;
         font-weight: 600 !important;
-        padding: 4px 8px !important;
+        padding: 5px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
@@ -432,7 +426,7 @@ st.markdown("""
         border-radius: 10px !important;
         font-size: 0.83rem !important;
         font-weight: 700 !important;
-        padding: 4px 8px !important;
+        padding: 5px 8px !important;
         text-align: left !important;
         justify-content: flex-start !important;
         white-space: normal !important;
@@ -454,367 +448,4 @@ st.markdown("""
         padding-top: 8px !important;
         padding-bottom: 8px !important;
         margin-top: auto !important;
-        box-shadow: 0 -12px 24px -4px rgba(2, 132, 199, 0.12) !important;
-        border-top: 1.5px solid #cbd5e1 !important;
-    }
-
-    .light-profile-card {
-        background: #f8fafc !important;
-        border-radius: 18px;
-        padding: 10px 10px;
-        text-align: center;
-        border: 1.5px solid #cbd5e1 !important;
-    }
-    .light-profile-avatar {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin: 0 auto 4px auto;
-        display: block;
-        border: 2.5px solid #0284c7;
-        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
-    }
-    .light-profile-avatar-fallback {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: #0284c7;
-        color: white;
-        font-size: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 4px auto;
-    }
-    .light-profile-name {
-        font-size: 0.96rem;
-        font-weight: 700;
-        color: #0f172a !important;
-        margin-bottom: 1px;
-    }
-    .light-profile-book {
-        font-size: 0.76rem;
-        color: #0369a1 !important;
-        font-weight: 700;
-        margin-bottom: 4px;
-    }
-    .light-profile-bio {
-        background: #ffffff !important;
-        border: 1px solid #cbd5e1;
-        border-radius: 10px;
-        padding: 6px 8px;
-        font-size: 0.78rem;
-        color: #1e293b !important;
-        text-align: left;
-        line-height: 1.4;
-        font-weight: 500;
-    }
-
-    .clear-chat-container .stButton button {
-        background-color: #ffffff !important;
-        color: #be123c !important;
-        border: 1.5px solid #fda4af !important;
-        border-radius: 16px !important;
-        font-size: 0.80rem !important;
-        font-weight: 700 !important;
-        padding: 5px 10px !important;
-        margin-top: 4px !important;
-        transition: all 0.2s ease !important;
-    }
-    .clear-chat-container .stButton button:hover {
-        background-color: #ffe4e6 !important;
-        border-color: #f43f5e !important;
-        color: #9f1239 !important;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# 5. OpenRouter Connection
-api_key = st.secrets.get("OPENROUTER_API_KEY", "")
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=api_key or "missing_key"
-)
-
-# Unrestricted paid tier model
-MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
-
-# 6. Load Catalog
-def load_catalog():
-    with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
-        data = json.load(f)
-    standardized = {}
-    for story_title, story_val in data.items():
-        if isinstance(story_val, list):
-            standardized[story_title] = {"cover": "", "characters": story_val}
-        else:
-            standardized[story_title] = story_val
-    return standardized
-
-catalog = load_catalog()
-all_stories = list(catalog.keys())
-
-# 7. Persistent Session Initialization
-if "character_chats" not in st.session_state:
-    st.session_state.character_chats = {}
-
-if "failed_prompts" not in st.session_state:
-    st.session_state.failed_prompts = {}
-
-if "selected_story" not in st.session_state:
-    st.session_state.selected_story = all_stories[0]
-
-first_char_name = catalog[st.session_state.selected_story]["characters"][0]["name"]
-if "selected_char" not in st.session_state:
-    st.session_state.selected_char = first_char_name
-
-# Track open dropdowns (default first story expanded)
-if "expanded_stories" not in st.session_state:
-    st.session_state.expanded_stories = {st.session_state.selected_story}
-
-# 8. Sidebar Directory: Direct Story & Character Bubbles (Tight Spacing)
-st.sidebar.markdown("### Conversations")
-
-for story_name, story_data in catalog.items():
-    is_expanded = story_name in st.session_state.expanded_stories
-    cover_b64 = get_image_base64(story_data.get("cover", ""))
-    cover_html = f'<img class="book-bubble-thumb" src="{cover_b64}">' if cover_b64 else '<div class="book-bubble-fallback">📖</div>'
-    
-    # Story Bubble & Title Row
-    col_b_thumb, col_b_btn = st.sidebar.columns([1, 4])
-    with col_b_thumb:
-        st.markdown(cover_html, unsafe_allow_html=True)
-    with col_b_btn:
-        st.markdown('<div class="sidebar-book-btn">', unsafe_allow_html=True)
-        arrow = "▾" if is_expanded else "▸"
-        if st.button(f"{arrow} {story_name}", key=f"book_toggle_{story_name}", use_container_width=True):
-            if is_expanded:
-                st.session_state.expanded_stories.remove(story_name)
-            else:
-                st.session_state.expanded_stories.add(story_name)
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # Indented Character Bubbles
-    if is_expanded:
-        for char_obj in story_data["characters"]:
-            is_active = (char_obj["name"] == st.session_state.selected_char and story_name == st.session_state.selected_story)
-            char_b64 = get_image_base64(char_obj.get("avatar", ""))
-            
-            thumb_class = "char-bubble-thumb-active" if is_active else "char-bubble-thumb"
-            char_thumb_html = f'<img class="{thumb_class}" src="{char_b64}">' if char_b64 else '<div class="char-bubble-fallback">👤</div>'
-            
-            col_ind, col_c_thumb, col_c_btn = st.sidebar.columns([0.35, 0.9, 3.75])
-            with col_c_thumb:
-                st.markdown(char_thumb_html, unsafe_allow_html=True)
-            with col_c_btn:
-                btn_class = "sidebar-char-btn-active" if is_active else "sidebar-char-btn"
-                st.markdown(f'<div class="{btn_class}">', unsafe_allow_html=True)
-                
-                label = f"💬 {char_obj['name']}" if is_active else char_obj["name"]
-                if st.button(label, key=f"sel_{story_name}_{char_obj['name']}", use_container_width=True):
-                    st.session_state.selected_story = story_name
-                    st.session_state.selected_char = char_obj["name"]
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
-
-# Retrieve Active Character Details
-selected_story = st.session_state.selected_story
-chars_in_story = catalog[selected_story]["characters"]
-current_char = next((c for c in chars_in_story if c["name"] == st.session_state.selected_char), chars_in_story[0])
-st.session_state.selected_char = current_char["name"]
-avatar_b64 = get_image_base64(current_char.get("avatar", ""))
-
-# 9. Locked Profile Card in Sidebar
-avatar_portrait_html = f'<img class="light-profile-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="light-profile-avatar-fallback">📖</div>'
-st.sidebar.markdown(f"""
-<div class="locked-profile-anchor">
-    <div class="light-profile-card">
-        {avatar_portrait_html}
-        <div class="light-profile-name">{current_char['name']}</div>
-        <div class="light-profile-book">📖 {selected_story}</div>
-        <div class="light-profile-bio">
-            <b>About:</b><br>{current_char.get('tagline', '')}
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-with st.sidebar.container():
-    st.markdown('<div class="clear-chat-container">', unsafe_allow_html=True)
-    if st.button("🗑️ Clear Chat History", key="clear_chat_history_btn", use_container_width=True):
-        now = get_hkt_time()
-        st.session_state.character_chats[current_char["name"]] = [
-            {"role": "assistant", "content": f"Hello! I am {current_char['name']}. What would you like to ask me?", "time": now}
-        ]
-        st.session_state.failed_prompts.pop(current_char["name"], None)
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# 10. Initialize Conversation
-now_str = get_hkt_time()
-if current_char["name"] not in st.session_state.character_chats:
-    st.session_state.character_chats[current_char["name"]] = [
-        {
-            "role": "assistant",
-            "content": f"Hello! I am {current_char['name']}. What would you like to ask me?",
-            "time": now_str
-        }
-    ]
-
-current_messages = st.session_state.character_chats[current_char["name"]]
-
-# 11. Locked Top Header Bar with Glowing Green Status Dot
-top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
-st.markdown(f"""
-<div class="chat-top-header">
-    <div class="header-left">
-        <span class="back-arrow-btn">←</span>
-        <div class="header-titles">
-            <h3>{current_char['name']}</h3>
-            <span class="online-badge"><span class="status-dot-glow"></span> Online</span>
-        </div>
-    </div>
-    {top_avatar_html}
-</div>
-""", unsafe_allow_html=True)
-
-# 12. Starter Questions
-starters = current_char.get("starter_questions", [])
-if len(current_messages) <= 1 and starters:
-    cols = st.columns(len(starters))
-    for idx, question in enumerate(starters):
-        if cols[idx].button(question, key=f"{current_char['name']}_chip_{idx}", use_container_width=True):
-            st.session_state.pending_prompt = question
-            st.rerun()
-
-# 13. Render Chat Feed
-for msg in current_messages:
-    role = msg["role"]
-    content = msg["content"]
-    
-    st.markdown(
-        f'<div class="msg-row {role}"><div class="msg-bubble {role}">{content}</div></div>',
-        unsafe_allow_html=True
-    )
-
-# 14. Persistent Retry Notification Bar
-if current_char["name"] in st.session_state.failed_prompts:
-    failed_text = st.session_state.failed_prompts[current_char["name"]]
-    st.warning(f"Connection dropped on: '{failed_text}'")
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if st.button("🔄 Resend Message", key="retry_btn_action", use_container_width=True):
-            st.session_state.pending_prompt = st.session_state.failed_prompts.pop(current_char["name"])
-            st.rerun()
-    with col2:
-        if st.button("Dismiss", key="dismiss_btn_action", use_container_width=True):
-            st.session_state.failed_prompts.pop(current_char["name"])
-            st.rerun()
-
-# 15. Integrated Bottom Chat Input with Natural Typing Pace
-user_query = st.chat_input("Write a message...")
-if "pending_prompt" in st.session_state:
-    user_query = st.session_state.pop("pending_prompt")
-
-if user_query:
-    if not api_key:
-        st.error("Please add OPENROUTER_API_KEY in Streamlit Secrets.")
-        st.stop()
-
-    current_time = get_hkt_time()
-
-    # Save and display user message immediately
-    st.session_state.character_chats[current_char["name"]].append({
-        "role": "user",
-        "content": user_query,
-        "time": current_time
-    })
-    st.markdown(
-        f'<div class="msg-row user"><div class="msg-bubble user">{user_query}</div></div>',
-        unsafe_allow_html=True
-    )
-
-    # Clean roleplay instructions tailored for primary school learners
-    system_instruction = (
-        f"You are roleplaying as {current_char['name']} from the book '{selected_story}'.\n"
-        f"{current_char['system_prompt']}\n\n"
-        "Rules for speaking to the student:\n"
-        "1. Speak directly in character using simple, everyday English words suitable for primary school students.\n"
-        "2. Keep your answer brief: 2 to 3 sentences maximum.\n"
-        "3. Do NOT repeat or echo the student's question.\n"
-        "4. Output only your spoken words. Never write outlines, notes, or bullet points."
-    )
-
-    conversation_payload = [
-        {"role": "system", "content": system_instruction}
-    ]
-    for m in st.session_state.character_chats[current_char["name"]][-8:]:
-        conversation_payload.append({"role": m["role"], "content": m["content"]})
-
-    # Realistic typing indicator display
-    typing_box = st.empty()
-    typing_box.markdown(f'''
-    <div class="typing-pill">
-        <span>✍️ {current_char["name"]} is typing...</span>
-    </div>
-    ''', unsafe_allow_html=True)
-
-    # 1.4-second natural pause before words start streaming
-    time.sleep(1.4)
-
-    bubble_placeholder = st.empty()
-    full_response_text = ""
-
-    try:
-        stream = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=conversation_payload,
-            stream=True,
-            temperature=0.7,
-            max_tokens=150
-        )
-        
-        has_started_typing = False
-        for chunk in stream:
-            content = chunk.choices[0].delta.content or ""
-            if not content:
-                continue
-
-            for char in content:
-                full_response_text += char
-                time.sleep(0.015)  # 15ms per character typing cadence
-                
-                if not has_started_typing and full_response_text.strip():
-                    typing_box.empty()
-                    has_started_typing = True
-
-                if has_started_typing:
-                    bubble_placeholder.markdown(
-                        f'<div class="msg-row assistant"><div class="msg-bubble assistant">{full_response_text}</div></div>',
-                        unsafe_allow_html=True
-                    )
-
-        typing_box.empty()
-
-        if full_response_text.strip():
-            st.session_state.character_chats[current_char["name"]].append({
-                "role": "assistant",
-                "content": full_response_text.strip(),
-                "time": current_time
-            })
-            st.session_state.failed_prompts.pop(current_char["name"], None)
-        else:
-            bubble_placeholder.empty()
-            raise Exception("No response received from the model.")
-
-    except Exception as e:
-        typing_box.empty()
-        bubble_placeholder.empty()
-        
-        if st.session_state.character_chats[current_char["name"]] and st.session_state.character_chats[current_char["name"]][-1]["role"] == "user":
-            st.session_state.character_chats[current_char["name"]].pop()
-            
-        st.session_state.failed_prompts[current_char["name"]] = user_query
-        st.rerun()
+        box-shadow: 0 -12px 24
