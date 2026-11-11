@@ -1,4 +1,112 @@
 {
+  "More-igami": {
+    "cover": "images/moreigami_cover.png",
+    "resources": {
+      "images": {
+        "crane_steps": "images/crane_steps.jpg",
+        "crane_steps_1": "images/crane_steps_1.jpg",
+        "crane_steps_2": "images/crane_steps_2.jpg",
+        "crane_steps_3": "images/crane_steps_3.jpg",
+        "crane_steps_4": "images/crane_steps_4.jpg",
+        "crane_steps_5": "images/crane_steps_5.jpg",
+        "crane_steps_6": "images/crane_steps_6.jpg",
+        "crane_steps_7": "images/crane_steps_7.jpg",
+        "crane_steps_8": "images/crane_steps_8.jpg",
+        "crane_steps_9": "images/crane_steps_9.jpg",
+        "crane_steps_10": "images/crane_steps_10.jpg",
+        "crane_steps_11": "images/crane_steps_11.jpg",
+        "crane_steps_12": "images/crane_steps_12.jpg",
+        "crane_steps_13": "images/crane_steps_13.jpg",
+        "crane_steps_14": "images/crane_steps_14.jpg",
+        "crane_steps_15": "images/crane_steps_15.jpg",
+        "crane_steps_16": "images/crane_steps_16.jpg",
+        "cat_steps": "images/cat_steps.jpg",
+        "cat_steps_1": "images/cat_steps_1.jpg",
+        "cat_steps_2": "images/cat_steps_2.jpg",
+        "cat_steps_3": "images/cat_steps_3.jpg",
+        "cat_steps_4": "images/cat_steps_4.jpg",
+        "cat_steps_5": "images/cat_steps_5.jpg",
+        "cat_steps_6": "images/cat_steps_6.jpg",
+        "cat_steps_7": "images/cat_steps_7.jpg",
+        "dog_steps": "images/dog_steps.jpg",
+        "dog_steps_1": "images/dog_steps_1.jpg",
+        "dog_steps_2": "images/dog_steps_2.jpg",
+        "dog_steps_3": "images/dog_steps_3.jpg",
+        "dog_steps_4": "images/dog_steps_4.jpg",
+        "dog_steps_5": "images/dog_steps_5.jpg",
+        "dog_steps_6": "images/dog_steps_6.jpg",
+        "frog_steps": "images/frog_steps.jpg",
+        "frog_steps_1": "images/frog_steps_1.jpg",
+        "frog_steps_2": "images/frog_steps_2.jpg",
+        "frog_steps_3": "images/frog_steps_3.jpg",
+        "frog_steps_4": "images/frog_steps_4.jpg",
+        "frog_steps_5": "images/frog_steps_5.jpg",
+        "frog_steps_6": "images/frog_steps_6.jpg",
+        "frog_steps_7": "images/frog_steps_7.jpg",
+        "frog_steps_8": "images/frog_steps_8.jpg",
+        "frog_steps_9": "images/frog_steps_9.jpg",
+        "frog_steps_10": "images/frog_steps_10.jpg",
+        "frog_steps_11": "images/frog_steps_11.jpg",
+        "heart_steps": "images/heart_steps.jpg",
+        "heart_steps_1": "images/heart_steps_1.jpg",
+        "heart_steps_2": "images/heart_steps_2.jpg",
+        "heart_steps_3": "images/heart_steps_3.jpg",
+        "heart_steps_4": "images/heart_steps_4.jpg",
+        "heart_steps_5": "images/heart_steps_5.jpg",
+        "heart_steps_6": "images/heart_steps_6.jpg",
+        "heart_steps_7": "images/heart_steps_7.jpg",
+        "heart_steps_8": "images/heart_steps_8.jpg",
+        "heart_steps_9": "images/heart_steps_9.jpg",
+        "heart_steps_10": "images/heart_steps_10.jpg",
+        "heart_steps_11": "images/heart_steps_11.jpg",
+        "heart_steps_12": "images/heart_steps_12.jpg",
+        "heart_steps_13": "images/heart_steps_13.jpg",
+        "heart_steps_14": "images/heart_steps_14.jpg",
+        "heart_steps_15": "images/heart_steps_15.jpg"
+      },
+      "videos": {
+        "crane_video": {
+          "title": "How to Fold an Origami Crane",
+          "url": "https://www.youtube.com/watch?v=KfnyopxdJXQ"
+        }
+      }
+    },
+    "characters": [
+      {
+        "name": "Joey",
+        "avatar": "images/joey.png",
+        "tagline": "A determined boy who loves folding paper into origami",
+        "system_prompt": "You are Joey from 'More-igami'. You love folding origami and are excited to teach kids how to fold cranes, cats, dogs, frogs, and hearts! Speak with energetic kid enthusiasm in 2 to 3 sentences.",
+        "starter_questions": [
+          "Can you teach me how to fold an origami crane?",
+          "Can we fold an origami cat, dog, frog, or heart?",
+          "How did you help Mr. Lopez at his restaurant?"
+        ]
+      },
+      {
+        "name": "Mrs. Takimoto",
+        "avatar": "images/takimoto.png",
+        "tagline": "Joey's wise neighbor who folds beautiful origami models",
+        "system_prompt": "You are Mrs. Takimoto, the wise origami master from 'More-igami'. You guide students step-by-step with warm encouragement and remind them that patience is key. Speak gently in 2 to 3 sentences.",
+        "starter_questions": [
+          "Can you teach me how to fold a paper crane or heart?",
+          "Can you show me how to fold an origami frog or cat?",
+          "Why does origami take so much practice and patience?"
+        ]
+      },
+      {
+        "name": "Mr. Lopez",
+        "avatar": "images/lopez.png",
+        "tagline": "The friendly owner of the local Mexican restaurant",
+        "system_prompt": "You are Mr. Lopez from 'More-igami'. You appreciate hard work, clean folds, and creative designs. Speak with warm cheer in 2 to 3 sentences.",
+        "starter_questions": [
+          "What kind of food do you serve at your restaurant?",
+          "How did Joey's folded napkins help your tables?",
+          "Can you show me how Joey folds origami animals?"
+        ]
+      }
+    ]
+  },
   "Journey to the Center of the Earth": {
     "cover": "images/journey_cover.png",
     "characters": [
@@ -196,71 +304,6 @@
           "How did visiting the garden help you walk?",
           "What did you think when Mary first came into your room?",
           "What is your favorite thing to do outside now?"
-        ]
-      }
-    ]
-  },
-  "More-igami": {
-    "cover": "images/moreigami_cover.png",
-    "resources": {
-      "images": {
-        "crane_steps": "resources/more-igami/crane_steps.jpg",
-        "crane_step_1": "resources/more-igami/crane_steps_1.jpg",
-        "crane_step_2": "resources/more-igami/crane_steps_2.jpg",
-        "crane_step_3": "resources/more-igami/crane_steps_3.jpg",
-        "crane_step_4": "resources/more-igami/crane_steps_4.jpg",
-        "crane_step_5": "resources/more-igami/crane_steps_5.jpg",
-        "crane_step_6": "resources/more-igami/crane_steps_6.jpg",
-        "crane_step_7": "resources/more-igami/crane_steps_7.jpg",
-        "crane_step_8": "resources/more-igami/crane_steps_8.jpg",
-        "crane_step_9": "resources/more-igami/crane_steps_9.jpg",
-        "crane_step_10": "resources/more-igami/crane_steps_10.jpg",
-        "crane_step_11": "resources/more-igami/crane_steps_11.jpg",
-        "crane_step_12": "resources/more-igami/crane_steps_12.jpg",
-        "crane_step_13": "resources/more-igami/crane_steps_13.jpg",
-        "crane_step_14": "resources/more-igami/crane_steps_14.jpg",
-        "crane_step_15": "resources/more-igami/crane_steps_15.jpg",
-        "crane_step_16": "resources/more-igami/crane_steps_16.jpg"
-      },
-      "videos": {
-        "crane_video": {
-          "title": "Origami: Crane tutorial",
-          "url": "https://www.youtube.com/watch?v=Ux1ECrNDZl4"
-        }
-      }
-    },
-    "characters": [
-      {
-        "name": "Joey",
-        "avatar": "images/joey.png",
-        "tagline": "A determined boy who loves folding paper into origami",
-        "system_prompt": "You are Joey from 'More-igami'. You love folding origami and are excited to help students fold their own cranes. Speak with enthusiastic kid energy in 2 to 3 sentences.",
-        "starter_questions": [
-          "Can you show me how to fold an origami crane?",
-          "What did Mrs. Takimoto teach you about origami?",
-          "How did you help Mr. Lopez at his restaurant?"
-        ]
-      },
-      {
-        "name": "Mrs. Takimoto",
-        "avatar": "images/takimoto.png",
-        "tagline": "Joey's wise neighbor who folds beautiful origami cranes",
-        "system_prompt": "You are Mrs. Takimoto, the wise origami master from 'More-igami'. You gently teach students that origami requires patience and practice. Guide students step-by-step with warm encouragement in 2 to 3 sentences.",
-        "starter_questions": [
-          "Can you teach me how to fold a crane step-by-step?",
-          "Why does origami take so much practice and patience?",
-          "What does an origami master need to know?"
-        ]
-      },
-      {
-        "name": "Mr. Lopez",
-        "avatar": "images/lopez.png",
-        "tagline": "The friendly owner of the local Mexican restaurant",
-        "system_prompt": "You are Mr. Lopez from 'More-igami'. You run the restaurant and appreciate hard work and practice. You can cheer the student on and share the crane guides Joey used.",
-        "starter_questions": [
-          "What kind of food do you serve at your restaurant?",
-          "How did Joey's folded napkins help your tables?",
-          "Can you show me how Joey folds paper cranes?"
         ]
       }
     ]
