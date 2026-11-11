@@ -914,13 +914,13 @@ if user_query:
         media_instructions = (
             "\n\nORIGAMI LEARNING AIDS YOU CAN SHARE:\n"
             "You know how to fold 5 origami designs: Crane, Cat, Dog, Frog, and Heart.\n"
-            "Whenever a student asks to fold one, or asks for a specific step, include the matching tag:\n"
-            "- CRANE (16 steps): [IMAGE:crane_steps] for overall; [IMAGE:crane_steps_1] through [IMAGE:crane_steps_16] for steps; [VIDEO:crane_video] for tutorial video.\n"
-            "- CAT (7 steps): [IMAGE:cat_steps] for overall; [IMAGE:cat_steps_1] through [IMAGE:cat_steps_7] for steps.\n"
-            "- DOG (6 steps): [IMAGE:dog_steps] for overall; [IMAGE:dog_steps_1] through [IMAGE:dog_steps_6] for steps.\n"
-            "- FROG (11 steps): [IMAGE:frog_steps] for overall; [IMAGE:frog_steps_1] through [IMAGE:frog_steps_11] for steps.\n"
-            "- HEART (15 steps): [IMAGE:heart_steps] for overall; [IMAGE:heart_steps_1] through [IMAGE:heart_steps_15] for steps.\n"
-            "Only output the relevant tag when a student asks to see how to fold, asks for an origami guide, or asks for a specific step."
+            "Whenever a student asks how to fold one, asks for steps, or asks for a video/demonstration, output the matching tags:\n"
+            "- CRANE (16 steps): [IMAGE:crane_steps] for overall diagram; [IMAGE:crane_steps_1] through [IMAGE:crane_steps_16] for individual steps; [VIDEO:crane_video] for tutorial video.\n"
+            "- CAT (7 steps): [IMAGE:cat_steps] for overall diagram; [IMAGE:cat_steps_1] through [IMAGE:cat_steps_7] for individual steps; [VIDEO:cat_video] for tutorial video.\n"
+            "- DOG (6 steps): [IMAGE:dog_steps] for overall diagram; [IMAGE:dog_steps_1] through [IMAGE:dog_steps_6] for individual steps; [VIDEO:dog_video] for tutorial video.\n"
+            "- FROG (11 steps): [IMAGE:frog_steps] for overall diagram; [IMAGE:frog_steps_1] through [IMAGE:frog_steps_11] for individual steps; [VIDEO:frog_video] for tutorial video.\n"
+            "- HEART (15 steps): [IMAGE:heart_steps] for overall diagram; [IMAGE:heart_steps_1] through [IMAGE:heart_steps_15] for individual steps; [VIDEO:heart_video] for tutorial video.\n"
+            "Only output the relevant tag when a student asks to see how to fold, asks for an origami guide, asks for a step, or asks to watch a video."
         )
 
     system_instruction = (
