@@ -3,7 +3,9 @@ import json
 import time
 import re
 import base64
+from io import BytesIO
 from datetime import datetime, timezone, timedelta
+from PIL import Image
 import streamlit as st
 from openai import OpenAI
 
@@ -22,52 +24,94 @@ def get_hkt_time():
     hkt_zone = timezone(timedelta(hours=8))
     return datetime.now(hkt_zone).strftime("%I:%M %p").lower()
 
-# 3. Base64 Image Encoder (Handles PNG/JPEG/JPG, case variations, and 1 vs 01 padding)
-def get_image_base64(relative_path):
-    if not relative_path:
+# 3. Universal Recursive File Finder (Case-Insensitive, Folder-Agnostic)
+@st.cache_data(show_spinner=False)
+def find_image_file(key_or_path: str) -> str:
+    """Finds the absolute path of an image anywhere in the repo."""
+    if not key_or_path:
         return None
-    
-    full_path = os.path.join(BASE_DIR, relative_path)
-    candidate_paths = [full_path]
-    
-    # Check alternate extensions
-    root, ext = os.path.splitext(full_path)
-    for alt_ext in [".jpeg", ".jpg", ".png", ".JPG", ".JPEG", ".PNG"]:
-        if alt_ext != ext:
-            candidate_paths.append(root + alt_ext)
-            
-    # Check zero-padding differences (e.g. cat_steps_1.jpg <-> cat_steps_01.jpg)
-    base_dir_part = os.path.dirname(full_path)
-    filename_part = os.path.basename(full_path)
-    
-    # If ends in _1 to _9, also test _01 to _09
-    match_single = re.search(r'_([1-9])\.', filename_part)
-    if match_single:
-        num = match_single.group(1)
-        padded_name = filename_part.replace(f"_{num}.", f"_0{num}.")
-        candidate_paths.append(os.path.join(base_dir_part, padded_name))
-        for alt_ext in [".jpeg", ".jpg", ".png", ".JPG", ".JPEG", ".PNG"]:
-            candidate_paths.append(os.path.join(base_dir_part, os.path.splitext(padded_name)[0] + alt_ext))
         
-    # If ends in _01 to _09, also test _1 to _9
-    match_padded = re.search(r'_0([1-9])\.', filename_part)
-    if match_padded:
-        num = match_padded.group(1)
-        unpadded_name = filename_part.replace(f"_0{num}.", f"_{num}.")
-        candidate_paths.append(os.path.join(base_dir_part, unpadded_name))
-        for alt_ext in [".jpeg", ".jpg", ".png", ".JPG", ".JPEG", ".PNG"]:
-            candidate_paths.append(os.path.join(base_dir_part, os.path.splitext(unpadded_name)[0] + alt_ext))
-
-    for path in candidate_paths:
-        if os.path.isfile(path):
-            with open(path, "rb") as f:
-                encoded = base64.b64encode(f.read()).decode()
-                cur_ext = os.path.splitext(path)[1].lower().replace(".", "")
-                mime = "jpeg" if cur_ext in ["jpg", "jpeg"] else cur_ext
-                return f"data:image/{mime};base64,{encoded}"
+    direct_path = os.path.join(BASE_DIR, key_or_path)
+    if os.path.isfile(direct_path):
+        return direct_path
+        
+    bare_name = os.path.basename(key_or_path)
+    bare_name = re.sub(r'\.(jpg|jpeg|png|webp)$', '', bare_name, flags=re.I).strip()
+    
+    variations = [bare_name]
+    m_single = re.search(r'^(.*)_([1-9])$', bare_name)
+    if m_single:
+        variations.append(f"{m_single.group(1)}_0{m_single.group(2)}")
+    m_padded = re.search(r'^(.*)_0([1-9])$', bare_name)
+    if m_padded:
+        variations.append(f"{m_padded.group(1)}_{m_padded.group(2)}")
+        
+    search_dirs = [
+        os.path.join(BASE_DIR, "images"),
+        os.path.join(BASE_DIR, "resources"),
+        os.path.join(BASE_DIR, "resources", "more-igami"),
+        os.path.join(BASE_DIR, "images", "more-igami"),
+        BASE_DIR
+    ]
+    
+    valid_exts = [".jpg", ".jpeg", ".png", ".webp", ".JPG", ".JPEG", ".PNG"]
+    
+    for s_dir in search_dirs:
+        if os.path.isdir(s_dir):
+            for v in variations:
+                for ext in valid_exts:
+                    candidate = os.path.join(s_dir, v + ext)
+                    if os.path.isfile(candidate):
+                        return candidate
+                        
+    for root, _, files in os.walk(BASE_DIR):
+        if any(skip in root for skip in [".git", "venv", "__pycache__"]):
+            continue
+        for f in files:
+            f_name, f_ext = os.path.splitext(f)
+            if f_ext.lower() in [".jpg", ".jpeg", ".png", ".webp"]:
+                for v in variations:
+                    if f_name.lower() == v.lower():
+                        return os.path.join(root, f)
+                        
     return None
 
-# 4. Helper to Load Story Text from books/
+# 4. Optimized Base64 Encoder (Compresses images to ~40KB to prevent WebSocket drops)
+@st.cache_data(show_spinner=False)
+def encode_image_to_base64(file_path: str) -> str:
+    try:
+        with Image.open(file_path) as img:
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+            
+            max_width = 640
+            if img.width > max_width:
+                height = int((max_width / img.width) * img.height)
+                img = img.resize((max_width, height), Image.Resampling.LANCZOS)
+                
+            buffer = BytesIO()
+            img.save(buffer, format="JPEG", quality=80, optimize=True)
+            encoded = base64.b64encode(buffer.getvalue()).decode()
+            return f"data:image/jpeg;base64,{encoded}"
+    except Exception:
+        try:
+            with open(file_path, "rb") as f:
+                encoded = base64.b64encode(f.read()).decode()
+                ext = os.path.splitext(file_path)[1].lower().replace(".", "")
+                mime = "jpeg" if ext in ["jpg", "jpeg"] else ext
+                return f"data:image/{mime};base64,{encoded}"
+        except Exception:
+            return None
+
+def get_image_base64(relative_path_or_key):
+    if not relative_path_or_key:
+        return None
+    file_path = find_image_file(relative_path_or_key)
+    if file_path:
+        return encode_image_to_base64(file_path)
+    return None
+
+# 5. Helper to Load Story Text
 def load_story_text(story_name: str) -> str:
     base_slug = story_name.lower().replace(" ", "-").replace("'", "")
     candidates = [
@@ -82,49 +126,39 @@ def load_story_text(story_name: str) -> str:
                 return f.read().strip()
     return ""
 
-# 5. Media Parser: Resolves images directly from JSON, images/, and resources/
-def render_media_content(text: str, story_resources: dict, current_story_slug: str) -> str:
+# 6. Media Parser: Converts [IMAGE:key] and [VIDEO:key] into visual embeds
+def render_media_content(text: str, story_resources: dict, current_story_slug: str, is_streaming: bool = False) -> str:
     if not text:
         return ""
     
-    images_map = story_resources.get("images", {})
     videos_map = story_resources.get("videos", {})
 
     def replace_img(match):
         key = match.group(1).strip()
         
-        # 1. Exact key match from characters.json
-        rel_path = images_map.get(key)
-        
-        # 2. Check unpadded/padded variations from JSON
-        if not rel_path and re.search(r'_\d+$', key):
-            prefix, num_str = key.rsplit('_', 1)
-            num_val = int(num_str)
-            alt_key = f"{prefix}_{num_val:02d}" if len(num_str) == 1 else f"{prefix}_{num_val}"
-            rel_path = images_map.get(alt_key)
+        if is_streaming:
+            return f'<div class="chat-media-container"><span class="typing-pill">📷 Loading {key}...</span></div>'
             
-        # 3. Direct checks in images/ and resources/ if not in JSON
-        if not rel_path:
-            possible_locations = [
-                f"images/{key}.jpg",
-                f"resources/{current_story_slug}/{key}.jpg"
-            ]
-            for loc in possible_locations:
-                if get_image_base64(loc):
-                    rel_path = loc
-                    break
-
-        img_b64 = get_image_base64(rel_path)
+        img_b64 = get_image_base64(key)
         if img_b64:
             return (
                 f'<div class="chat-media-container">'
                 f'<img src="{img_b64}" class="chat-embedded-img" alt="{key}" />'
                 f'</div>'
             )
-        return ""
+        return (
+            f'<div class="chat-media-container">'
+            f'<div style="background: #fef2f2; border: 1.5px dashed #f87171; border-radius: 12px; padding: 10px 14px; font-size: 0.85rem; color: #991b1b;">'
+            f'📷 <b>Image not found:</b> <code>{key}</code><br>'
+            f'<span style="font-size: 0.75rem; color: #7f1d1d;">Make sure <code>{key}.jpg</code> or <code>{key}.jpeg</code> is committed to GitHub.</span>'
+            f'</div></div>'
+        )
 
     def replace_vid(match):
         key = match.group(1).strip()
+        if is_streaming:
+            return f'<div class="chat-media-container"><span class="typing-pill">▶️ Loading video...</span></div>'
+            
         vid_info = videos_map.get(key)
         if vid_info:
             url = vid_info.get("url", "")
@@ -142,11 +176,11 @@ def render_media_content(text: str, story_resources: dict, current_story_slug: s
                 )
         return ""
 
-    processed = re.sub(r'\[IMAGE:\s*([a-zA-Z0-9_\-]+)\s*\]', replace_img, text)
-    processed = re.sub(r'\[VIDEO:\s*([a-zA-Z0-9_\-]+)\s*\]', replace_vid, processed)
+    processed = re.sub(r'\[IMAGE:\s*([a-zA-Z0-9_\-\.]+)\s*\]', replace_img, text)
+    processed = re.sub(r'\[VIDEO:\s*([a-zA-Z0-9_\-\.]+)\s*\]', replace_vid, processed)
     return processed
 
-# 6. High-Contrast Sky-Blue & Pure White CSS
+# 7. CSS Styles
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -414,7 +448,6 @@ st.markdown("""
         fill: #ffffff !important;
     }
 
-    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-right: 1.5px solid #cbd5e1 !important;
@@ -660,7 +693,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 7. OpenRouter Connection
+# 8. OpenRouter Connection
 api_key = st.secrets.get("OPENROUTER_API_KEY", "")
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
@@ -669,7 +702,7 @@ client = OpenAI(
 
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
 
-# 8. Load Catalog (Maintains Exact JSON Dict Key Order)
+# 9. Load Catalog (Maintains Exact JSON Dict Key Order)
 def load_catalog():
     with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -686,7 +719,7 @@ def load_catalog():
 catalog = load_catalog()
 all_stories = list(catalog.keys())
 
-# 9. Persistent Session Initialization
+# 10. Persistent Session Initialization
 if "character_chats" not in st.session_state:
     st.session_state.character_chats = {}
 
@@ -703,7 +736,7 @@ if "selected_char" not in st.session_state:
 if "expanded_stories" not in st.session_state:
     st.session_state.expanded_stories = {st.session_state.selected_story}
 
-# 10. Sidebar Directory
+# 11. Sidebar Directory
 st.sidebar.markdown("### Conversations")
 
 for story_name, story_data in catalog.items():
@@ -756,7 +789,7 @@ current_char = next((c for c in chars_in_story if c["name"] == st.session_state.
 st.session_state.selected_char = current_char["name"]
 avatar_b64 = get_image_base64(current_char.get("avatar", ""))
 
-# 11. Locked Profile Card in Sidebar
+# 12. Locked Profile Card in Sidebar
 avatar_portrait_html = f'<img class="light-profile-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="light-profile-avatar-fallback">📖</div>'
 st.sidebar.markdown(f"""
 <div class="locked-profile-anchor">
@@ -782,7 +815,7 @@ with st.sidebar.container():
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 12. Initialize Conversation
+# 13. Initialize Conversation
 now_str = get_hkt_time()
 if current_char["name"] not in st.session_state.character_chats:
     st.session_state.character_chats[current_char["name"]] = [
@@ -795,7 +828,7 @@ if current_char["name"] not in st.session_state.character_chats:
 
 current_messages = st.session_state.character_chats[current_char["name"]]
 
-# 13. Locked Top Header Bar with Glowing Green Status Dot
+# 14. Locked Top Header Bar
 top_avatar_html = f'<img class="header-avatar" src="{avatar_b64}">' if avatar_b64 else '<div class="header-avatar-fallback">📖</div>'
 st.markdown(f"""
 <div class="chat-top-header">
@@ -810,7 +843,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 14. Starter Questions
+# 15. Starter Questions
 starters = current_char.get("starter_questions", [])
 if len(current_messages) <= 1 and starters:
     cols = st.columns(len(starters))
@@ -819,19 +852,19 @@ if len(current_messages) <= 1 and starters:
             st.session_state.pending_prompt = question
             st.rerun()
 
-# 15. Render Chat Feed
+# 16. Render Chat Feed
 for msg in current_messages:
     role = msg["role"]
     raw_content = msg["content"]
     
-    rendered_content = render_media_content(raw_content, story_resources, story_slug) if role == "assistant" else raw_content
+    rendered_content = render_media_content(raw_content, story_resources, story_slug, is_streaming=False) if role == "assistant" else raw_content
     
     st.markdown(
         f'<div class="msg-row {role}"><div class="msg-bubble {role}">{rendered_content}</div></div>',
         unsafe_allow_html=True
     )
 
-# 16. Persistent Retry Notification Bar
+# 17. Persistent Retry Notification Bar
 if current_char["name"] in st.session_state.failed_prompts:
     failed_text = st.session_state.failed_prompts[current_char["name"]]
     st.warning(f"Connection dropped on: '{failed_text}'")
@@ -845,7 +878,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 17. Integrated Bottom Chat Input with Expanded Origami Instructions
+# 18. Integrated Bottom Chat Input
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -867,7 +900,6 @@ if user_query:
         unsafe_allow_html=True
     )
 
-    # Load Story Text
     book_content = load_story_text(selected_story)
     story_context = ""
     if book_content:
@@ -876,9 +908,9 @@ if user_query:
             f'"""\n{book_content}\n"""'
         )
 
-    # Expanded Origami & Media Instructions
+    # Dynamic Origami Instructions for More-igami
     media_instructions = ""
-    if story_resources:
+    if selected_story == "More-igami":
         media_instructions = (
             "\n\nORIGAMI LEARNING AIDS YOU CAN SHARE:\n"
             "You know how to fold 5 origami designs: Crane, Cat, Dog, Frog, and Heart.\n"
@@ -928,7 +960,7 @@ if user_query:
             messages=conversation_payload,
             stream=True,
             temperature=0.7,
-            max_tokens=160
+            max_tokens=200
         )
         
         has_started_typing = False
@@ -946,7 +978,8 @@ if user_query:
                     has_started_typing = True
 
                 if has_started_typing:
-                    display_content = render_media_content(full_response_text, story_resources, story_slug)
+                    # Non-blocking media indicator while streaming
+                    display_content = render_media_content(full_response_text, story_resources, story_slug, is_streaming=True)
                     bubble_placeholder.markdown(
                         f'<div class="msg-row assistant"><div class="msg-bubble assistant">{display_content}</div></div>',
                         unsafe_allow_html=True
