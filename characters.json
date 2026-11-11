@@ -68,9 +68,24 @@
         "crane_video": {
           "title": "How to Fold an Origami Crane",
           "url": "https://www.youtube.com/watch?v=KfnyopxdJXQ"
-      "heart_video": {
-          "title": "How To Fold An Origami Heart",
+        },
+        "cat_video": {
+          "title": "How to Fold an Origami Cat",
+          "url": "https://www.youtube.com/shorts/UU8AjCNG1bw"
+        },
+        "dog_video": {
+          "title": "How to Fold an Origami Dog",
+          "url": "https://www.youtube.com/watch?v=lHu3K-ZuOFs"
+        },
+        "frog_video": {
+          "title": "How to Fold an Origami Jumping Frog",
+          "url": "https://www.youtube.com/watch?v=Oy8KG_aZvGk"
+        },
+        "heart_video": {
+          "title": "How to Fold an Origami Heart",
           "url": "https://www.youtube.com/watch?v=jfzOzdqb4Ck&list=PLnoO3k54vcBQ_tNFyn7ukM1-LaQBAG2Ld"
+        }
+      }
         }
       }
     },
