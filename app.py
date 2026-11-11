@@ -36,7 +36,7 @@ def get_image_base64(relative_path):
         if alt_ext != ext:
             candidate_paths.append(root + alt_ext)
             
-    # Check zero-padding differences (e.g. crane_steps_1.jpg <-> crane_steps_01.jpg)
+    # Check zero-padding differences (e.g. cat_steps_1.jpg <-> cat_steps_01.jpg)
     base_dir_part = os.path.dirname(full_path)
     filename_part = os.path.basename(full_path)
     
@@ -82,33 +82,38 @@ def load_story_text(story_name: str) -> str:
                 return f.read().strip()
     return ""
 
-# 5. Media Parser: Converts [IMAGE:key] and [VIDEO:key] into visual embeds
+# 5. Media Parser: Resolves images directly from JSON, images/, and resources/
 def render_media_content(text: str, story_resources: dict, current_story_slug: str) -> str:
-    """Replaces [IMAGE:key] and [VIDEO:key] tags with inline image and video HTML."""
     if not text:
         return ""
     
     images_map = story_resources.get("images", {})
     videos_map = story_resources.get("videos", {})
 
-    # Replace [IMAGE:key]
     def replace_img(match):
         key = match.group(1).strip()
         
-        # 1. Exact match in JSON resources
+        # 1. Exact key match from characters.json
         rel_path = images_map.get(key)
         
-        # 2. Check unpadded/padded variation in JSON
+        # 2. Check unpadded/padded variations from JSON
         if not rel_path and re.search(r'_\d+$', key):
             prefix, num_str = key.rsplit('_', 1)
             num_val = int(num_str)
             alt_key = f"{prefix}_{num_val:02d}" if len(num_str) == 1 else f"{prefix}_{num_val}"
             rel_path = images_map.get(alt_key)
             
-        # 3. Direct file system fallback
+        # 3. Direct checks in images/ and resources/ if not in JSON
         if not rel_path:
-            rel_path = f"resources/{current_story_slug}/{key}.jpg"
-            
+            possible_locations = [
+                f"images/{key}.jpg",
+                f"resources/{current_story_slug}/{key}.jpg"
+            ]
+            for loc in possible_locations:
+                if get_image_base64(loc):
+                    rel_path = loc
+                    break
+
         img_b64 = get_image_base64(rel_path)
         if img_b64:
             return (
@@ -118,7 +123,6 @@ def render_media_content(text: str, story_resources: dict, current_story_slug: s
             )
         return ""
 
-    # Replace [VIDEO:key]
     def replace_vid(match):
         key = match.group(1).strip()
         vid_info = videos_map.get(key)
@@ -171,7 +175,6 @@ st.markdown("""
         background-color: transparent !important;
     }
 
-    /* Sticky Chat Header */
     div[data-testid="stElementContainer"]:has(.chat-top-header),
     .element-container:has(.chat-top-header),
     div:has(> div > .chat-top-header) {
@@ -263,7 +266,6 @@ st.markdown("""
         font-size: 24px;
     }
 
-    /* Message Rows & Bubbles */
     .msg-row {
         display: flex;
         width: 100%;
@@ -305,7 +307,6 @@ st.markdown("""
         border: 1.5px solid #cbd5e1 !important;
     }
 
-    /* Embedded Chat Media */
     .chat-media-container {
         margin-top: 10px;
         margin-bottom: 4px;
@@ -320,7 +321,7 @@ st.markdown("""
     }
     .video-responsive-wrapper {
         position: relative;
-        padding-bottom: 56.25%; /* 16:9 ratio */
+        padding-bottom: 56.25%;
         height: 0;
         overflow: hidden;
         border-radius: 14px;
@@ -370,7 +371,6 @@ st.markdown("""
         box-shadow: 0 6px 14px rgba(2, 132, 199, 0.3) !important;
     }
 
-    /* Floating Chat Input */
     [data-testid="stBottom"],
     [data-testid="stBottom"] > div,
     [data-testid="stBottom"] > div > div {
@@ -414,9 +414,7 @@ st.markdown("""
         fill: #ffffff !important;
     }
 
-    /* =========================================================
-       SIDEBAR & STABLE COLUMN RENDERING
-       ========================================================= */
+    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-right: 1.5px solid #cbd5e1 !important;
@@ -453,7 +451,6 @@ st.markdown("""
         gap: 0.4rem !important;
     }
 
-    /* Book Bubbles */
     .book-bubble-thumb {
         width: 40px;
         height: 40px;
@@ -503,7 +500,6 @@ st.markdown("""
         color: #0284c7 !important;
     }
 
-    /* Character Bubbles */
     .char-bubble-thumb {
         width: 32px;
         height: 32px;
@@ -579,7 +575,6 @@ st.markdown("""
         margin: 0 !important;
     }
 
-    /* Sticky Profile Card at Bottom of Sidebar */
     div[data-testid="stElementContainer"]:has(.locked-profile-anchor),
     .element-container:has(.locked-profile-anchor) {
         position: sticky !important;
@@ -674,7 +669,7 @@ client = OpenAI(
 
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
 
-# 8. Load Catalog
+# 8. Load Catalog (Maintains Exact JSON Dict Key Order)
 def load_catalog():
     with open(os.path.join(BASE_DIR, "characters.json"), "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -850,7 +845,7 @@ if current_char["name"] in st.session_state.failed_prompts:
             st.session_state.failed_prompts.pop(current_char["name"])
             st.rerun()
 
-# 17. Integrated Bottom Chat Input with Media Capabilities
+# 17. Integrated Bottom Chat Input with Expanded Origami Instructions
 user_query = st.chat_input("Write a message...")
 if "pending_prompt" in st.session_state:
     user_query = st.session_state.pop("pending_prompt")
@@ -881,15 +876,19 @@ if user_query:
             f'"""\n{book_content}\n"""'
         )
 
-    # Dynamic Media Aids Instruction
+    # Expanded Origami & Media Instructions
     media_instructions = ""
     if story_resources:
         media_instructions = (
-            "\n\nLEARNING AIDS YOU CAN SHARE:\n"
-            "- If the student asks for the complete crane instructions or overall diagram, output: [IMAGE:crane_steps]\n"
-            "- If the student asks for a specific step (e.g. step 1, step 2, up to step 16), output the matching tag: [IMAGE:crane_steps_1] through [IMAGE:crane_steps_16]\n"
-            "- If the student asks for a video demonstration, tutorial, or movie, output: [VIDEO:crane_video]\n"
-            "Only include these tags when the student explicitly asks to see how to fold, asks for steps, or asks for a video."
+            "\n\nORIGAMI LEARNING AIDS YOU CAN SHARE:\n"
+            "You know how to fold 5 origami designs: Crane, Cat, Dog, Frog, and Heart.\n"
+            "Whenever a student asks to fold one, or asks for a specific step, include the matching tag:\n"
+            "- CRANE (16 steps): [IMAGE:crane_steps] for overall; [IMAGE:crane_steps_1] through [IMAGE:crane_steps_16] for steps; [VIDEO:crane_video] for tutorial video.\n"
+            "- CAT (7 steps): [IMAGE:cat_steps] for overall; [IMAGE:cat_steps_1] through [IMAGE:cat_steps_7] for steps.\n"
+            "- DOG (6 steps): [IMAGE:dog_steps] for overall; [IMAGE:dog_steps_1] through [IMAGE:dog_steps_6] for steps.\n"
+            "- FROG (11 steps): [IMAGE:frog_steps] for overall; [IMAGE:frog_steps_1] through [IMAGE:frog_steps_11] for steps.\n"
+            "- HEART (15 steps): [IMAGE:heart_steps] for overall; [IMAGE:heart_steps_1] through [IMAGE:heart_steps_15] for steps.\n"
+            "Only output the relevant tag when a student asks to see how to fold, asks for an origami guide, or asks for a specific step."
         )
 
     system_instruction = (
